@@ -168,7 +168,7 @@ AC_DEFUN([FLAGS_SETUP_WARNINGS],
       ;;
     gcc)
       DISABLE_WARNING_PREFIX="-Wno-"
-      CFLAGS_WARNINGS_ARE_ERRORS="-Werror"
+      CFLAGS_WARNINGS_ARE_ERRORS=""
       BUILD_CC_DISABLE_WARNING_PREFIX="-Wno-"
       ;;
     clang)

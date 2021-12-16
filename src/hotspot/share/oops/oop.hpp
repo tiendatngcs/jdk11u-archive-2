@@ -56,6 +56,8 @@ class oopDesc {
   friend class VMStructs;
   friend class JVMCIVMStructs;
  private:
+  int _access_counter;
+  int _gc_epoch;
   volatile markOop _mark;
   union _metadata {
     Klass*      _klass;
@@ -63,9 +65,13 @@ class oopDesc {
   } _metadata;
 
  public:
+  static int static_gc_epoch;
   inline markOop  mark()          const;
   inline markOop  mark_raw()      const;
   inline markOop* mark_addr_raw() const;
+  inline int access_counter();
+  inline int true_access_counter();
+  inline int gc_epoch();
 
   inline void set_mark(volatile markOop m);
   inline void set_mark_raw(volatile markOop m);
@@ -74,6 +80,11 @@ class oopDesc {
   inline void release_set_mark(markOop m);
   inline markOop cas_set_mark(markOop new_mark, markOop old_mark);
   inline markOop cas_set_mark_raw(markOop new_mark, markOop old_mark, atomic_memory_order order = memory_order_conservative);
+  
+  inline void set_access_counter(int new_value);
+  inline void increase_access_counter(int increment);
+  
+  inline void set_gc_epoch(int new_value);
 
   // Used only to re-initialize the mark word (e.g., of promoted
   // objects during a GC) -- requires a valid klass pointer
@@ -204,7 +215,7 @@ class oopDesc {
 
   jboolean bool_field_acquire(int offset) const;
   void release_bool_field_put(int offset, jboolean contents);
-
+  
   jint int_field_acquire(int offset) const;
   void release_int_field_put(int offset, jint contents);
 
@@ -324,6 +335,8 @@ class oopDesc {
 
   // for code generation
   static int mark_offset_in_bytes()      { return offset_of(oopDesc, _mark); }
+  static int access_counter_offset_in_bytes() {return offset_of(oopDesc, _access_counter); }
+  static int gc_epoch_offset_in_bytes() {return offset_of(oopDesc, _gc_epoch); }
   static int klass_offset_in_bytes()     { return offset_of(oopDesc, _metadata._klass); }
   static int klass_gap_offset_in_bytes() {
     assert(has_klass_gap(), "only applicable to compressed klass pointers");
