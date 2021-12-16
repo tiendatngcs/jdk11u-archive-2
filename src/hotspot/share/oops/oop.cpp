@@ -34,7 +34,7 @@
 #include "utilities/copy.hpp"
 
 bool always_do_update_barrier = false;
-int static_access_counter = 0;
+int static_gc_epoch = 0;
 
 void oopDesc::print_on(outputStream* st) const {
   if (this == NULL) {
