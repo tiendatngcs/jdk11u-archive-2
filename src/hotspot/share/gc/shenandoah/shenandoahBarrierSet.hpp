@@ -70,6 +70,8 @@ public:
   virtual void on_thread_attach(JavaThread* thread);
   virtual void on_thread_detach(JavaThread* thread);
 
+  static inline void oop_increase_access_counter(oop p);
+
   static inline oop resolve_forwarded_not_null(oop p);
   static inline oop resolve_forwarded_not_null_mutator(oop p);
   static inline oop resolve_forwarded(oop p);
