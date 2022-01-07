@@ -123,10 +123,6 @@ inline void ShenandoahBarrierSet::satb_barrier(T *field)
   if (HasDecorator<decorators, IS_DEST_UNINITIALIZED>::value ||
       HasDecorator<decorators, AS_NO_KEEPALIVE>::value)
   {
-    // valid ?
-    oop obj = CompressedOops::decode_not_null(RawAccess<>::oop_load(field));
-    oop_increase_access_counter(obj);
-    // valid ?
     return;
   }
   if (ShenandoahSATBBarrier && _heap->is_concurrent_mark_in_progress())
