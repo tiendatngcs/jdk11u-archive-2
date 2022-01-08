@@ -170,13 +170,15 @@ static void do_oop_store(InterpreterMacroAssembler* _masm,
     if (!is_array || (dst.index() == noreg && dst.disp() == 0)) {
       if (is_array) {
         __ verify_oop(dst.base());
-        __ call_VM(noreg, CAST_FROM_FN_PTR(address, InterpreterRuntime::write_barrier), dst.base());
+        if (dst.base() != NULL) {
+          __ call_VM(noreg, CAST_FROM_FN_PTR(address, InterpreterRuntime::write_barrier), dst.base());
+        }
       }
       else {
         __ verify_oop(dst.base());
-        // __ push(rax);
-        __ call_VM(noreg, CAST_FROM_FN_PTR(address, InterpreterRuntime::write_barrier), dst.base());
-        // __ pop(rax);
+        if (dst.base() != NULL) {
+          __ call_VM(noreg, CAST_FROM_FN_PTR(address, InterpreterRuntime::write_barrier), dst.base());
+        }
       }
         
     }
