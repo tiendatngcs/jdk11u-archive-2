@@ -151,9 +151,36 @@ static Assembler::Condition j_not(TemplateTable::Condition cc) {
 static void do_oop_store(InterpreterMacroAssembler* _masm,
                          Address dst,
                          Register val,
+                         BarrierSet::Name barrier,
                          DecoratorSet decorators = 0) {
   assert(val == noreg || val == rax, "parameter is just for looks");
+  bool is_array = (decorators & IS_ARRAY) != 0;
+  if (val == noreg){
+    __ store_heap_oop(dst, val, rdx, rbx, decorators);
+    return;
+  } 
+    
+  // if (!is_array) __ movptr(c_rarg0, dst.base());
+  // if (barrier == BarrierSet::ShenandoahBarrierSet && !is_array) {
+  //   __ call_VM(noreg, CAST_FROM_FN_PTR(address, InterpreterRuntime::write_barrier), dst.base());
+  // }
   __ store_heap_oop(dst, val, rdx, rbx, decorators);
+  if (barrier == BarrierSet::ShenandoahBarrierSet) {
+    // __ call_VM(noreg, CAST_FROM_FN_PTR(address, InterpreterRuntime::print_something));
+    if (!is_array || (dst.index() == noreg && dst.disp() == 0)) {
+      if (is_array) {
+        __ verify_oop(dst.base());
+        __ call_VM(noreg, CAST_FROM_FN_PTR(address, InterpreterRuntime::write_barrier), dst.base());
+      }
+      else {
+        __ verify_oop(dst.base());
+        // __ push(rax);
+        __ call_VM(noreg, CAST_FROM_FN_PTR(address, InterpreterRuntime::write_barrier), dst.base());
+        // __ pop(rax);
+      }
+        
+    }
+  }
 }
 
 static void do_oop_load(InterpreterMacroAssembler* _masm,
@@ -1149,7 +1176,7 @@ void TemplateTable::aastore() {
   __ movptr(rax, at_tos());
   __ movl(rcx, at_tos_p1()); // index
   // Now store using the appropriate barrier
-  do_oop_store(_masm, element_address, rax, IS_ARRAY);
+  do_oop_store(_masm, element_address, rax, _bs->kind(), IS_ARRAY);
   __ jmp(done);
 
   // Have a NULL in rax, rdx=array, ecx=index.  Store NULL at ary[idx]
@@ -1157,7 +1184,7 @@ void TemplateTable::aastore() {
   __ profile_null_seen(rbx);
 
   // Store a NULL
-  do_oop_store(_masm, element_address, noreg, IS_ARRAY);
+  do_oop_store(_masm, element_address, noreg, _bs->kind(), IS_ARRAY);
 
   // Pop stack arguments
   __ bind(done);
@@ -3175,7 +3202,7 @@ void TemplateTable::putfield_or_static(int byte_no, bool is_static, RewriteContr
     __ pop(atos);
     if (!is_static) pop_and_check_object(obj);
     // Store into the field
-    do_oop_store(_masm, field, rax);
+    do_oop_store(_masm, field, rax, _bs->kind());
     if (!is_static && rc == may_rewrite) {
       patch_bytecode(Bytecodes::_fast_aputfield, bc, rbx, true, byte_no);
     }
@@ -3423,7 +3450,7 @@ void TemplateTable::fast_storefield(TosState state) {
   // access field
   switch (bytecode()) {
   case Bytecodes::_fast_aputfield:
-    do_oop_store(_masm, field, rax);
+    do_oop_store(_masm, field, rax, _bs->kind());
     break;
   case Bytecodes::_fast_lputfield:
 #ifdef _LP64

@@ -70,6 +70,8 @@ class InterpreterRuntime: AllStatic {
   // Quicken instance-of and check-cast bytecodes
   static void    quicken_io_cc(JavaThread* thread);
 
+  static void write_barrier(JavaThread* thread, oopDesc* obj);
+
   // Exceptions thrown by the interpreter
   static void    throw_AbstractMethodError(JavaThread* thread);
   static void    throw_AbstractMethodErrorWithMethod(JavaThread* thread, Method* oop);

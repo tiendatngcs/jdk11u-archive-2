@@ -459,6 +459,17 @@ IRT_ENTRY(void, InterpreterRuntime::throw_ClassCastException(
   THROW_MSG(vmSymbols::java_lang_ClassCastException(), message);
 IRT_END
 
+IRT_ENTRY(void, InterpreterRuntime::write_barrier(JavaThread* thread, oopDesc* obj))
+  bool is_oop = oopDesc::is_oop(obj);
+  if (is_oop){
+    // tty->print_cr("Is oop");
+    obj->add_access_counter(1);
+    return;
+  }
+  tty->print_cr("Is not oop");
+  obj->add_access_counter(1);
+IRT_END
+
 // exception_handler_for_exception(...) returns the continuation address,
 // the exception oop (via TLS) and sets the bci/bcp for the continuation.
 // The exception oop is returned to make sure it is preserved over GC (it
