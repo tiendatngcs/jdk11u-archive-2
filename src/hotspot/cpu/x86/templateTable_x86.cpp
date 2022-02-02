@@ -154,31 +154,7 @@ static void do_oop_store(InterpreterMacroAssembler* _masm,
                          BarrierSet::Name barrier,
                          DecoratorSet decorators = 0) {
   assert(val == noreg || val == rax, "parameter is just for looks");
-  bool is_array = (decorators & IS_ARRAY) != 0;
-  if (val == noreg){
-    __ store_heap_oop(dst, val, rdx, rbx, decorators);
-    return;
-  } 
-    
-  // if (!is_array) __ movptr(c_rarg0, dst.base());
-  // if (barrier == BarrierSet::ShenandoahBarrierSet && !is_array) {
-  //   __ call_VM(noreg, CAST_FROM_FN_PTR(address, InterpreterRuntime::write_barrier), dst.base());
-  // }
   __ store_heap_oop(dst, val, rdx, rbx, decorators);
-  if (barrier == BarrierSet::ShenandoahBarrierSet) {
-    // __ call_VM(noreg, CAST_FROM_FN_PTR(address, InterpreterRuntime::print_something));
-    if (!is_array || (dst.index() == noreg && dst.disp() == 0)) {
-      if (is_array) {
-        __ verify_oop(dst.base());
-        __ call_VM(noreg, CAST_FROM_FN_PTR(address, InterpreterRuntime::write_barrier), dst.base());
-      }
-      else {
-        __ verify_oop(dst.base());
-        __ call_VM(noreg, CAST_FROM_FN_PTR(address, InterpreterRuntime::write_barrier), dst.base());
-      }
-        
-    }
-  }
 }
 
 static void do_oop_load(InterpreterMacroAssembler* _masm,

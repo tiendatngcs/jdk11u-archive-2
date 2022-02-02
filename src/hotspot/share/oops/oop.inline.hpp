@@ -75,14 +75,14 @@ void oopDesc::set_access_counter(int new_value) {
   _access_counter = new_value;
 }
 
-void oopDesc::increase_access_counter(int increment) {
+void oopDesc::increase_access_counter() {
   int ac = true_access_counter();
-  if (INT_MAX - increment < ac) {
+  if (INT_MAX - 1 < ac) {
     // overflow
     set_access_counter(INT_MAX);
     return;
   }
-  set_access_counter(ac + increment);
+  set_access_counter(ac + 1);
 }
 
 void oopDesc::set_gc_epoch(int new_value) {

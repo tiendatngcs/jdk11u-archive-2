@@ -44,7 +44,7 @@ inline void ShenandoahBarrierSet::oop_increase_access_counter(oop p)
     // if (heap != NULL){
     //   heap->oop_check_to_reset_access_counter(p);
     // }
-    p->increase_access_counter(1);
+    p->increase_access_counter();
   }
 }
 
