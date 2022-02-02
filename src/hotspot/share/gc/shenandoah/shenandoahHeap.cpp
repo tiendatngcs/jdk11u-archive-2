@@ -453,6 +453,12 @@ ShenandoahHeap::ShenandoahHeap(ShenandoahCollectorPolicy* policy) :
   _used(0),
   _committed(0),
   _bytes_allocated_since_gc_start(0),
+  _valid_size(0),
+  _valid_count(0),
+  _invalid_size(0),
+  _invalid_count(0),
+  _histogram(),
+  _size_histogram(),
   _max_workers(MAX2(ConcGCThreads, ParallelGCThreads)),
   _workers(NULL),
   _safepoint_workers(NULL),
@@ -506,6 +512,7 @@ ShenandoahHeap::ShenandoahHeap(ShenandoahCollectorPolicy* policy) :
                  /* are_ConcurrentGC_threads */ false);
     _safepoint_workers->initialize_workers();
   }
+  reset_histogram();
 }
 
 #ifdef _MSC_VER
@@ -630,6 +637,33 @@ size_t ShenandoahHeap::committed() const {
   return _committed;
 }
 
+size_t ShenandoahHeap::oop_stats(bool is_valid, bool is_count) const {
+  OrderAccess::acquire();
+  if (is_valid) {
+    if (is_count) {
+      return _valid_count;
+    }
+    return _valid_size;
+  }
+  if (is_count) {
+    return _invalid_count;
+  }
+  return _invalid_size;
+}
+
+const size_t* ShenandoahHeap::histogram()   const {
+  OrderAccess::acquire();
+  return _histogram;
+}
+
+const size_t* ShenandoahHeap::size_histogram()   const {
+  OrderAccess::acquire();
+  return _size_histogram;
+}
+
+
+/////////////////////////////////// 
+
 void ShenandoahHeap::increase_committed(size_t bytes) {
   shenandoah_assert_heaplocked_or_safepoint();
   _committed += bytes;
@@ -655,6 +689,84 @@ void ShenandoahHeap::decrease_used(size_t bytes) {
 
 void ShenandoahHeap::increase_allocated(size_t bytes) {
   Atomic::add(bytes, &_bytes_allocated_since_gc_start);
+}
+
+
+///// stats keeping mechanics
+void ShenandoahHeap::set_oop_stats(bool is_valid, bool is_count, size_t new_value) {
+  if (is_valid) {
+    if (is_count) {
+      _valid_count = new_value;
+      return;
+    }
+    _valid_size = new_value;
+    return;
+  }
+  if (is_count) {
+    _invalid_count = new_value;
+    return;
+  }
+  _invalid_size = new_value;
+  return;
+}
+void ShenandoahHeap::increase_oop_stats(bool is_valid, bool is_count, size_t increment) {
+  if (is_valid) {
+    if (is_count) {
+      _valid_count += increment;
+      return;
+    }
+    _valid_size += increment;
+    return;
+  }
+  if (is_count) {
+    _invalid_count += increment;
+    return;
+  }
+  _invalid_size += increment;
+  return;
+}
+
+void ShenandoahHeap::update_histogram(oop obj) {
+  // uintptr_t ac
+  if (obj == NULL) return;
+  // oop_check_to_reset_access_counter(obj);
+  uintptr_t ac = obj->access_counter();
+  uintptr_t gc_epoch = obj->gc_epoch();
+
+  if (ac == 0 && gc_epoch == 0 && oopDesc::static_gc_epoch != 0) {
+    ResourceMark rm;
+    tty->print_cr("untouched oop | ac %lu | gc_epoch %lu | size %d", ac, gc_epoch, obj->size());
+    tty->print_cr("%s", obj->klass()->internal_name());
+    increase_oop_stats(false, false, obj->size());
+    increase_oop_stats(false, true, 1);
+  } else {
+    increase_oop_stats(true, false, obj->size());
+    increase_oop_stats(true, true, 1);
+    if (ac == 0){
+      _histogram[0] += 1;
+      _size_histogram[0] += obj->size();
+      return;
+    }
+    int idx = static_cast<int>(log2(ac)) + 1;
+    int arr_size = sizeof(_histogram)/sizeof(_histogram[0]);
+    // printf("arr_size %d | ac %lu | idx %d\n", arr_size, ac, idx);
+    if (idx >= arr_size) {
+      // Atomic::add(1, &_histogram[arr_size-1]);
+      _histogram[arr_size-1] += 1;
+      _size_histogram[arr_size-1] += obj->size();
+    }
+    else {
+      // Atomic::add(1, &_histogram[idx]);
+      _histogram[idx] += 1;
+      _size_histogram[idx] += obj->size();
+    }
+  }
+}
+
+void ShenandoahHeap::reset_histogram() {
+  OrderAccess::acquire();
+  memset(_histogram, 0, sizeof(_histogram));
+  memset(_size_histogram, 0, sizeof(_size_histogram));
 }
 
 void ShenandoahHeap::notify_mutator_alloc_words(size_t words, bool waste) {

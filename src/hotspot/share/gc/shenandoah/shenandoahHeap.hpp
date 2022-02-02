@@ -168,6 +168,14 @@ private:
   volatile size_t _bytes_allocated_since_gc_start;
   shenandoah_padding(1);
 
+  size_t _valid_size;
+  size_t _valid_count;
+  size_t _invalid_size;
+  size_t _invalid_count;
+
+  size_t _histogram[30];
+  size_t _size_histogram[30];
+
 public:
   void increase_used(size_t bytes);
   void decrease_used(size_t bytes);
@@ -189,6 +197,15 @@ public:
   size_t committed()         const;
 
   void set_soft_max_capacity(size_t v);
+
+  void set_oop_stats(bool is_valid, bool is_count, size_t new_value);
+  void increase_oop_stats(bool is_valid, bool is_count, size_t increment);
+
+  void update_histogram(oop obj);
+  void reset_histogram();
+
+  const size_t* histogram()   const;
+  const size_t* size_histogram() const;
 
 // ---------- Workers handling
 //
