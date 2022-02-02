@@ -204,6 +204,8 @@ public:
   void update_histogram(oop obj);
   void reset_histogram();
 
+  size_t oop_stats(bool is_valid, bool is_count) const;
+
   const size_t* histogram()   const;
   const size_t* size_histogram() const;
 
