@@ -75,8 +75,8 @@ void oopDesc::set_access_counter(int new_value) {
   _access_counter = new_value;
 }
 
-void oopDesc::set_access_counter(HeapWord* mem, intptr_t new_value){ 
-  *(intptr_t*)(((char*)mem) + access_counter_offset_in_bytes()) = new_value;
+void oopDesc::set_access_counter(HeapWord* mem, int new_value){ 
+  *(int*)(((char*)mem) + access_counter_offset_in_bytes()) = new_value;
 }
 
 void oopDesc::increase_access_counter() {
@@ -93,8 +93,8 @@ void oopDesc::set_gc_epoch(int new_value) {
   _gc_epoch = new_value;
 }
 
-void oopDesc::set_gc_epoch(HeapWord* mem, intptr_t new_value){ 
-  *(intptr_t*)(((char*)mem) + gc_epoch_offset_in_bytes()) = new_value;
+void oopDesc::set_gc_epoch(HeapWord* mem, int new_value){ 
+  *(int*)(((char*)mem) + gc_epoch_offset_in_bytes()) = new_value;
 }
 
 void oopDesc::set_mark(volatile markOop m) {
