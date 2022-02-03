@@ -82,9 +82,11 @@ class oopDesc {
   inline markOop cas_set_mark_raw(markOop new_mark, markOop old_mark, atomic_memory_order order = memory_order_conservative);
   
   inline void set_access_counter(int new_value);
+  static inline void set_access_counter(HeapWord* mem, intptr_t new_value);
   inline void increase_access_counter();
   
   inline void set_gc_epoch(int new_value);
+  static inline void set_gc_epoch(HeapWord* mem, intptr_t new_value);
 
   // Used only to re-initialize the mark word (e.g., of promoted
   // objects during a GC) -- requires a valid klass pointer

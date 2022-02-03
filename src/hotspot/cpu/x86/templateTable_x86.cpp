@@ -4102,9 +4102,13 @@ void TemplateTable::_new() {
       __ pop(rcx);   // get saved klass back in the register.
       __ movptr(rbx, Address(rcx, Klass::prototype_header_offset()));
       __ movptr(Address(rax, oopDesc::mark_offset_in_bytes ()), rbx);
+      __ movptr(Address(rax, oopDesc::access_counter_offset_in_bytes ()), (intptr_t)0);
+      __ movptr(Address(rax, oopDesc::gc_epoch_offset_in_bytes ()), (intptr_t)0);
     } else {
       __ movptr(Address(rax, oopDesc::mark_offset_in_bytes ()),
                 (intptr_t)markOopDesc::prototype()); // header
+      __ movptr(Address(rax, oopDesc::access_counter_offset_in_bytes ()), (intptr_t)0);
+      __ movptr(Address(rax, oopDesc::gc_epoch_offset_in_bytes ()), (intptr_t)0);
       __ pop(rcx);   // get saved klass back in the register.
     }
 #ifdef _LP64

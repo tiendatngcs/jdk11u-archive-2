@@ -402,6 +402,11 @@ oop MemAllocator::finish(HeapWord* mem) const {
     // May be bootstrapping
     oopDesc::set_mark_raw(mem, markOopDesc::prototype());
   }
+
+  // zero ac and gc_epoch
+  oopDesc::set_access_counter(mem, 0);
+  oopDesc::set_gc_epoch(mem, 0);
+
   // Need a release store to ensure array/class length, mark word, and
   // object zeroing are visible before setting the klass non-NULL, for
   // concurrent collectors.

@@ -106,7 +106,9 @@ inline oop ShenandoahHeap::maybe_update_with_forwarded(T* p) {
   T o = RawAccess<>::oop_load(p);
   if (!CompressedOops::is_null(o)) {
     oop obj = CompressedOops::decode_not_null(o);
-    return maybe_update_with_forwarded_not_null(p, obj);
+    oop fwd = maybe_update_with_forwarded_not_null(p, obj);
+    update_histogram(fwd);
+    return fwd;
   } else {
     return NULL;
   }
