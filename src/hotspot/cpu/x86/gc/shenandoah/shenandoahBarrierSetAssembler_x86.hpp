@@ -61,6 +61,8 @@ private:
 
   address generate_shenandoah_lrb(StubCodeGenerator* cgen);
 
+  void oop_increase_access_counter(MacroAssembler* masm, Register obj, Register temp1);
+
 public:
   static address shenandoah_lrb();
 

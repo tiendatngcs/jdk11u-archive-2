@@ -435,7 +435,7 @@ void ShenandoahControlThread::service_concurrent_normal_cycle(GCCause::Cause cau
   // Cycle is complete
 
   log_info(gc)("Dat log --- cycle is complete\n"
-                "Current gc epoch: %d\n"
+                "Current gc epoch: %lu\n"
                 "heap: ______\n"
                 "capacity: %lu\n"
                 "used: %lu\n"
