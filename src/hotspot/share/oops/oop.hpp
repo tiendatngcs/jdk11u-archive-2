@@ -56,8 +56,8 @@ class oopDesc {
   friend class VMStructs;
   friend class JVMCIVMStructs;
  private:
-  int _access_counter;
-  int _gc_epoch;
+  intptr_t _access_counter;
+  intptr_t _gc_epoch;
   volatile markOop _mark;
   union _metadata {
     Klass*      _klass;
@@ -65,13 +65,13 @@ class oopDesc {
   } _metadata;
 
  public:
-  static int static_gc_epoch;
+  static intptr_t static_gc_epoch;
   inline markOop  mark()          const;
   inline markOop  mark_raw()      const;
   inline markOop* mark_addr_raw() const;
-  inline int access_counter();
-  inline int true_access_counter();
-  inline int gc_epoch();
+  inline intptr_t access_counter();
+  inline intptr_t true_access_counter();
+  inline intptr_t gc_epoch();
 
   inline void set_mark(volatile markOop m);
   inline void set_mark_raw(volatile markOop m);
@@ -81,12 +81,12 @@ class oopDesc {
   inline markOop cas_set_mark(markOop new_mark, markOop old_mark);
   inline markOop cas_set_mark_raw(markOop new_mark, markOop old_mark, atomic_memory_order order = memory_order_conservative);
   
-  inline void set_access_counter(int new_value);
-  static inline void set_access_counter(HeapWord* mem, int new_value);
+  inline void set_access_counter(intptr_t new_value);
+  static inline void set_access_counter(HeapWord* mem, intptr_t new_value);
   inline void increase_access_counter();
   
-  inline void set_gc_epoch(int new_value);
-  static inline void set_gc_epoch(HeapWord* mem, int new_value);
+  inline void set_gc_epoch(intptr_t new_value);
+  static inline void set_gc_epoch(HeapWord* mem, intptr_t new_value);
 
   // Used only to re-initialize the mark word (e.g., of promoted
   // objects during a GC) -- requires a valid klass pointer

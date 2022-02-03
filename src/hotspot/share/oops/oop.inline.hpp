@@ -55,7 +55,7 @@ markOop* oopDesc::mark_addr_raw() const {
   return (markOop*) &_mark;
 }
 
-int oopDesc::true_access_counter() {
+intptr_t oopDesc::true_access_counter() {
   if (_gc_epoch != static_gc_epoch) {
     set_access_counter(0);
     set_gc_epoch(static_gc_epoch);
@@ -63,24 +63,24 @@ int oopDesc::true_access_counter() {
   return access_counter();
 }
 
-int oopDesc::access_counter() {
+intptr_t oopDesc::access_counter() {
   return _access_counter;
 }
 
-int oopDesc::gc_epoch() {
+intptr_t oopDesc::gc_epoch() {
   return _gc_epoch;
 }
 
-void oopDesc::set_access_counter(int new_value) {
+void oopDesc::set_access_counter(intptr_t new_value) {
   _access_counter = new_value;
 }
 
-void oopDesc::set_access_counter(HeapWord* mem, int new_value){ 
-  *(int*)(((char*)mem) + access_counter_offset_in_bytes()) = new_value;
+void oopDesc::set_access_counter(HeapWord* mem, intptr_t new_value){ 
+  *(intptr_t*)(((char*)mem) + access_counter_offset_in_bytes()) = new_value;
 }
 
 void oopDesc::increase_access_counter() {
-  int ac = true_access_counter();
+  intptr_t ac = true_access_counter();
   if (INT_MAX - 1 < ac) {
     // overflow
     set_access_counter(INT_MAX);
@@ -89,12 +89,12 @@ void oopDesc::increase_access_counter() {
   set_access_counter(ac + 1);
 }
 
-void oopDesc::set_gc_epoch(int new_value) {
+void oopDesc::set_gc_epoch(intptr_t new_value) {
   _gc_epoch = new_value;
 }
 
-void oopDesc::set_gc_epoch(HeapWord* mem, int new_value){ 
-  *(int*)(((char*)mem) + gc_epoch_offset_in_bytes()) = new_value;
+void oopDesc::set_gc_epoch(HeapWord* mem, intptr_t new_value){ 
+  *(intptr_t*)(((char*)mem) + gc_epoch_offset_in_bytes()) = new_value;
 }
 
 void oopDesc::set_mark(volatile markOop m) {
