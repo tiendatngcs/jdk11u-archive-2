@@ -769,6 +769,14 @@ void ShenandoahHeap::reset_histogram() {
   memset(_size_histogram, 0, sizeof(_size_histogram));
 }
 
+void ShenandoahHeap::reset_oop_stats() {
+  OrderAccess::acquire();
+  _valid_size = 0;
+  _valid_count = 0;
+  _invalid_size = 0;
+  _invalid_count = 0;
+}
+
 void ShenandoahHeap::notify_mutator_alloc_words(size_t words, bool waste) {
   size_t bytes = words * HeapWordSize;
   if (!waste) {

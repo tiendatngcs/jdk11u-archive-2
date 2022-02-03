@@ -454,15 +454,16 @@ void ShenandoahControlThread::service_concurrent_normal_cycle(GCCause::Cause cau
   }
 
   log_info(gc)("Valid/invalid oop stats\n"
-                "valid_count: %lu\n"
-                "valid_size: %lu\n"
-                "invalid_count: %lu\n"
-                "invalid_size: %lu\n", heap->oop_stats(true, true), heap->oop_stats(true, false), heap->oop_stats(false, true), heap->oop_stats(false, false));
+                "valid_count: %lu bytes\n"
+                "valid_size: %lu bytes\n"
+                "invalid_count: %lu bytes\n"
+                "invalid_size: %lu bytes\n", heap->oop_stats(true, true)*HeapWordSize, heap->oop_stats(true, false)*HeapWordSize, heap->oop_stats(false, true)*HeapWordSize, heap->oop_stats(false, false)*HeapWordSize);
 
   heap->heuristics()->record_success_concurrent();
   heap->shenandoah_policy()->record_success_concurrent();
   
   heap->reset_histogram();
+  heap->reset_oop_stats();
   oopDesc::static_gc_epoch += 1;
 }
 

@@ -203,6 +203,7 @@ public:
 
   void update_histogram(oop obj);
   void reset_histogram();
+  void reset_oop_stats();
 
   size_t oop_stats(bool is_valid, bool is_count) const;
 
