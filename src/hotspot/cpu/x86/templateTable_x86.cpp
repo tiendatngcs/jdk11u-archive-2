@@ -147,6 +147,66 @@ static Assembler::Condition j_not(TemplateTable::Condition cc) {
 // Store an oop (or NULL) at the address described by obj.
 // If val == noreg this means store a NULL
 
+static void oop_increase_access_counter(InterpreterMacroAssembler* _masm,
+                          Register obj,
+                          Register temp1,
+                          BarrierSet::Name barrier) {
+  if (barrier == BarrierSet::ShenandoahBarrierSet){
+    assert_different_registers(obj, temp1);
+    Label oop_is_null, no_reset_values;
+    __ cmpptr(obj, 0);
+    __ jcc(Assembler::equal, oop_is_null);
+
+
+
+    if (UseCompressedOops) {
+      __ decode_heap_oop(obj);
+    }
+    // __ pusha();
+    // __ call_VM_leaf(CAST_FROM_FN_PTR(address, InterpreterRuntime::print_oop), obj);
+    // __ popa();
+
+    // load obj gc_epoch to temp1
+
+    // cmp temp1 to static_gc_epoch if equal jmp to no_reset_values, 
+    __ movptr(temp1, InternalAddress((address)(&oopDesc::static_gc_epoch)));
+    // __ pusha();
+    // __ call_VM_leaf(CAST_FROM_FN_PTR(address, ShenandoahRuntime::print_address), temp1);
+    // __ popa();
+    
+    __ cmpptr(temp1, Address(obj, oopDesc::gc_epoch_offset_in_bytes()));
+    __ jcc(Assembler::equal, no_reset_values);
+    // Reset ac to 0 and gc_epoch to current gc_epoch
+    __ movptr(Address(obj, oopDesc::gc_epoch_offset_in_bytes()), temp1);
+
+    // __ pusha();
+    // __ call_VM_leaf(CAST_FROM_FN_PTR(address, ShenandoahRuntime::print_address), temp1);
+    // __ popa();
+
+    __ movptr(Address(obj, oopDesc::access_counter_offset_in_bytes()), (intptr_t)0); // illegal use but works for this situation
+
+
+    __ bind(no_reset_values);
+    // increment ac by 1
+    __ movptr(temp1, Address(obj, oopDesc::access_counter_offset_in_bytes()));
+    __ increment(temp1);
+    __ movptr(Address(obj, oopDesc::access_counter_offset_in_bytes()), temp1);
+
+
+    // __ pusha();
+    // __ call_VM_leaf(CAST_FROM_FN_PTR(address, InterpreterRuntime::print_oop), obj);
+    // __ popa();
+
+    // __ pusha();
+    // __ call_VM_leaf(CAST_FROM_FN_PTR(address, InterpreterRuntime::print_newline));
+    // __ popa();
+    if (UseCompressedOops) {
+      __ encode_heap_oop(obj);
+    }
+    
+    __ bind(oop_is_null);
+  }
+}
 
 static void do_oop_store(InterpreterMacroAssembler* _masm,
                          Address dst,
@@ -163,6 +223,7 @@ static void do_oop_load(InterpreterMacroAssembler* _masm,
                         DecoratorSet decorators = 0) {
   __ load_heap_oop(dst, src, rdx, rbx, decorators);
 }
+
 
 Address TemplateTable::at_bcp(int offset) {
   assert(_desc->uses_bcp(), "inconsistent uses_bcp information");
@@ -822,6 +883,13 @@ void TemplateTable::aaload() {
   // rax: index
   // rdx: array
   index_check(rdx, rax); // kills rbx
+  // // Dat mod
+  // // assuming that r9 will not be altered
+  __ movptr(r9, rdx);
+  // // Dat mod ends
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
   do_oop_load(_masm,
               Address(rdx, rax,
                       UseCompressedOops ? Address::times_4 : Address::times_ptr,
@@ -1120,6 +1188,10 @@ void TemplateTable::aastore() {
   __ movl(rcx, at_tos_p1()); // index
   __ movptr(rdx, at_tos_p2()); // array
 
+  // Dat mod
+  __ movptr(r9, rdx);
+  // Dat mod ends
+
   Address element_address(rdx, rcx,
                           UseCompressedOops? Address::times_4 : Address::times_ptr,
                           arrayOopDesc::base_offset_in_bytes(T_OBJECT));
@@ -1150,6 +1222,9 @@ void TemplateTable::aastore() {
   __ movptr(rax, at_tos());
   __ movl(rcx, at_tos_p1()); // index
   // Now store using the appropriate barrier
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
   do_oop_store(_masm, element_address, rax, _bs->kind(), IS_ARRAY);
   __ jmp(done);
 
@@ -1158,6 +1233,9 @@ void TemplateTable::aastore() {
   __ profile_null_seen(rbx);
 
   // Store a NULL
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
   do_oop_store(_masm, element_address, noreg, _bs->kind(), IS_ARRAY);
 
   // Pop stack arguments
@@ -2874,6 +2952,11 @@ void TemplateTable::getfield_or_static(int byte_no, bool is_static, RewriteContr
 
   if (!is_static) pop_and_check_object(obj);
 
+  // // Dat mod
+  // // assuming that r9 will not be altered
+  __ movptr(r9, obj);
+  // // Dat mod ends
+
   const Address field(obj, off, Address::times_1, 0*wordSize);
 
   Label Done, notByte, notBool, notInt, notShort, notChar, notLong, notFloat, notObj, notDouble;
@@ -2912,6 +2995,9 @@ void TemplateTable::getfield_or_static(int byte_no, bool is_static, RewriteContr
   __ cmpl(flags, atos);
   __ jcc(Assembler::notEqual, notObj);
   // atos
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
   do_oop_load(_masm, field, rax);
   __ push(atos);
   if (!is_static && rc == may_rewrite) {
@@ -3128,6 +3214,11 @@ void TemplateTable::putfield_or_static(int byte_no, bool is_static, RewriteContr
   __ shrl(rdx, ConstantPoolCacheEntry::is_volatile_shift);
   __ andl(rdx, 0x1);
 
+  // Dat mod
+  __ movptr(r9, obj);
+  // Dat mod ends
+  // field addresses
+
   // field addresses
   const Address field(obj, off, Address::times_1, 0*wordSize);
   NOT_LP64( const Address hi(obj, off, Address::times_1, 1*wordSize);)
@@ -3176,6 +3267,9 @@ void TemplateTable::putfield_or_static(int byte_no, bool is_static, RewriteContr
     __ pop(atos);
     if (!is_static) pop_and_check_object(obj);
     // Store into the field
+    __ pusha();
+    oop_increase_access_counter(_masm, obj, r8, _bs->kind());
+    __ popa();
     do_oop_store(_masm, field, rax, _bs->kind());
     if (!is_static && rc == may_rewrite) {
       patch_bytecode(Bytecodes::_fast_aputfield, bc, rbx, true, byte_no);
@@ -3418,12 +3512,19 @@ void TemplateTable::fast_storefield(TosState state) {
   // Get object from stack
   pop_and_check_object(rcx);
 
+  // Dat mod
+  __ movptr(r9, rcx);
+  // Dat mod ends
+
   // field address
   const Address field(rcx, rbx, Address::times_1);
 
   // access field
   switch (bytecode()) {
   case Bytecodes::_fast_aputfield:
+    __ pusha();
+    oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+    __ popa();
     do_oop_store(_masm, field, rax, _bs->kind());
     break;
   case Bytecodes::_fast_lputfield:
@@ -3509,11 +3610,20 @@ void TemplateTable::fast_accessfield(TosState state) {
   // rax: object
   __ verify_oop(rax);
   __ null_check(rax);
+
+  // // Dat mod
+  // // assuming that r9 will not be altered
+  __ movptr(r9, rax);
+  // // Dat mod ends
+
   Address field(rax, rbx, Address::times_1);
 
   // access field
   switch (bytecode()) {
   case Bytecodes::_fast_agetfield:
+    __ pusha();
+    oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+    __ popa();
     do_oop_load(_masm, field, rax);
     __ verify_oop(rax);
     break;
@@ -3570,12 +3680,21 @@ void TemplateTable::fast_xaccess(TosState state) {
   // next instruction)
   __ increment(rbcp);
   __ null_check(rax);
+
+  // // Dat mod
+  // // assuming that r9 will not be altered
+  __ movptr(r9, rax);
+  // // Dat mod ends
+
   const Address field = Address(rax, rbx, Address::times_1, 0*wordSize);
   switch (state) {
   case itos:
     __ access_load_at(T_INT, IN_HEAP, rax, field, noreg, noreg);
     break;
   case atos:
+    __ pusha();
+    oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+    __ popa();
     do_oop_load(_masm, field, rax);
     __ verify_oop(rax);
     break;
