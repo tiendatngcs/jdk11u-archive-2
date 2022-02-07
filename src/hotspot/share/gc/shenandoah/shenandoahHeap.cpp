@@ -2449,9 +2449,10 @@ void ShenandoahHeap::op_stats_collection() {
   assert(ShenandoahSafepoint::is_at_shenandoah_safepoint(), "must be at safepoint");
   ShenandoahHeap* heap = ShenandoahHeap::heap();
 
-  _update_refs_iterator.reset();
+  ShenandoahRegionIterator regions;
+  regions.reset();
 
-  ShenandoahHeapRegion* r = _update_refs_iterator->next();
+  ShenandoahHeapRegion* r = regions.next();
   while (r != NULL) {
     if (r->is_active() && !r->is_cset() && !r->is_humongous()) {
       HeapWord* cs = r->bottom();
@@ -2463,7 +2464,7 @@ void ShenandoahHeap::op_stats_collection() {
         cs += obj->size();
       }
     }
-    r = _update_refs_iterator->next();
+    r = regions.next();
   }
 
   // Cycle is complete
