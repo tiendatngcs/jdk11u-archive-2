@@ -2451,13 +2451,20 @@ void ShenandoahHeap::op_stats_collection() {
 
   ShenandoahRegionIterator regions;
   regions.reset();
-
+  HeapWord* obj_addr = NULL;
   ShenandoahHeapRegion* r = regions.next();
   while (r != NULL) {
     if (r->is_active() && !r->is_cset()) {
       tty->print_cr("Iterating region %lu", r->index());
-      ShenandoahStatsCollectionClosure cl;
-      r->oop_iterate(&cl);
+      // ShenandoahStatsCollectionClosure cl;
+      // r->oop_iterate(&cl);
+      obj_addr = r->bottom();
+      while (obj_addr < r->top()) {
+        oop obj = oop(obj_addr);
+        int size = obj->size();
+        tty->print_cr("Printing oop ac = %lu | gc_epoch = %lu | region = %lu", obj->access_counter(), obj->gc_epoch(), _heap->heap_region_index_containing(obj));
+        obj_addr += size;
+      }
     }
     r = regions.next();
   }
