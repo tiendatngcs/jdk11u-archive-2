@@ -2456,7 +2456,7 @@ void ShenandoahHeap::op_stats_collection() {
   while (r != NULL) {
     if (r->is_active() && !r->is_cset()) {
       ShenandoahStatsCollectionClosure cl;
-      r->oop_iterate(&cl)
+      r->oop_iterate(&cl);
     }
     r = regions.next();
   }
