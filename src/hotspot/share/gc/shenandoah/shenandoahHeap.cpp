@@ -2454,15 +2454,9 @@ void ShenandoahHeap::op_stats_collection() {
 
   ShenandoahHeapRegion* r = regions.next();
   while (r != NULL) {
-    if (r->is_active() && !r->is_cset() && !r->is_humongous()) {
-      HeapWord* cs = r->bottom();
-      while (cs < r->top()) {
-        oop obj = oop(cs);
-        assert(oopDesc::is_oop(obj), "sanity");
-        // assert(ctx->is_marked(obj), "object expected to be marked");
-        heap->update_histogram(obj);
-        cs += obj->size();
-      }
+    if (r->is_active() && !r->is_cset()) {
+      ShenandoahStatsCollectionClosure cl;
+      r->oop_iterate(&cl)
     }
     r = regions.next();
   }

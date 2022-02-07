@@ -198,4 +198,19 @@ public:
   virtual void do_oop(oop* p)       { do_oop_work(p); }
 };
 
+class ShenandoahStatsCollectionClosure : public BasicOopIterateClosure {
+private:
+  ShenandoahHeap* _heap;
+
+  template <class T>
+  void do_oop_work(T* p);
+
+public:
+  ShenandoahStatsCollectionClosure() :
+    _heap(ShenandoahHeap::heap()) {}
+
+  virtual void do_oop(narrowOop* p) { do_oop_work(p); }
+  virtual void do_oop(oop* p)       { do_oop_work(p); }
+}
+
 #endif // SHARE_VM_GC_SHENANDOAH_SHENANDOAHOOPCLOSURES_HPP

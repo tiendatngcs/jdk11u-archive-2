@@ -37,4 +37,13 @@ inline void ShenandoahUpdateHeapRefsClosure::do_oop_work(T* p) {
   _heap->maybe_update_with_forwarded(p);
 }
 
+template <class T>
+inline void ShenandoahStatsCollectionClosure::do_oop_work(T *p) {
+  T o = RawAccess<>::oop_load(p);
+  if (!CompressedOops::is_null(o)) {
+    oop obj = CompressedOops::decode_not_null(o);
+    tty->print_cr("Printing oop ac = %lu | gc_epoch = %lu", obj->access_counter(), obj->gc_epoch());
+  }
+}
+
 #endif // SHARE_VM_GC_SHENANDOAH_SHENANDOAHOOPCLOSURES_INLINE_HPP
