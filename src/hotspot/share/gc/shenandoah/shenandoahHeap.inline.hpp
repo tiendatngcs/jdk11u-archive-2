@@ -107,7 +107,7 @@ inline oop ShenandoahHeap::maybe_update_with_forwarded(T* p) {
   if (!CompressedOops::is_null(o)) {
     oop obj = CompressedOops::decode_not_null(o);
     oop fwd = maybe_update_with_forwarded_not_null(p, obj);
-    update_histogram(fwd);
+    // update_histogram(fwd);
     return fwd;
   } else {
     return NULL;
@@ -448,6 +448,8 @@ inline void ShenandoahHeap::marked_object_iterate(ShenandoahHeapRegion* region, 
         oop obj = oop(slots[c]);
         assert(oopDesc::is_oop(obj), "sanity");
         assert(ctx->is_marked(obj), "object expected to be marked");
+
+        if (is_update_refs_in_progress()) update_histogram(obj);
         cl->do_object(obj);
       }
     } while (avail > 0);
@@ -458,6 +460,8 @@ inline void ShenandoahHeap::marked_object_iterate(ShenandoahHeapRegion* region, 
       oop obj = oop(cb);
       assert(oopDesc::is_oop(obj), "sanity");
       assert(ctx->is_marked(obj), "object expected to be marked");
+
+      if (is_update_refs_in_progress()) update_histogram(obj);
       cl->do_object(obj);
       cb += skip_bitmap_delta;
       if (cb < limit_bitmap) {
@@ -477,6 +481,8 @@ inline void ShenandoahHeap::marked_object_iterate(ShenandoahHeapRegion* region, 
     assert(oopDesc::is_oop(obj), "sanity");
     assert(ctx->is_marked(obj), "object expected to be marked");
     int size = obj->size();
+
+    if (is_update_refs_in_progress()) update_histogram(obj);
     cl->do_object(obj);
     cs += size;
   }
