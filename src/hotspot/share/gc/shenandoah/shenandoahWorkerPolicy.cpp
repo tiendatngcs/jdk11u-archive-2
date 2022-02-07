@@ -111,6 +111,11 @@ uint ShenandoahWorkerPolicy::calc_workers_for_final_update_ref() {
   return _prev_par_update_ref;
 }
 
+uint ShenandoahWorkerPolicy::calc_workers_for_stats_collection() {
+  // Stats collection is single-threaded
+  return 1;
+}
+
 uint ShenandoahWorkerPolicy::calc_workers_for_conc_preclean() {
   // Precleaning is single-threaded
   return 1;

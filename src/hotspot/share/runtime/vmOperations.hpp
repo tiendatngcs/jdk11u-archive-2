@@ -111,6 +111,7 @@
   shtemplate(template, ShenandoahInitUpdateRefs)  \
   shtemplate(template, ShenandoahFinalUpdateRefs) \
   shtemplate(template, ShenandoahDegeneratedGC)   \
+  shtemplate(template, ShenandoahStatsCollection) \
   template(Exit)                                  \
   template(LinuxDllLoad)                          \
   template(RotateGCLog)                           \
