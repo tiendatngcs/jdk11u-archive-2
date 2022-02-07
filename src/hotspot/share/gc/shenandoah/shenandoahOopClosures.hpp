@@ -198,7 +198,7 @@ public:
   virtual void do_oop(oop* p)       { do_oop_work(p); }
 };
 
-class ShenandoahStatsCollectionClosure : public BasicOopIterateClosure {
+class ShenandoahStatsCollectionClosure : public MetadataVisitingOopIterateClosure {
 private:
   ShenandoahHeap* _heap;
 

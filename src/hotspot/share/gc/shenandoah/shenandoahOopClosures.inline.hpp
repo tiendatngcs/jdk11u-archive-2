@@ -42,7 +42,7 @@ inline void ShenandoahStatsCollectionClosure::do_oop_work(T *p) {
   T o = RawAccess<>::oop_load(p);
   if (!CompressedOops::is_null(o)) {
     oop obj = CompressedOops::decode_not_null(o);
-    tty->print_cr("Printing oop ac = %lu | gc_epoch = %lu", obj->access_counter(), obj->gc_epoch());
+    tty->print_cr("Printing oop ac = %lu | gc_epoch = %lu | region = %lu", obj->access_counter(), obj->gc_epoch(), _heap->heap_region_index_containing(obj));
   }
 }
 

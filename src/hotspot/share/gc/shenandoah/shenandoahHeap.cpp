@@ -2455,6 +2455,7 @@ void ShenandoahHeap::op_stats_collection() {
   ShenandoahHeapRegion* r = regions.next();
   while (r != NULL) {
     if (r->is_active() && !r->is_cset()) {
+      tty->print_cr("Iterating region %lu", r->index());
       ShenandoahStatsCollectionClosure cl;
       r->oop_iterate(&cl);
     }
