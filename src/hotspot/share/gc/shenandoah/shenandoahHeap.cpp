@@ -2448,7 +2448,24 @@ void ShenandoahHeap::op_final_updaterefs() {
 void ShenandoahHeap::op_stats_collection() {
   assert(ShenandoahSafepoint::is_at_shenandoah_safepoint(), "must be at safepoint");
   ShenandoahHeap* heap = ShenandoahHeap::heap();
-  
+
+  _update_refs_iterator.reset();
+
+  ShenandoahHeapRegion* r = _update_refs_iterator->next();
+  while (r != NULL) {
+    if (r->is_active() && !r->is_cset() && !r->is_humongous()) {
+      HeapWord* cs = r->bottom();
+      while (cs < r->top()) {
+        oop obj = oop(cs);
+        assert(oopDesc::is_oop(obj), "sanity");
+        // assert(ctx->is_marked(obj), "object expected to be marked");
+        heap->update_histogram(obj);
+        cs += obj->size();
+      }
+    }
+    r = _update_refs_iterator->next();
+  }
+
   // Cycle is complete
 
   log_info(gc)("Dat log --- cycle is complete\n"

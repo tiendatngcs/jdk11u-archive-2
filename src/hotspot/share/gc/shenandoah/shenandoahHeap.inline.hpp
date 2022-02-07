@@ -449,7 +449,7 @@ inline void ShenandoahHeap::marked_object_iterate(ShenandoahHeapRegion* region, 
         assert(oopDesc::is_oop(obj), "sanity");
         assert(ctx->is_marked(obj), "object expected to be marked");
 
-        if (is_update_refs_in_progress()) update_histogram(obj);
+        // if (is_update_refs_in_progress()) update_histogram(obj);
         cl->do_object(obj);
       }
     } while (avail > 0);
@@ -461,7 +461,7 @@ inline void ShenandoahHeap::marked_object_iterate(ShenandoahHeapRegion* region, 
       assert(oopDesc::is_oop(obj), "sanity");
       assert(ctx->is_marked(obj), "object expected to be marked");
 
-      if (is_update_refs_in_progress()) update_histogram(obj);
+      // if (is_update_refs_in_progress()) update_histogram(obj);
       cl->do_object(obj);
       cb += skip_bitmap_delta;
       if (cb < limit_bitmap) {
@@ -482,7 +482,7 @@ inline void ShenandoahHeap::marked_object_iterate(ShenandoahHeapRegion* region, 
     assert(ctx->is_marked(obj), "object expected to be marked");
     int size = obj->size();
 
-    if (is_update_refs_in_progress()) update_histogram(obj);
+    // if (is_update_refs_in_progress()) update_histogram(obj);
     cl->do_object(obj);
     cs += size;
   }
