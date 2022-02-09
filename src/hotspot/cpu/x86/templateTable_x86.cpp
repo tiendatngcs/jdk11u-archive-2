@@ -214,6 +214,9 @@ static void do_oop_store(InterpreterMacroAssembler* _masm,
                          BarrierSet::Name barrier,
                          DecoratorSet decorators = 0) {
   assert(val == noreg || val == rax, "parameter is just for looks");
+  // if (val != noreg) { // not storing null
+  //   oop_increase_access_counter(_masm, val, r8, barrier);
+  // }
   __ store_heap_oop(dst, val, rdx, rbx, decorators);
 }
 
@@ -222,6 +225,7 @@ static void do_oop_load(InterpreterMacroAssembler* _masm,
                         Register dst,
                         DecoratorSet decorators = 0) {
   __ load_heap_oop(dst, src, rdx, rbx, decorators);
+  // oop_increase_access_counter(_masm, dst, r8, barrier);
 }
 
 
@@ -833,6 +837,13 @@ void TemplateTable::iaload() {
   // rax: index
   // rdx: array
   index_check(rdx, rax); // kills rbx
+  // // Dat mod
+  // // assuming that r9 will not be altered
+  __ movptr(r9, rdx);
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
+  // // Dat mod ends
   __ access_load_at(T_INT, IN_HEAP | IS_ARRAY, rax,
                     Address(rdx, rax, Address::times_4,
                             arrayOopDesc::base_offset_in_bytes(T_INT)),
@@ -845,7 +856,14 @@ void TemplateTable::laload() {
   // rdx: array
   index_check(rdx, rax); // kills rbx
   NOT_LP64(__ mov(rbx, rax));
-  // rbx,: index
+  // rbx: index
+  // // Dat mod
+  // // assuming that r9 will not be altered
+  __ movptr(r9, rdx);
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
+  // // Dat mod ends
   __ access_load_at(T_LONG, IN_HEAP | IS_ARRAY, noreg /* ltos */,
                     Address(rdx, rbx, Address::times_8,
                             arrayOopDesc::base_offset_in_bytes(T_LONG)),
@@ -859,6 +877,13 @@ void TemplateTable::faload() {
   // rax: index
   // rdx: array
   index_check(rdx, rax); // kills rbx
+  // // Dat mod
+  // // assuming that r9 will not be altered
+  __ movptr(r9, rdx);
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
+  // // Dat mod ends
   __ access_load_at(T_FLOAT, IN_HEAP | IS_ARRAY, noreg /* ftos */,
                     Address(rdx, rax,
                             Address::times_4,
@@ -871,6 +896,13 @@ void TemplateTable::daload() {
   // rax: index
   // rdx: array
   index_check(rdx, rax); // kills rbx
+  // // Dat mod
+  // // assuming that r9 will not be altered
+  __ movptr(r9, rdx);
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
+  // // Dat mod ends
   __ access_load_at(T_DOUBLE, IN_HEAP | IS_ARRAY, noreg /* dtos */,
                     Address(rdx, rax,
                             Address::times_8,
@@ -886,10 +918,10 @@ void TemplateTable::aaload() {
   // // Dat mod
   // // assuming that r9 will not be altered
   __ movptr(r9, rdx);
-  // // Dat mod ends
   __ pusha();
   oop_increase_access_counter(_masm, r9, r8, _bs->kind());
   __ popa();
+  // // Dat mod ends
   do_oop_load(_masm,
               Address(rdx, rax,
                       UseCompressedOops ? Address::times_4 : Address::times_ptr,
@@ -903,6 +935,13 @@ void TemplateTable::baload() {
   // rax: index
   // rdx: array
   index_check(rdx, rax); // kills rbx
+  // // Dat mod
+  // // assuming that r9 will not be altered
+  __ movptr(r9, rdx);
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
+  // // Dat mod ends
   __ access_load_at(T_BYTE, IN_HEAP | IS_ARRAY, rax,
                     Address(rdx, rax, Address::times_1, arrayOopDesc::base_offset_in_bytes(T_BYTE)),
                     noreg, noreg);
@@ -913,6 +952,13 @@ void TemplateTable::caload() {
   // rax: index
   // rdx: array
   index_check(rdx, rax); // kills rbx
+  // // Dat mod
+  // // assuming that r9 will not be altered
+  __ movptr(r9, rdx);
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
+  // // Dat mod ends
   __ access_load_at(T_CHAR, IN_HEAP | IS_ARRAY, rax,
                     Address(rdx, rax, Address::times_2, arrayOopDesc::base_offset_in_bytes(T_CHAR)),
                     noreg, noreg);
@@ -928,6 +974,13 @@ void TemplateTable::fast_icaload() {
   // rax: index
   // rdx: array
   index_check(rdx, rax); // kills rbx
+  // // Dat mod
+  // // assuming that r9 will not be altered
+  __ movptr(r9, rdx);
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
+  // // Dat mod ends
   __ access_load_at(T_CHAR, IN_HEAP | IS_ARRAY, rax,
                     Address(rdx, rax, Address::times_2, arrayOopDesc::base_offset_in_bytes(T_CHAR)),
                     noreg, noreg);
@@ -939,6 +992,13 @@ void TemplateTable::saload() {
   // rax: index
   // rdx: array
   index_check(rdx, rax); // kills rbx
+  // // Dat mod
+  // // assuming that r9 will not be altered
+  __ movptr(r9, rdx);
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
+  // // Dat mod ends
   __ access_load_at(T_SHORT, IN_HEAP | IS_ARRAY, rax,
                     Address(rdx, rax, Address::times_2, arrayOopDesc::base_offset_in_bytes(T_SHORT)),
                     noreg, noreg);
@@ -1133,6 +1193,13 @@ void TemplateTable::iastore() {
   // rbx: index
   // rdx: array
   index_check(rdx, rbx); // prefer index in rbx
+  // // Dat mod
+  // // assuming that r9 will not be altered
+  __ movptr(r9, rdx);
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
+  // // Dat mod ends
   __ access_store_at(T_INT, IN_HEAP | IS_ARRAY,
                      Address(rdx, rbx, Address::times_4,
                              arrayOopDesc::base_offset_in_bytes(T_INT)),
@@ -1147,6 +1214,13 @@ void TemplateTable::lastore() {
   // rdx: high(value)
   index_check(rcx, rbx);  // prefer index in rbx,
   // rbx,: index
+  // // Dat mod
+  // // assuming that r9 will not be altered
+  __ movptr(r9, rcx);
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
+  // // Dat mod ends
   __ access_store_at(T_LONG, IN_HEAP | IS_ARRAY,
                      Address(rcx, rbx, Address::times_8,
                              arrayOopDesc::base_offset_in_bytes(T_LONG)),
@@ -1161,6 +1235,13 @@ void TemplateTable::fastore() {
   // rbx:  index
   // rdx:  array
   index_check(rdx, rbx); // prefer index in rbx
+  // // Dat mod
+  // // assuming that r9 will not be altered
+  __ movptr(r9, rdx);
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
+  // // Dat mod ends
   __ access_store_at(T_FLOAT, IN_HEAP | IS_ARRAY,
                      Address(rdx, rbx, Address::times_4,
                              arrayOopDesc::base_offset_in_bytes(T_FLOAT)),
@@ -1173,7 +1254,14 @@ void TemplateTable::dastore() {
   // value is in UseSSE >= 2 ? xmm0 : ST(0)
   // rbx:  index
   // rdx:  array
-  index_check(rdx, rbx); // prefer index in rbx
+  index_check(rdx, rbx); // prefer index in 
+  // // Dat mod
+  // // assuming that r9 will not be altered
+  __ movptr(r9, rdx);
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
+  // // Dat mod ends
   __ access_store_at(T_DOUBLE, IN_HEAP | IS_ARRAY,
                      Address(rdx, rbx, Address::times_8,
                              arrayOopDesc::base_offset_in_bytes(T_DOUBLE)),
@@ -1260,6 +1348,13 @@ void TemplateTable::bastore() {
   __ jccb(Assembler::zero, L_skip);
   __ andl(rax, 1);  // if it is a T_BOOLEAN array, mask the stored value to 0/1
   __ bind(L_skip);
+  // // Dat mod
+  // // assuming that r9 will not be altered
+  __ movptr(r9, rdx);
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
+  // // Dat mod ends
   __ access_store_at(T_BYTE, IN_HEAP | IS_ARRAY,
                      Address(rdx, rbx,Address::times_1,
                              arrayOopDesc::base_offset_in_bytes(T_BYTE)),
@@ -1273,6 +1368,13 @@ void TemplateTable::castore() {
   // rbx: index
   // rdx: array
   index_check(rdx, rbx);  // prefer index in rbx
+  // // Dat mod
+  // // assuming that r9 will not be altered
+  __ movptr(r9, rdx);
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
+  // // Dat mod ends
   __ access_store_at(T_CHAR, IN_HEAP | IS_ARRAY,
                      Address(rdx, rbx, Address::times_2,
                              arrayOopDesc::base_offset_in_bytes(T_CHAR)),

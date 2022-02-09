@@ -256,6 +256,7 @@ inline void ShenandoahConcurrentMark::mark_through_ref(T *p, ShenandoahHeap* hea
       shenandoah_assert_not_in_cset_except(p, obj, heap->cancelled_gc());
 
       if (mark_context->mark(obj)) {
+        heap->update_histogram(obj);
         bool pushed = q->push(ShenandoahMarkTask(obj));
         assert(pushed, "overflow queue should always succeed pushing");
 

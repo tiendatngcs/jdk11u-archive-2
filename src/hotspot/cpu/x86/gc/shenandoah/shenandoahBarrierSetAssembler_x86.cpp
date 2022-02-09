@@ -543,11 +543,11 @@ void ShenandoahBarrierSetAssembler::load_at(MacroAssembler* masm, DecoratorSet d
       dst = result_dst;
     }
 
-    save_machine_state(masm, /* handle_gpr = */ true, /* handle_fp = */ true);
-    // __ pusha();
-    oop_increase_access_counter(masm, dst, r8);
-    // __ popa();
-    restore_machine_state(masm, /* handle_gpr = */ true, /* handle_fp = */ true);
+    // save_machine_state(masm, /* handle_gpr = */ true, /* handle_fp = */ true);
+    // // __ pusha();
+    // oop_increase_access_counter(masm, dst, r8);
+    // // __ popa();
+    // restore_machine_state(masm, /* handle_gpr = */ true, /* handle_fp = */ true);
     
   } else {
     BarrierSetAssembler::load_at(masm, decorators, type, dst, src, tmp1, tmp_thread);
@@ -622,13 +622,13 @@ void ShenandoahBarrierSetAssembler::store_at(MacroAssembler* masm, DecoratorSet 
       BarrierSetAssembler::store_at(masm, decorators, type, Address(tmp1, 0), val, noreg, noreg);
     }
 
-    if (as_normal) {
-      save_machine_state(masm, /* handle_gpr = */ true, /* handle_fp = */ true);
-      // obj is the address to the actual oop load oop to the same register
-      __ load_heap_oop(tmp1, Address(tmp1, 0), noreg, noreg, AS_RAW);
-      oop_increase_access_counter(masm, tmp1, r8);
-      restore_machine_state(masm, /* handle_gpr = */ true, /* handle_fp = */ true);
-    }
+    // if (as_normal) {
+    //   save_machine_state(masm, /* handle_gpr = */ true, /* handle_fp = */ true);
+    //   // obj is the address to the actual oop load oop to the same register
+    //   __ load_heap_oop(tmp1, Address(tmp1, 0), noreg, noreg, AS_RAW);
+    //   oop_increase_access_counter(masm, tmp1, r8);
+    //   restore_machine_state(masm, /* handle_gpr = */ true, /* handle_fp = */ true);
+    // }
 
     NOT_LP64(imasm->restore_bcp());
   } else {

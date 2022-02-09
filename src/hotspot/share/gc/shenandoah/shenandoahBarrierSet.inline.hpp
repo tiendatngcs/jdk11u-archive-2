@@ -131,10 +131,18 @@ inline void ShenandoahBarrierSet::satb_barrier(T *field)
     if (!CompressedOops::is_null(heap_oop))
     {
       oop obj = CompressedOops::decode_not_null(heap_oop);
-      oop_increase_access_counter(obj);
+      // oop_increase_access_counter(obj);
       enqueue(obj);
     }
-  }
+  } 
+  // else {
+  //   T heap_oop = RawAccess<>::oop_load(field);
+  //   if (!CompressedOops::is_null(heap_oop))
+  //   {
+  //     oop obj = CompressedOops::decode_not_null(heap_oop);
+  //     oop_increase_access_counter(obj);
+  //   }
+  // }
 }
 
 inline void ShenandoahBarrierSet::satb_enqueue(oop value)
@@ -148,7 +156,7 @@ inline void ShenandoahBarrierSet::satb_enqueue(oop value)
 
 inline void ShenandoahBarrierSet::iu_barrier(oop obj)
 {
-  oop_increase_access_counter(obj);
+  // oop_increase_access_counter(obj);
   if (ShenandoahIUBarrier && obj != NULL && _heap->is_concurrent_mark_in_progress())
   {
     enqueue(obj);
@@ -341,8 +349,6 @@ bool ShenandoahBarrierSet::AccessBarrier<decorators, BarrierSetT>::oop_arraycopy
                                                                                          size_t length)
 {
   ShenandoahBarrierSet *bs = ShenandoahBarrierSet::barrier_set();
-  oop_increase_access_counter(src_obj);
-  oop_increase_access_counter(dst_obj);
 
   bs->arraycopy_barrier(arrayOopDesc::obj_offset_to_raw(src_obj, src_offset_in_bytes, src_raw),
                         arrayOopDesc::obj_offset_to_raw(dst_obj, dst_offset_in_bytes, dst_raw),
@@ -377,7 +383,7 @@ void ShenandoahBarrierSet::arraycopy_work(T *src, size_t count)
         oop witness = ShenandoahHeap::cas_oop(fwd, elem_ptr, o);
         obj = fwd;
       }
-      oop_increase_access_counter(obj);
+      // oop_increase_access_counter(obj);
       if (ENQUEUE && !ctx->is_marked(obj))
       {
         queue.enqueue_known_active(obj);

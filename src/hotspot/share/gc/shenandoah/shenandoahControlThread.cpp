@@ -432,7 +432,7 @@ void ShenandoahControlThread::service_concurrent_normal_cycle(GCCause::Cause cau
     heap->entry_cleanup_complete();
   }
 
-  heap->vmop_entry_stats_collection();
+  // heap->vmop_entry_stats_collection();
 
 
   heap->heuristics()->record_success_concurrent();
