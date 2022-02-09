@@ -433,10 +433,41 @@ void ShenandoahControlThread::service_concurrent_normal_cycle(GCCause::Cause cau
   }
 
   // heap->vmop_entry_stats_collection();
+  // Cycle is complete
+
+  log_info(gc)("Dat log --- cycle is complete\n"
+                "Current gc epoch: %lu\n"
+                "heap: ______\n"
+                "capacity: %lu\n"
+                "used: %lu\n"
+                "committed: %lu\n"
+                "bytes_allocated_since_gc_start: %lu\n", oopDesc::static_gc_epoch, heap->capacity(), heap->used(), heap->committed(), heap->bytes_allocated_since_gc_start());
+  // int arr_size = sizeof(heap->histogram()) / sizeof(heap->histogram()[0]);
+  // log_info(gc)("Array size: %d", arr_size);
+  log_info(gc)("Obj count ac histogram");
+  for (int i = 0; i < 30; i++){
+    log_info(gc)("\t%d: %lu", i, heap->histogram()[i]);
+  }
+
+  log_info(gc)("Obj size ac histogram");
+  for (int i = 0; i < 30; i++){
+    log_info(gc)("\t%d: %lu", i, heap->size_histogram()[i]);
+  }
+
+  log_info(gc)("Valid/invalid oop stats\n"
+                "valid_count: %lu bytes\n"
+                "valid_size: %lu bytes\n"
+                "invalid_count: %lu bytes\n"
+                "invalid_size: %lu bytes\n", heap->oop_stats(true, true)*HeapWordSize, heap->oop_stats(true, false)*HeapWordSize, heap->oop_stats(false, true)*HeapWordSize, heap->oop_stats(false, false)*HeapWordSize);
+
 
 
   heap->heuristics()->record_success_concurrent();
   heap->shenandoah_policy()->record_success_concurrent();
+  
+  heap->reset_histogram();
+  heap->reset_oop_stats();
+  oopDesc::static_gc_epoch += 1;
 }
 
 bool ShenandoahControlThread::check_cancellation_or_degen(ShenandoahHeap::ShenandoahDegenPoint point) {
