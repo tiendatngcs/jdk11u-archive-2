@@ -257,7 +257,7 @@ inline void ShenandoahConcurrentMark::mark_through_ref(T *p, ShenandoahHeap* hea
 
       if (mark_context->mark(obj)) {
         heap->update_histogram(obj);
-        print_cr("Marked oop size %lu bytes, region %d, is humongous %s, total marked %lu", obj->size()*HeapWordSize, heap->heap_region_index_containing(obj), heap->heap_region_containing(obj)->is_humongous() ? "true" : "false", (heap->oop_stats(true, false)+heap->oop_stats(false, false)));
+        tty->print_cr("Marked oop size %lu bytes, region %d, is humongous %s, total marked %lu", obj->size()*HeapWordSize, heap->heap_region_index_containing(obj), heap->heap_region_containing(obj)->is_humongous() ? "true" : "false", (heap->oop_stats(true, false)+heap->oop_stats(false, false)));
         bool pushed = q->push(ShenandoahMarkTask(obj));
         assert(pushed, "overflow queue should always succeed pushing");
 
