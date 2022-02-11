@@ -639,7 +639,6 @@ size_t ShenandoahHeap::committed() const {
 }
 
 size_t ShenandoahHeap::oop_stats(bool is_valid, bool is_count) const {
-  OrderAccess::acquire();
   if (is_valid) {
     if (is_count) {
       return _valid_count;
@@ -653,12 +652,12 @@ size_t ShenandoahHeap::oop_stats(bool is_valid, bool is_count) const {
 }
 
 const size_t* ShenandoahHeap::histogram()   const {
-  OrderAccess::acquire();
+  // OrderAccess::acquire();
   return _histogram;
 }
 
 const size_t* ShenandoahHeap::size_histogram()   const {
-  OrderAccess::acquire();
+  // OrderAccess::acquire();
   return _size_histogram;
 }
 
@@ -1735,6 +1734,7 @@ void ShenandoahHeap::op_final_mark() {
       rp->verify_no_references_recorded();
     }
   }
+  tty->print_cr("Mark finished, total marked %lu bytes", oop_stats(true, false)+oop_stats(false, false));
 }
 
 void ShenandoahHeap::op_conc_evac() {
@@ -2340,6 +2340,7 @@ void ShenandoahHeap::update_heap_references(bool concurrent) {
 
 void ShenandoahHeap::op_init_updaterefs() {
   assert(ShenandoahSafepoint::is_at_shenandoah_safepoint(), "must be at safepoint");
+  tty->print_cr("Evac finished, total evacuated %lu bytes", bytes_evacuated_since_gc_start());
 
   set_evacuation_in_progress(false);
 
