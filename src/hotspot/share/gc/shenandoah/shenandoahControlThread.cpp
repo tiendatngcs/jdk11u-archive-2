@@ -185,6 +185,7 @@ void ShenandoahControlThread::run_service() {
       update_gc_id();
 
       heap->reset_bytes_allocated_since_gc_start();
+      heap->reset_bytes_evacuated_since_gc_start();
 
       // Capture metaspace usage before GC.
       const size_t metadata_prev_used = MetaspaceUtils::used_bytes();
