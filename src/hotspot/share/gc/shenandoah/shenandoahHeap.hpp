@@ -166,6 +166,7 @@ private:
   volatile size_t _used;
   volatile size_t _committed;
   volatile size_t _bytes_allocated_since_gc_start;
+  volatile size_t _bytes_evacuated_since_gc_start;
   shenandoah_padding(1);
 
   size_t _valid_size;
@@ -184,9 +185,13 @@ public:
   void increase_committed(size_t bytes);
   void decrease_committed(size_t bytes);
   void increase_allocated(size_t bytes);
+  void increase_evacuated(size_t bytes);
 
   size_t bytes_allocated_since_gc_start();
   void reset_bytes_allocated_since_gc_start();
+  
+  size_t bytes_evacuated_since_gc_start();
+  void reset_bytes_evacuated_since_gc_start();
 
   size_t min_capacity()      const;
   size_t max_capacity()      const;

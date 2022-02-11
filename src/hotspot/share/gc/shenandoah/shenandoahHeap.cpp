@@ -453,6 +453,7 @@ ShenandoahHeap::ShenandoahHeap(ShenandoahCollectorPolicy* policy) :
   _used(0),
   _committed(0),
   _bytes_allocated_since_gc_start(0),
+  _bytes_evacuated_since_gc_start(0),
   _valid_size(0),
   _valid_count(0),
   _invalid_size(0),
@@ -689,6 +690,10 @@ void ShenandoahHeap::decrease_used(size_t bytes) {
 
 void ShenandoahHeap::increase_allocated(size_t bytes) {
   Atomic::add(bytes, &_bytes_allocated_since_gc_start);
+}
+
+void ShenandoahHeap::increase_evacuated(size_t bytes) {
+  Atomic::add(bytes, &_bytes_evacuated_since_gc_start);
 }
 
 
@@ -2173,6 +2178,14 @@ void ShenandoahHeap::reset_bytes_allocated_since_gc_start() {
   OrderAccess::release_store_fence(&_bytes_allocated_since_gc_start, (size_t)0);
 }
 
+size_t ShenandoahHeap::bytes_evacuated_since_gc_start() {
+  return OrderAccess::load_acquire(&_bytes_evacuated_since_gc_start);
+}
+
+void ShenandoahHeap::reset_bytes_evacuated_since_gc_start() {
+  OrderAccess::release_store_fence(&_bytes_evacuated_since_gc_start, (size_t)0);
+}
+
 void ShenandoahHeap::set_degenerated_gc_in_progress(bool in_progress) {
   _degenerated_gc_in_progress.set_cond(in_progress);
 }
@@ -2477,7 +2490,8 @@ void ShenandoahHeap::op_stats_collection() {
                 "capacity: %lu\n"
                 "used: %lu\n"
                 "committed: %lu\n"
-                "bytes_allocated_since_gc_start: %lu\n", oopDesc::static_gc_epoch, heap->capacity(), heap->used(), heap->committed(), heap->bytes_allocated_since_gc_start());
+                "bytes_allocated_since_gc_start: %lu\n"
+                "bytes_evacuated_since_gc_start: %lu\n", oopDesc::static_gc_epoch, heap->capacity(), heap->used(), heap->committed(), heap->bytes_allocated_since_gc_start(), heap->bytes_evacuated_since_gc_start());
   // int arr_size = sizeof(heap->histogram()) / sizeof(heap->histogram()[0]);
   // log_info(gc)("Array size: %d", arr_size);
   log_info(gc)("Obj count ac histogram");
@@ -2494,7 +2508,9 @@ void ShenandoahHeap::op_stats_collection() {
                 "valid_count: %lu bytes\n"
                 "valid_size: %lu bytes\n"
                 "invalid_count: %lu bytes\n"
-                "invalid_size: %lu bytes\n", heap->oop_stats(true, true)*HeapWordSize, heap->oop_stats(true, false)*HeapWordSize, heap->oop_stats(false, true)*HeapWordSize, heap->oop_stats(false, false)*HeapWordSize);
+                "invalid_size: %lu bytes\n"
+                "total_count: %lu bytes\n"
+                "total_size: %lu bytes\n", heap->oop_stats(true, true)*HeapWordSize, heap->oop_stats(true, false)*HeapWordSize, heap->oop_stats(false, true)*HeapWordSize, heap->oop_stats(false, false)*HeapWordSize, (heap->oop_stats(true, true)+heap->oop_stats(false, true))*HeapWordSize, (heap->oop_stats(true, false)+heap->oop_stats(false, false))*HeapWordSize);
   heap->reset_histogram();
   heap->reset_oop_stats();
   oopDesc::static_gc_epoch += 1;
