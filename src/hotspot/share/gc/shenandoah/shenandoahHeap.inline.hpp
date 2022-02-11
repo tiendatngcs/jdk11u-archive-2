@@ -314,7 +314,7 @@ inline oop ShenandoahHeap::evacuate_object(oop p, Thread* thread) {
     // Successfully evacuated. Our copy is now the public one!
     shenandoah_assert_correct(NULL, copy_val);
     increase_evacuated(copy_val->size() * HeapWordSize);
-    tty->print_cr("Evacuated oop size %d bytes, orig region %lu, new region %lu, total evacuated %lu", copy_val->size()*HeapWordSize, heap_region_index_containing(copy_val), heap_region_index_containing(p), (oop_stats(true, false)+oop_stats(false, false)));
+    tty->print_cr("Evacuated oop size %d bytes, orig region %lu, new region %lu, total evacuated %lu", copy_val->size()*HeapWordSize, heap_region_index_containing(copy_val), heap_region_index_containing(p), bytes_evacuated_since_gc_start());
     return copy_val;
   }  else {
     // Failed to evacuate. We need to deal with the object that is left behind. Since this
