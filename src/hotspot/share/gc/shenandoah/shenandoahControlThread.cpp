@@ -185,7 +185,6 @@ void ShenandoahControlThread::run_service() {
       update_gc_id();
 
       heap->reset_bytes_allocated_since_gc_start();
-      heap->reset_bytes_evacuated_since_gc_start();
 
       // Capture metaspace usage before GC.
       const size_t metadata_prev_used = MetaspaceUtils::used_bytes();
@@ -462,7 +461,7 @@ void ShenandoahControlThread::service_concurrent_normal_cycle(GCCause::Cause cau
                 "invalid_count: %lu bytes\n"
                 "invalid_size: %lu bytes\n"
                 "total_count: %lu bytes\n"
-                "total_size: %lu bytes\n", heap->oop_stats(true, true)*HeapWordSize, heap->oop_stats(true, false)*HeapWordSize, heap->oop_stats(false, true)*HeapWordSize, heap->oop_stats(false, false)*HeapWordSize, (heap->oop_stats(true, true)+heap->oop_stats(false, true))*HeapWordSize, (heap->oop_stats(true, false)+heap->oop_stats(false, false))*HeapWordSize);
+                "total_size: %lu bytes\n", heap->oop_stats(true, true), heap->oop_stats(true, false), heap->oop_stats(false, true), heap->oop_stats(false, false), heap->oop_stats(true, true)+heap->oop_stats(false, true), heap->oop_stats(true, false)+heap->oop_stats(false, false));
 
 
 
@@ -471,6 +470,7 @@ void ShenandoahControlThread::service_concurrent_normal_cycle(GCCause::Cause cau
 
   heap->reset_histogram();
   heap->reset_oop_stats();
+  heap->reset_bytes_evacuated_since_gc_start();
   oopDesc::static_gc_epoch += 1;
 }
 

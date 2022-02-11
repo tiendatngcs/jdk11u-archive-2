@@ -740,12 +740,12 @@ void ShenandoahHeap::update_histogram(oop obj) {
 
   if (ac == 0 && gc_epoch == 0 && oopDesc::static_gc_epoch != 0) {
     ResourceMark rm;
-    tty->print_cr("untouched oop | ac %lu | gc_epoch %lu | size %d", ac, gc_epoch, obj->size());
-    tty->print_cr("%s", obj->klass()->external_name());
-    increase_oop_stats(false, false, obj->size());
+    // tty->print_cr("untouched oop | ac %lu | gc_epoch %lu | size %d", ac, gc_epoch, obj->size());
+    // tty->print_cr("%s", obj->klass()->external_name());
+    increase_oop_stats(false, false, obj->size()*HeapWordSize);
     increase_oop_stats(false, true, 1);
   } else {
-    increase_oop_stats(true, false, obj->size());
+    increase_oop_stats(true, false, obj->size()*HeapWordSize);
     increase_oop_stats(true, true, 1);
     if (ac == 0){
       _histogram[0] += 1;
