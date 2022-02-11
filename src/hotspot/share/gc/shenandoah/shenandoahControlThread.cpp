@@ -441,7 +441,8 @@ void ShenandoahControlThread::service_concurrent_normal_cycle(GCCause::Cause cau
                 "capacity: %lu\n"
                 "used: %lu\n"
                 "committed: %lu\n"
-                "bytes_allocated_since_gc_start: %lu\n", oopDesc::static_gc_epoch, heap->capacity(), heap->used(), heap->committed(), heap->bytes_allocated_since_gc_start());
+                "bytes_allocated_since_gc_start: %lu\n"
+                "bytes_evacuated_since_gc_start: %lu\n", oopDesc::static_gc_epoch, heap->capacity(), heap->used(), heap->committed(), heap->bytes_allocated_since_gc_start(), heap->bytes_evacuated_since_gc_start());
   int arr_size = sizeof(heap->histogram()) / sizeof(heap->histogram()[0]);
   log_info(gc)("Array size: %d", arr_size);
   log_info(gc)("Obj count ac histogram");
@@ -458,7 +459,9 @@ void ShenandoahControlThread::service_concurrent_normal_cycle(GCCause::Cause cau
                 "valid_count: %lu bytes\n"
                 "valid_size: %lu bytes\n"
                 "invalid_count: %lu bytes\n"
-                "invalid_size: %lu bytes\n", heap->oop_stats(true, true)*HeapWordSize, heap->oop_stats(true, false)*HeapWordSize, heap->oop_stats(false, true)*HeapWordSize, heap->oop_stats(false, false)*HeapWordSize);
+                "invalid_size: %lu bytes\n"
+                "total_count: %lu bytes\n"
+                "total_size: %lu bytes\n", heap->oop_stats(true, true)*HeapWordSize, heap->oop_stats(true, false)*HeapWordSize, heap->oop_stats(false, true)*HeapWordSize, heap->oop_stats(false, false)*HeapWordSize, (heap->oop_stats(true, true)+heap->oop_stats(false, true))*HeapWordSize, (heap->oop_stats(true, false)+heap->oop_stats(false, false))*HeapWordSize);
 
 
 
