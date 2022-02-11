@@ -313,7 +313,7 @@ inline oop ShenandoahHeap::evacuate_object(oop p, Thread* thread) {
   if (result == copy_val) {
     // Successfully evacuated. Our copy is now the public one!
     shenandoah_assert_correct(NULL, copy_val);
-    increase_evacuated(copy_val.size()*HeapWordSize);
+    increase_evacuated(copy_val->size()*HeapWordSize);
     return copy_val;
   }  else {
     // Failed to evacuate. We need to deal with the object that is left behind. Since this
