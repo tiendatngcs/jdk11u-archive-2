@@ -2639,14 +2639,14 @@ void ShenandoahHeap::vmop_entry_final_updaterefs() {
   VMThread::execute(&op);
 }
 
-void ShenandoahHeap::vmop_entry_stats_collection() {
-  TraceCollectorStats tcs(monitoring_support()->stw_collection_counters());
-  ShenandoahGCPhase phase(ShenandoahPhaseTimings::stats_collection_gross);
+// void ShenandoahHeap::vmop_entry_stats_collection() {
+//   TraceCollectorStats tcs(monitoring_support()->stw_collection_counters());
+//   ShenandoahGCPhase phase(ShenandoahPhaseTimings::stats_collection_gross);
 
-  try_inject_alloc_failure();
-  VM_ShenandoahStatsCollection op;
-  VMThread::execute(&op);
-}
+//   try_inject_alloc_failure();
+//   VM_ShenandoahStatsCollection op;
+//   VMThread::execute(&op);
+// }
 
 void ShenandoahHeap::vmop_entry_full(GCCause::Cause cause) {
   TraceCollectorStats tcs(monitoring_support()->full_stw_collection_counters());
@@ -2719,19 +2719,19 @@ void ShenandoahHeap::entry_final_updaterefs() {
   op_final_updaterefs();
 }
 
-void ShenandoahHeap::entry_stats_collection() {
-  static const char* msg = "Pause Stats Collection";
-  ShenandoahPausePhase gc_phase(msg);
-  EventMark em("%s", msg);
+// void ShenandoahHeap::entry_stats_collection() {
+//   static const char* msg = "Pause Stats Collection";
+//   ShenandoahPausePhase gc_phase(msg);
+//   EventMark em("%s", msg);
 
-  ShenandoahGCPhase phase(ShenandoahPhaseTimings::stats_collection);
+//   ShenandoahGCPhase phase(ShenandoahPhaseTimings::stats_collection);
 
-  ShenandoahWorkerScope scope(workers(),
-                              ShenandoahWorkerPolicy::calc_workers_for_stats_collection(),
-                              "stats collection");
+//   ShenandoahWorkerScope scope(workers(),
+//                               ShenandoahWorkerPolicy::calc_workers_for_stats_collection(),
+//                               "stats collection");
 
-  op_stats_collection();
-}
+//   op_stats_collection();
+// }
 
 void ShenandoahHeap::entry_full(GCCause::Cause cause) {
   static const char* msg = "Pause Full";

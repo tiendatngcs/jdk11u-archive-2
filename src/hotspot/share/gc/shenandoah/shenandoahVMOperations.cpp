@@ -69,7 +69,7 @@ void VM_ShenandoahFinalUpdateRefs::doit() {
   ShenandoahHeap::heap()->entry_final_updaterefs();
 }
 
-void VM_ShenandoahStatsCollection::doit() {
-  ShenandoahGCPauseMark mark(_gc_id, SvcGCMarker::OTHER);
-  ShenandoahHeap::heap()->entry_stats_collection();
-}
+// void VM_ShenandoahStatsCollection::doit() {
+//   ShenandoahGCPauseMark mark(_gc_id, SvcGCMarker::OTHER);
+//   ShenandoahHeap::heap()->entry_stats_collection();
+// }
