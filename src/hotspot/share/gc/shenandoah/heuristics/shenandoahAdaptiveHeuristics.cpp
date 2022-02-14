@@ -88,11 +88,13 @@ void ShenandoahAdaptiveHeuristics::choose_collection_set_from_regiondata(Shenand
     size_t new_garbage = cur_garbage + r->garbage();
 
     if (new_cset > max_cset) {
+      tty->print_cr("Exceeding max cset");
       break;
     }
 
     if (ShenandoahCSCollectAll){
       // printf("Collecting one of all regions\n");
+      tty->print_cr("Collecting region %lu", r->index());
       cset->add_region(r);
       cur_cset = new_cset;
       cur_garbage = new_garbage;
