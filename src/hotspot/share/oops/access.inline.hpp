@@ -162,7 +162,7 @@ namespace AccessInternal {
 
     static void oop_access_barrier(oop base, ptrdiff_t offset, oop value) {
       base->increase_access_counter();
-      value->increase_access_counter();
+      // value->increase_access_counter();
       GCBarrierType::oop_store_in_heap_at(base, offset, value);
     }
   };
