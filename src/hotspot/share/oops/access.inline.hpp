@@ -223,7 +223,7 @@ namespace AccessInternal {
   template <class GCBarrierType, DecoratorSet decorators>
   struct PostRuntimeDispatch<GCBarrierType, BARRIER_RESOLVE, decorators>: public AllStatic {
     static oop access_barrier(oop obj) {
-      obj->increase_access_counter();
+      // obj->increase_access_counter();
       oop returning_oop = GCBarrierType::resolve(obj);
       // returning_oop->increase_access_counter();
       return returning_oop;
