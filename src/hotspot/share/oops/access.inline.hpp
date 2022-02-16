@@ -191,7 +191,7 @@ namespace AccessInternal {
     static T access_barrier(oop base, ptrdiff_t offset) {
       tty->print_cr("load_in_heap_at oop base ac %lu | gc_epoch %lu", base->access_counter(), base->gc_epoch());
       base->increase_access_counter();
-      return GCBarrierType::load_in_heap_at<T>(base, offset);
+      return GCBarrierType::template load_in_heap_at<T>(base, offset);
     }
 
     static oop oop_access_barrier(oop base, ptrdiff_t offset) {
