@@ -214,8 +214,8 @@ namespace AccessInternal {
   template <class GCBarrierType, DecoratorSet decorators>
   struct PostRuntimeDispatch<GCBarrierType, BARRIER_CLONE, decorators>: public AllStatic {
     static void access_barrier(oop src, oop dst, size_t size) {
-      src->increase_access_counter();
-      dst->increase_access_counter();
+      // src->increase_access_counter();
+      // dst->increase_access_counter();
       GCBarrierType::clone_in_heap(src, dst, size);
     }
   };
