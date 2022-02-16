@@ -707,6 +707,7 @@ namespace AccessInternal {
     inline static typename EnableIf<
       HasDecorator<decorators, AS_RAW>::value>::type
     store_at(oop base, ptrdiff_t offset, T value) {
+      base->increase_access_counter();
       store<decorators>(field_addr(base, offset), value);
     }
 
@@ -714,6 +715,7 @@ namespace AccessInternal {
     inline static typename EnableIf<
       !HasDecorator<decorators, AS_RAW>::value>::type
     store_at(oop base, ptrdiff_t offset, T value) {
+      base->increase_access_counter();
       if (is_hardwired_primitive<decorators>()) {
         const DecoratorSet expanded_decorators = decorators | AS_RAW;
         PreRuntimeDispatch::store_at<expanded_decorators>(base, offset, value);
@@ -763,6 +765,7 @@ namespace AccessInternal {
     inline static typename EnableIf<
       HasDecorator<decorators, AS_RAW>::value, T>::type
     load_at(oop base, ptrdiff_t offset) {
+      base->increase_access_counter();
       return load<decorators, T>(field_addr(base, offset));
     }
 
@@ -770,6 +773,7 @@ namespace AccessInternal {
     inline static typename EnableIf<
       !HasDecorator<decorators, AS_RAW>::value, T>::type
     load_at(oop base, ptrdiff_t offset) {
+      base->increase_access_counter();
       if (is_hardwired_primitive<decorators>()) {
         const DecoratorSet expanded_decorators = decorators | AS_RAW;
         return PreRuntimeDispatch::load_at<expanded_decorators, T>(base, offset);
@@ -819,6 +823,7 @@ namespace AccessInternal {
     inline static typename EnableIf<
       HasDecorator<decorators, AS_RAW>::value, T>::type
     atomic_cmpxchg_at(T new_value, oop base, ptrdiff_t offset, T compare_value) {
+      base->increase_access_counter();
       return atomic_cmpxchg<decorators>(new_value, field_addr(base, offset), compare_value);
     }
 
@@ -826,6 +831,7 @@ namespace AccessInternal {
     inline static typename EnableIf<
       !HasDecorator<decorators, AS_RAW>::value, T>::type
     atomic_cmpxchg_at(T new_value, oop base, ptrdiff_t offset, T compare_value) {
+      base->increase_access_counter();
       if (is_hardwired_primitive<decorators>()) {
         const DecoratorSet expanded_decorators = decorators | AS_RAW;
         return PreRuntimeDispatch::atomic_cmpxchg_at<expanded_decorators>(new_value, base, offset, compare_value);
@@ -875,6 +881,7 @@ namespace AccessInternal {
     inline static typename EnableIf<
       HasDecorator<decorators, AS_RAW>::value, T>::type
     atomic_xchg_at(T new_value, oop base, ptrdiff_t offset) {
+      base->increase_access_counter();
       return atomic_xchg<decorators>(new_value, field_addr(base, offset));
     }
 
@@ -882,6 +889,7 @@ namespace AccessInternal {
     inline static typename EnableIf<
       !HasDecorator<decorators, AS_RAW>::value, T>::type
     atomic_xchg_at(T new_value, oop base, ptrdiff_t offset) {
+      base->increase_access_counter();
       if (is_hardwired_primitive<decorators>()) {
         const DecoratorSet expanded_decorators = decorators | AS_RAW;
         return PreRuntimeDispatch::atomic_xchg<expanded_decorators>(new_value, base, offset);
@@ -896,6 +904,8 @@ namespace AccessInternal {
     arraycopy(arrayOop src_obj, size_t src_offset_in_bytes, T* src_raw,
               arrayOop dst_obj, size_t dst_offset_in_bytes, T* dst_raw,
               size_t length) {
+      src_obj->increase_access_counter();
+      dst_obj->increase_access_counter();
       typedef RawAccessBarrier<decorators & RAW_DECORATOR_MASK> Raw;
       if (HasDecorator<decorators, INTERNAL_VALUE_IS_OOP>::value) {
         return Raw::oop_arraycopy(src_obj, src_offset_in_bytes, src_raw,
@@ -914,6 +924,8 @@ namespace AccessInternal {
     arraycopy(arrayOop src_obj, size_t src_offset_in_bytes, T* src_raw,
               arrayOop dst_obj, size_t dst_offset_in_bytes, T* dst_raw,
               size_t length) {
+      src_obj->increase_access_counter();
+      dst_obj->increase_access_counter();
       if (UseCompressedOops) {
         const DecoratorSet expanded_decorators = decorators | convert_compressed_oops;
         return PreRuntimeDispatch::arraycopy<expanded_decorators>(src_obj, src_offset_in_bytes, src_raw,
@@ -933,6 +945,8 @@ namespace AccessInternal {
     arraycopy(arrayOop src_obj, size_t src_offset_in_bytes, T* src_raw,
               arrayOop dst_obj, size_t dst_offset_in_bytes, T* dst_raw,
               size_t length) {
+      src_obj->increase_access_counter();
+      dst_obj->increase_access_counter();
       if (is_hardwired_primitive<decorators>()) {
         const DecoratorSet expanded_decorators = decorators | AS_RAW;
         return PreRuntimeDispatch::arraycopy<expanded_decorators>(src_obj, src_offset_in_bytes, src_raw,
@@ -949,6 +963,8 @@ namespace AccessInternal {
     inline static typename EnableIf<
       HasDecorator<decorators, AS_RAW>::value>::type
     clone(oop src, oop dst, size_t size) {
+      src->increase_access_counter();
+      dst->increase_access_counter();
       typedef RawAccessBarrier<decorators & RAW_DECORATOR_MASK> Raw;
       Raw::clone(src, dst, size);
     }
@@ -957,6 +973,8 @@ namespace AccessInternal {
     inline static typename EnableIf<
       !HasDecorator<decorators, AS_RAW>::value>::type
     clone(oop src, oop dst, size_t size) {
+      src->increase_access_counter();
+      dst->increase_access_counter();
       RuntimeDispatch<decorators, oop, BARRIER_CLONE>::clone(src, dst, size);
     }
 
@@ -964,6 +982,7 @@ namespace AccessInternal {
     inline static typename EnableIf<
       HasDecorator<decorators, INTERNAL_BT_TO_SPACE_INVARIANT>::value, oop>::type
     resolve(oop obj) {
+      obj->increase_access_counter();
       typedef RawAccessBarrier<decorators & RAW_DECORATOR_MASK> Raw;
       return Raw::resolve(obj);
     }
@@ -972,6 +991,7 @@ namespace AccessInternal {
     inline static typename EnableIf<
       !HasDecorator<decorators, INTERNAL_BT_TO_SPACE_INVARIANT>::value, oop>::type
     resolve(oop obj) {
+      obj->increase_access_counter();
       return RuntimeDispatch<decorators, oop, BARRIER_RESOLVE>::resolve(obj);
     }
   };

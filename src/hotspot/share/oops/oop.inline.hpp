@@ -87,7 +87,7 @@ void oopDesc::increase_access_counter() {
     return;
   }
   set_access_counter(ac + 1);
-  tty->print_cr("Increasing access counter ac %lu | gc_epoch %lu", access_counter(), gc_epoch());
+  // tty->print_cr("Increasing access counter ac %lu | gc_epoch %lu", access_counter(), gc_epoch());
 }
 
 void oopDesc::set_gc_epoch(intptr_t new_value) {
