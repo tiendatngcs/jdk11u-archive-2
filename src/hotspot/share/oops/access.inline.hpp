@@ -86,7 +86,7 @@ namespace AccessInternal {
       } else {
         returning_oop = GCBarrierType::oop_load_not_in_heap(reinterpret_cast<OopType*>(addr));
       }
-      returning_oop->increase_access_counter();
+      // returning_oop->increase_access_counter();
       return returning_oop;
     }
   };
@@ -178,7 +178,7 @@ namespace AccessInternal {
     static oop oop_access_barrier(oop base, ptrdiff_t offset) {
       base->increase_access_counter();
       oop returning_oop = GCBarrierType::oop_load_in_heap_at(base, offset);
-      returning_oop->increase_access_counter();
+      // returning_oop->increase_access_counter();
       return returning_oop;
     }
   };
@@ -225,7 +225,7 @@ namespace AccessInternal {
     static oop access_barrier(oop obj) {
       obj->increase_access_counter();
       oop returning_oop = GCBarrierType::resolve(obj);
-      returning_oop->increase_access_counter();
+      // returning_oop->increase_access_counter();
       return returning_oop;
     }
   };
