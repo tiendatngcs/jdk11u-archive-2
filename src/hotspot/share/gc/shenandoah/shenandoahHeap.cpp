@@ -2507,6 +2507,7 @@ void ShenandoahHeap::op_stats_collection() {
   regions.reset();
   HeapWord* obj_addr = NULL;
   ShenandoahHeapRegion* r = regions.next();
+  ShenandoahMarkingContext* const ctx = heap->complete_marking_context();
   while (r != NULL) {
     // if (r->is_active() && !r->is_cset()) {
     //   tty->print_cr("Iterating region %lu", r->index());
