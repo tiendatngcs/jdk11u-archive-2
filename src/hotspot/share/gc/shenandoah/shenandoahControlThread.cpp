@@ -458,6 +458,8 @@ void ShenandoahControlThread::service_concurrent_normal_cycle(GCCause::Cause cau
     PLAB* gclab = ShenandoahThreadLocalData::gclab(thread);
     tty->print_cr("jthread tlab capacity %lu, free %lu", gclab->word_sz(), gclab->words_remaining());
   }
+
+  assert(SafepointSynchronize::is_at_safepoint(), "Must be at a safepoint");
   for (NonJavaThread::Iterator njti; !njti.end(); njti.step()) {
     Thread *thread = njti.current();
     PLAB* gclab = ShenandoahThreadLocalData::gclab(thread);
