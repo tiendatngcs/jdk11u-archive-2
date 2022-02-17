@@ -455,6 +455,7 @@ ShenandoahHeap::ShenandoahHeap(ShenandoahCollectorPolicy* policy) :
   _bytes_allocated_since_gc_start(0),
   _bytes_evacuated_since_gc_start(0),
   _used_by_regions(0),
+  _total_marked_objects(0),
   _valid_size(0),
   _valid_count(0),
   _invalid_size(0),
@@ -698,6 +699,10 @@ void ShenandoahHeap::increase_evacuated(size_t bytes) {
 
 void ShenandoahHeap::increase_used_by_regions(size_t bytes) {
   Atomic::add(bytes, &_used_by_regions);
+}
+
+void ShenandoahHeap::increase_total_marked_objects(size_t bytes) {
+  Atomic::add(bytes, &_total_marked_objects);
 }
 
 
@@ -2199,6 +2204,14 @@ void ShenandoahHeap::reset_used_by_regions() {
   OrderAccess::release_store_fence(&_used_by_regions, (size_t)0);
 }
 
+size_t ShenandoahHeap::total_marked_objects() {
+  return OrderAccess::load_acquire(&_total_marked_objects);
+}
+
+void ShenandoahHeap::reset_total_marked_objects() {
+  OrderAccess::release_store_fence(&_total_marked_objects, (size_t)0);
+}
+
 void ShenandoahHeap::set_degenerated_gc_in_progress(bool in_progress) {
   _degenerated_gc_in_progress.set_cond(in_progress);
 }
@@ -2472,63 +2485,41 @@ void ShenandoahHeap::op_final_updaterefs() {
   }
 }
 
-// void ShenandoahHeap::op_stats_collection() {
-//   assert(ShenandoahSafepoint::is_at_shenandoah_safepoint(), "must be at safepoint");
-//   ShenandoahHeap* heap = ShenandoahHeap::heap();
+class ShenandoahStatsCountingObjectClosure : public ObjectClosure {
+private:
+  ShenandoahHeap* const _heap;
+  Thread* const _thread;
+public:
+  ShenandoahStatsCountingObjectClosure(ShenandoahHeap* heap) :
+    _heap(heap), _thread(Thread::current()) {}
 
-//   ShenandoahRegionIterator regions;
-//   regions.reset();
-//   HeapWord* obj_addr = NULL;
-//   ShenandoahHeapRegion* r = regions.next();
-//   while (r != NULL) {
-//     if (r->is_active() && !r->is_cset()) {
-//       tty->print_cr("Iterating region %lu", r->index());
-//       // ShenandoahStatsCollectionClosure cl;
-//       // r->oop_iterate(&cl);
-//       obj_addr = r->bottom();
-//       while (obj_addr < r->top()) {
-//         oop obj = oop(obj_addr);
-//         int size = obj->size();
-//         tty->print_cr("Printing oop ac = %lu | gc_epoch = %lu | region = %lu", obj->access_counter(), obj->gc_epoch(), _heap->heap_region_index_containing(obj));
-//         obj_addr += size;
-//       }
-//     }
-//     r = regions.next();
-//   }
+  void do_object(oop p) {
+    shenandoah_assert_marked(NULL, p);
+    _heap->increase_total_marked_objects(p->size() * HeapWordSize);
+  }
+};
 
-//   // Cycle is complete
+void ShenandoahHeap::op_stats_collection() {
+  assert(ShenandoahSafepoint::is_at_shenandoah_safepoint(), "must be at safepoint");
+  ShenandoahHeap* heap = ShenandoahHeap::heap();
 
-//   log_info(gc)("Dat log --- cycle is complete\n"
-//                 "Current gc epoch: %lu\n"
-//                 "heap: ______\n"
-//                 "capacity: %lu\n"
-//                 "used: %lu\n"
-//                 "committed: %lu\n"
-//                 "bytes_allocated_since_gc_start: %lu\n"
-//                 "bytes_evacuated_since_gc_start: %lu\n", oopDesc::static_gc_epoch, heap->capacity(), heap->used(), heap->committed(), heap->bytes_allocated_since_gc_start(), heap->bytes_evacuated_since_gc_start());
-//   // int arr_size = sizeof(heap->histogram()) / sizeof(heap->histogram()[0]);
-//   // log_info(gc)("Array size: %d", arr_size);
-//   log_info(gc)("Obj count ac histogram");
-//   for (int i = 0; i < 30; i++){
-//     log_info(gc)("\t%d: %lu", i, heap->histogram()[i]);
-//   }
+  ShenandoahRegionIterator regions;
+  regions.reset();
+  HeapWord* obj_addr = NULL;
+  ShenandoahHeapRegion* r = regions.next();
+  while (r != NULL) {
+    // if (r->is_active() && !r->is_cset()) {
+    //   tty->print_cr("Iterating region %lu", r->index());
+    //   // r->oop_iterate(&cl);
+    //   _heap->marked_object_iterate(r, )
 
-//   log_info(gc)("Obj size ac histogram");
-//   for (int i = 0; i < 30; i++){
-//     log_info(gc)("\t%d: %lu", i, heap->size_histogram()[i]);
-//   }
-
-//   log_info(gc)("Valid/invalid oop stats\n"
-//                 "valid_count: %lu bytes\n"
-//                 "valid_size: %lu bytes\n"
-//                 "invalid_count: %lu bytes\n"
-//                 "invalid_size: %lu bytes\n"
-//                 "total_count: %lu bytes\n"
-//                 "total_size: %lu bytes\n", heap->oop_stats(true, true)*HeapWordSize, heap->oop_stats(true, false)*HeapWordSize, heap->oop_stats(false, true)*HeapWordSize, heap->oop_stats(false, false)*HeapWordSize, (heap->oop_stats(true, true)+heap->oop_stats(false, true))*HeapWordSize, (heap->oop_stats(true, false)+heap->oop_stats(false, false))*HeapWordSize);
-//   heap->reset_histogram();
-//   heap->reset_oop_stats();
-//   oopDesc::static_gc_epoch += 1;
-// }
+    // }
+    ShenandoahStatsCountingObjectClosure cl(heap);
+    HeapWord* tams = ctx->top_at_mark_start(r);
+    marked_object_iterate(r, &cl, tams);
+    r = regions.next();
+  }
+}
 
 void ShenandoahHeap::print_extended_on(outputStream *st) const {
   print_on(st);
@@ -2653,14 +2644,14 @@ void ShenandoahHeap::vmop_entry_final_updaterefs() {
   VMThread::execute(&op);
 }
 
-// void ShenandoahHeap::vmop_entry_stats_collection() {
-//   TraceCollectorStats tcs(monitoring_support()->stw_collection_counters());
-//   ShenandoahGCPhase phase(ShenandoahPhaseTimings::stats_collection_gross);
+void ShenandoahHeap::vmop_entry_stats_collection() {
+  TraceCollectorStats tcs(monitoring_support()->stw_collection_counters());
+  ShenandoahGCPhase phase(ShenandoahPhaseTimings::stats_collection_gross);
 
-//   try_inject_alloc_failure();
-//   VM_ShenandoahStatsCollection op;
-//   VMThread::execute(&op);
-// }
+  try_inject_alloc_failure();
+  VM_ShenandoahStatsCollection op;
+  VMThread::execute(&op);
+}
 
 void ShenandoahHeap::vmop_entry_full(GCCause::Cause cause) {
   TraceCollectorStats tcs(monitoring_support()->full_stw_collection_counters());
@@ -2733,19 +2724,19 @@ void ShenandoahHeap::entry_final_updaterefs() {
   op_final_updaterefs();
 }
 
-// void ShenandoahHeap::entry_stats_collection() {
-//   static const char* msg = "Pause Stats Collection";
-//   ShenandoahPausePhase gc_phase(msg);
-//   EventMark em("%s", msg);
+void ShenandoahHeap::entry_stats_collection() {
+  static const char* msg = "Pause Stats Collection";
+  ShenandoahPausePhase gc_phase(msg);
+  EventMark em("%s", msg);
 
-//   ShenandoahGCPhase phase(ShenandoahPhaseTimings::stats_collection);
+  ShenandoahGCPhase phase(ShenandoahPhaseTimings::stats_collection);
 
-//   ShenandoahWorkerScope scope(workers(),
-//                               ShenandoahWorkerPolicy::calc_workers_for_stats_collection(),
-//                               "stats collection");
+  ShenandoahWorkerScope scope(workers(),
+                              ShenandoahWorkerPolicy::calc_workers_for_stats_collection(),
+                              "stats collection");
 
-//   op_stats_collection();
-// }
+  op_stats_collection();
+}
 
 void ShenandoahHeap::entry_full(GCCause::Cause cause) {
   static const char* msg = "Pause Full";

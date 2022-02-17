@@ -104,12 +104,12 @@ public:
   virtual void doit();
 };
 
-// class VM_ShenandoahStatsCollection: public VM_ShenandoahOperation {
-// public:
-//   VM_ShenandoahStatsCollection() : VM_ShenandoahOperation() {};
-//   VM_Operation::VMOp_Type type() const { return VMOp_ShenandoahStatsCollection; }
-//   const char* name()             const { return "Shenandoah Stats Collection"; }
-//   virtual void doit();
-// };
+class VM_ShenandoahStatsCollection: public VM_ShenandoahOperation {
+public:
+  VM_ShenandoahStatsCollection() : VM_ShenandoahOperation() {};
+  VM_Operation::VMOp_Type type() const { return VMOp_ShenandoahStatsCollection; }
+  const char* name()             const { return "Shenandoah Stats Collection"; }
+  virtual void doit();
+};
 
 #endif //SHARE_VM_GC_SHENANDOAH_VM_OPERATIONS_SHENANDOAH_HPP

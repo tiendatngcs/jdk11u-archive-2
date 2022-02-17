@@ -168,6 +168,7 @@ private:
   volatile size_t _bytes_allocated_since_gc_start;
   volatile size_t _bytes_evacuated_since_gc_start;
   volatile size_t _used_by_regions;
+  volatile size_t _total_marked_objects;
   shenandoah_padding(1);
 
   size_t _valid_size;
@@ -188,6 +189,7 @@ public:
   void increase_allocated(size_t bytes);
   void increase_evacuated(size_t bytes);
   void increase_used_by_regions(size_t bytes);
+  void increase_total_marked_objects(size_t bytes);
 
   size_t bytes_allocated_since_gc_start();
   void reset_bytes_allocated_since_gc_start();
@@ -197,6 +199,9 @@ public:
 
   size_t used_by_regions();
   void reset_used_by_regions();
+
+  size_t total_marked_objects();
+  void reset_total_marked_objects();
 
   size_t min_capacity()      const;
   size_t max_capacity()      const;
@@ -392,7 +397,7 @@ public:
   void vmop_entry_final_mark();
   void vmop_entry_init_updaterefs();
   void vmop_entry_final_updaterefs();
-  // void vmop_entry_stats_collection();
+  void vmop_entry_stats_collection();
   void vmop_entry_full(GCCause::Cause cause);
   void vmop_degenerated(ShenandoahDegenPoint point);
 
@@ -402,7 +407,7 @@ public:
   void entry_final_mark();
   void entry_init_updaterefs();
   void entry_final_updaterefs();
-  // void entry_stats_collection();
+  void entry_stats_collection();
   void entry_full(GCCause::Cause cause);
   void entry_degenerated(int point);
 
