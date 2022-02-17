@@ -440,9 +440,10 @@ void ShenandoahControlThread::service_concurrent_normal_cycle(GCCause::Cause cau
                 "heap: ______\n"
                 "capacity: %lu\n"
                 "used: %lu\n"
+                "used_by_regions: %lu\n"
                 "committed: %lu\n"
                 "bytes_allocated_since_gc_start: %lu\n"
-                "bytes_evacuated_since_gc_start: %lu\n", oopDesc::static_gc_epoch, heap->capacity(), heap->used(), heap->committed(), heap->bytes_allocated_since_gc_start(), heap->bytes_evacuated_since_gc_start());
+                "bytes_evacuated_since_gc_start: %lu\n", oopDesc::static_gc_epoch, heap->capacity(), heap->used(), heap->used_by_regions(), heap->committed(), heap->bytes_allocated_since_gc_start(), heap->bytes_evacuated_since_gc_start());
   int arr_size = sizeof(heap->histogram()) / sizeof(heap->histogram()[0]);
   log_info(gc)("Array size: %d", arr_size);
   log_info(gc)("Obj count ac histogram");
@@ -471,6 +472,7 @@ void ShenandoahControlThread::service_concurrent_normal_cycle(GCCause::Cause cau
   heap->reset_histogram();
   heap->reset_oop_stats();
   heap->reset_bytes_evacuated_since_gc_start();
+  heap->reset_used_by_regions();
   oopDesc::static_gc_epoch += 1;
 }
 

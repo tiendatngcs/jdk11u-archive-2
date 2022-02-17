@@ -454,6 +454,7 @@ ShenandoahHeap::ShenandoahHeap(ShenandoahCollectorPolicy* policy) :
   _committed(0),
   _bytes_allocated_since_gc_start(0),
   _bytes_evacuated_since_gc_start(0),
+  _used_by_regions(0),
   _valid_size(0),
   _valid_count(0),
   _invalid_size(0),
@@ -693,6 +694,10 @@ void ShenandoahHeap::increase_allocated(size_t bytes) {
 
 void ShenandoahHeap::increase_evacuated(size_t bytes) {
   Atomic::add(bytes, &_bytes_evacuated_since_gc_start);
+}
+
+void ShenandoahHeap::increase_used_by_regions(size_t bytes) {
+  Atomic::add(bytes, &_used_by_regions);
 }
 
 
@@ -2184,6 +2189,14 @@ size_t ShenandoahHeap::bytes_evacuated_since_gc_start() {
 
 void ShenandoahHeap::reset_bytes_evacuated_since_gc_start() {
   OrderAccess::release_store_fence(&_bytes_evacuated_since_gc_start, (size_t)0);
+}
+
+size_t ShenandoahHeap::used_by_regions() {
+  return OrderAccess::load_acquire(&_used_by_regions);
+}
+
+void ShenandoahHeap::reset_used_by_regions() {
+  OrderAccess::release_store_fence(&_used_by_regions, (size_t)0);
 }
 
 void ShenandoahHeap::set_degenerated_gc_in_progress(bool in_progress) {

@@ -355,6 +355,9 @@ void ShenandoahFreeSet::recycle_trash() {
       ShenandoahHeapLocker locker(_heap->lock());
       try_recycle_trashed(r);
     }
+    if (r->is_active()) {
+      _heap->increase_used_by_regions(r->used());
+    }
     SpinPause(); // allow allocators to take the lock
   }
 }
