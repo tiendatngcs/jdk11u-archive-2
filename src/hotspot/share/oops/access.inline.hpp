@@ -62,6 +62,7 @@ namespace AccessInternal {
 
     static void oop_access_barrier(void* addr, oop value) {
       typedef typename HeapOopType<decorators>::type OopType;
+      value->increase_access_counter();
       if (HasDecorator<decorators, IN_HEAP>::value) {
         GCBarrierType::oop_store_in_heap(reinterpret_cast<OopType*>(addr), value);
       } else {

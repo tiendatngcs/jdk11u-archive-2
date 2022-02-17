@@ -179,6 +179,7 @@ public:
 
     template <typename T>
     static T load_in_heap_at(oop base, ptrdiff_t offset) {
+      base->increase_access_counter();
       return Raw::template load_at<T>(base, offset);
     }
 
@@ -189,6 +190,7 @@ public:
 
     template <typename T>
     static void store_in_heap_at(oop base, ptrdiff_t offset, T value) {
+      base->increase_access_counter();
       Raw::store_at(base, offset, value);
     }
 
@@ -199,6 +201,7 @@ public:
 
     template <typename T>
     static T atomic_cmpxchg_in_heap_at(T new_value, oop base, ptrdiff_t offset, T compare_value) {
+      base->increase_access_counter();
       return Raw::oop_atomic_cmpxchg_at(new_value, base, offset, compare_value);
     }
 
@@ -209,6 +212,7 @@ public:
 
     template <typename T>
     static T atomic_xchg_in_heap_at(T new_value, oop base, ptrdiff_t offset) {
+      base->increase_access_counter();
       return Raw::atomic_xchg_at(new_value, base, offset);
     }
 
@@ -216,6 +220,8 @@ public:
     static void arraycopy_in_heap(arrayOop src_obj, size_t src_offset_in_bytes, T* src_raw,
                                   arrayOop dst_obj, size_t dst_offset_in_bytes, T* dst_raw,
                                   size_t length) {
+      src_obj->increase_access_counter();
+      dst_obj->increase_access_counter();
       Raw::arraycopy(src_obj, src_offset_in_bytes, src_raw,
                      dst_obj, dst_offset_in_bytes, dst_raw,
                      length);
@@ -230,6 +236,7 @@ public:
     }
 
     static oop oop_load_in_heap_at(oop base, ptrdiff_t offset) {
+      base->increase_access_counter();
       return Raw::template oop_load_at<oop>(base, offset);
     }
 
@@ -239,6 +246,7 @@ public:
     }
 
     static void oop_store_in_heap_at(oop base, ptrdiff_t offset, oop value) {
+      base->increase_access_counter();
       Raw::oop_store_at(base, offset, value);
     }
 
@@ -248,6 +256,7 @@ public:
     }
 
     static oop oop_atomic_cmpxchg_in_heap_at(oop new_value, oop base, ptrdiff_t offset, oop compare_value) {
+      base->increase_access_counter();
       return Raw::oop_atomic_cmpxchg_at(new_value, base, offset, compare_value);
     }
 
@@ -257,6 +266,7 @@ public:
     }
 
     static oop oop_atomic_xchg_in_heap_at(oop new_value, oop base, ptrdiff_t offset) {
+      base->increase_access_counter();
       return Raw::oop_atomic_xchg_at(new_value, base, offset);
     }
 
@@ -290,10 +300,13 @@ public:
 
     // Clone barrier support
     static void clone_in_heap(oop src, oop dst, size_t size) {
+      src->increase_access_counter();
+      dst->increase_access_counter();
       Raw::clone(src, dst, size);
     }
 
     static oop resolve(oop obj) {
+      obj->increase_access_counter();
       return Raw::resolve(obj);
     }
   };
