@@ -256,7 +256,7 @@ inline void ShenandoahConcurrentMark::mark_through_ref(T *p, ShenandoahHeap* hea
       shenandoah_assert_not_in_cset_except(p, obj, heap->cancelled_gc());
 
       if (mark_context->mark(obj)) {
-        heap->update_histogram(obj);
+        // heap->update_histogram(obj);
         // tty->print_cr("Marked oop size %d bytes, region %lu, is humongous %s, total marked %lu", obj->size()*HeapWordSize, heap->heap_region_index_containing(obj), heap->heap_region_containing(obj)->is_humongous() ? "true" : "false", (heap->oop_stats(true, false)+heap->oop_stats(false, false)));
         if (heap->heap_region_containing(obj)->is_humongous()){
           tty->print_cr("Humongous oop detected size %d bytes, region %lu", obj->size()*HeapWordSize, heap->heap_region_index_containing(obj));

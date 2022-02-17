@@ -66,6 +66,7 @@ inline void RawAccessBarrier<decorators>::oop_store(void* addr, T value) {
 template <DecoratorSet decorators>
 template <typename T>
 inline void RawAccessBarrier<decorators>::oop_store_at(oop base, ptrdiff_t offset, T value) {
+  base->increase_access_counter();
   oop_store(field_addr(base, offset), value);
 }
 
@@ -80,6 +81,7 @@ inline T RawAccessBarrier<decorators>::oop_load(void* addr) {
 template <DecoratorSet decorators>
 template <typename T>
 inline T RawAccessBarrier<decorators>::oop_load_at(oop base, ptrdiff_t offset) {
+  base->increase_access_counter();
   return oop_load<T>(field_addr(base, offset));
 }
 
@@ -98,6 +100,7 @@ inline T RawAccessBarrier<decorators>::oop_atomic_cmpxchg(T new_value, void* add
 template <DecoratorSet decorators>
 template <typename T>
 inline T RawAccessBarrier<decorators>::oop_atomic_cmpxchg_at(T new_value, oop base, ptrdiff_t offset, T compare_value) {
+  base->increase_access_counter();
   return oop_atomic_cmpxchg(new_value, field_addr(base, offset), compare_value);
 }
 
@@ -113,6 +116,7 @@ inline T RawAccessBarrier<decorators>::oop_atomic_xchg(T new_value, void* addr) 
 template <DecoratorSet decorators>
 template <typename T>
 inline T RawAccessBarrier<decorators>::oop_atomic_xchg_at(T new_value, oop base, ptrdiff_t offset) {
+  base->increase_access_counter();
   return oop_atomic_xchg(new_value, field_addr(base, offset));
 }
 
@@ -121,6 +125,8 @@ template <typename T>
 inline bool RawAccessBarrier<decorators>::oop_arraycopy(arrayOop src_obj, size_t src_offset_in_bytes, T* src_raw,
                                                         arrayOop dst_obj, size_t dst_offset_in_bytes, T* dst_raw,
                                                         size_t length) {
+  src_obj->increase_access_counter();
+  dst_obj->increase_access_counter();
   return arraycopy(src_obj, src_offset_in_bytes, src_raw,
                    dst_obj, dst_offset_in_bytes, dst_raw,
                    length);
@@ -255,6 +261,8 @@ public:
   arraycopy(arrayOop src_obj, size_t src_offset_in_bytes, T* src_raw,
             arrayOop dst_obj, size_t dst_offset_in_bytes, T* dst_raw,
             size_t length) {
+    src_obj->increase_access_counter();
+    dst_obj->increase_access_counter();
     src_raw = arrayOopDesc::obj_offset_to_raw(src_obj, src_offset_in_bytes, src_raw);
     dst_raw = arrayOopDesc::obj_offset_to_raw(dst_obj, dst_offset_in_bytes, dst_raw);
 
@@ -275,6 +283,8 @@ public:
   arraycopy(arrayOop src_obj, size_t src_offset_in_bytes, T* src_raw,
             arrayOop dst_obj, size_t dst_offset_in_bytes, T* dst_raw,
             size_t length) {
+    src_obj->increase_access_counter();
+    dst_obj->increase_access_counter();
     src_raw = arrayOopDesc::obj_offset_to_raw(src_obj, src_offset_in_bytes, src_raw);
     dst_raw = arrayOopDesc::obj_offset_to_raw(dst_obj, dst_offset_in_bytes, dst_raw);
 
@@ -288,6 +298,8 @@ public:
   arraycopy(arrayOop src_obj, size_t src_offset_in_bytes, T* src_raw,
             arrayOop dst_obj, size_t dst_offset_in_bytes, T* dst_raw,
             size_t length) {
+    src_obj->increase_access_counter();
+    dst_obj->increase_access_counter();
     src_raw = arrayOopDesc::obj_offset_to_raw(src_obj, src_offset_in_bytes, src_raw);
     dst_raw = arrayOopDesc::obj_offset_to_raw(dst_obj, dst_offset_in_bytes, dst_raw);
 
@@ -308,6 +320,8 @@ public:
   arraycopy(arrayOop src_obj, size_t src_offset_in_bytes, T* src_raw,
             arrayOop dst_obj, size_t dst_offset_in_bytes, T* dst_raw,
             size_t length) {
+    src_obj->increase_access_counter();
+    dst_obj->increase_access_counter();
     src_raw = arrayOopDesc::obj_offset_to_raw(src_obj, src_offset_in_bytes, src_raw);
     dst_raw = arrayOopDesc::obj_offset_to_raw(dst_obj, dst_offset_in_bytes, dst_raw);
 
@@ -323,6 +337,8 @@ public:
   arraycopy(arrayOop src_obj, size_t src_offset_in_bytes, T* src_raw,
             arrayOop dst_obj, size_t dst_offset_in_bytes, T* dst_raw,
             size_t length) {
+    src_obj->increase_access_counter();
+    dst_obj->increase_access_counter();
     src_raw = arrayOopDesc::obj_offset_to_raw(src_obj, src_offset_in_bytes, src_raw);
     dst_raw = arrayOopDesc::obj_offset_to_raw(dst_obj, dst_offset_in_bytes, dst_raw);
 
@@ -337,6 +353,8 @@ template <typename T>
 inline bool RawAccessBarrier<decorators>::arraycopy(arrayOop src_obj, size_t src_offset_in_bytes, T* src_raw,
                                                     arrayOop dst_obj, size_t dst_offset_in_bytes, T* dst_raw,
                                                     size_t length) {
+  src_obj->increase_access_counter();
+  dst_obj->increase_access_counter();
   RawAccessBarrierArrayCopy::arraycopy<decorators>(src_obj, src_offset_in_bytes, src_raw,
                                                    dst_obj, dst_offset_in_bytes, dst_raw,
                                                    length);

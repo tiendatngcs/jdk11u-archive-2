@@ -412,7 +412,7 @@ void ShenandoahControlThread::service_concurrent_normal_cycle(GCCause::Cause cau
     ShenandoahHeapLocker locker(heap->lock());
     heap->free_set()->log_status();
   }
-  
+
   // iterate through regions to collect marked obj stats
   heap->vmop_entry_stats_collection();
 
@@ -456,7 +456,12 @@ void ShenandoahControlThread::service_concurrent_normal_cycle(GCCause::Cause cau
     // thread->tlab().used_bytes();
     // thread->
     PLAB* gclab = ShenandoahThreadLocalData::gclab(thread);
-    tty->print_cr("gclab capacity %lu, free %lu", gclab->word_sz(), gclab->words_remaining());
+    tty->print_cr("jthread tlab capacity %lu, free %lu", gclab->word_sz(), gclab->words_remaining());
+  }
+  for (NonJavaThread::Iterator njti; !njti.end(); njti.step()) {
+    Thread *thread = njti.current();
+    PLAB* gclab = ShenandoahThreadLocalData::gclab(thread);
+    tty->print_cr("non-jthread tlab capacity %lu, free %lu", gclab->word_sz(), gclab->words_remaining());
   }
   log_info(gc)("Obj count ac histogram");
   for (int i = 0; i < 30; i++){

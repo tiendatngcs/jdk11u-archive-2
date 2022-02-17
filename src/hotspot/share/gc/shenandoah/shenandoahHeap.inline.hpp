@@ -312,6 +312,7 @@ inline oop ShenandoahHeap::evacuate_object(oop p, Thread* thread) {
   oop result = ShenandoahForwarding::try_update_forwardee(p, copy_val);
   if (result == copy_val) {
     // Successfully evacuated. Our copy is now the public one!
+    update_histogram(p);
     shenandoah_assert_correct(NULL, copy_val);
     increase_evacuated(copy_val->size() * HeapWordSize);
     // tty->print_cr("Evacuated oop size %d bytes, orig region %lu, new region %lu, total evacuated %lu", copy_val->size()*HeapWordSize, heap_region_index_containing(p), heap_region_index_containing(copy_val), bytes_evacuated_since_gc_start());
