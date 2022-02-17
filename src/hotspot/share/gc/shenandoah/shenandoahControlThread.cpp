@@ -444,8 +444,14 @@ void ShenandoahControlThread::service_concurrent_normal_cycle(GCCause::Cause cau
                 "committed: %lu\n"
                 "bytes_allocated_since_gc_start: %lu\n"
                 "bytes_evacuated_since_gc_start: %lu\n", oopDesc::static_gc_epoch, heap->capacity(), heap->used(), heap->used_by_regions(), heap->committed(), heap->bytes_allocated_since_gc_start(), heap->bytes_evacuated_since_gc_start());
-  int arr_size = sizeof(heap->histogram()) / sizeof(heap->histogram()[0]);
-  log_info(gc)("Array size: %d", arr_size);
+  for (JavaThreadIteratorWithHandle jtiwh; JavaThread *thread = jtiwh.next(); ) {
+    // thread->tlab().accumulate_statistics();
+    // thread->tlab().initialize_statistics();
+    // thread->tlab().used_bytes();
+    // thread->
+    PLAB* gclab = ShenandoahThreadLocalData::gclab(thread);
+    tty->print_cr("gclab capacity %lu, free %lu", gclab->word_sz(), gclab->words_remaining());
+  }
   log_info(gc)("Obj count ac histogram");
   for (int i = 0; i < 30; i++){
     log_info(gc)("\t%d: %lu", i, heap->histogram()[i]);
