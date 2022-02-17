@@ -949,8 +949,6 @@ namespace AccessInternal {
     inline static typename EnableIf<
       HasDecorator<decorators, AS_RAW>::value>::type
     clone(oop src, oop dst, size_t size) {
-      // src->increase_access_counter();
-      // dst->increase_access_counter();
       typedef RawAccessBarrier<decorators & RAW_DECORATOR_MASK> Raw;
       Raw::clone(src, dst, size);
     }
@@ -959,8 +957,6 @@ namespace AccessInternal {
     inline static typename EnableIf<
       !HasDecorator<decorators, AS_RAW>::value>::type
     clone(oop src, oop dst, size_t size) {
-      // src->increase_access_counter();
-      // dst->increase_access_counter();
       RuntimeDispatch<decorators, oop, BARRIER_CLONE>::clone(src, dst, size);
     }
 
@@ -968,7 +964,6 @@ namespace AccessInternal {
     inline static typename EnableIf<
       HasDecorator<decorators, INTERNAL_BT_TO_SPACE_INVARIANT>::value, oop>::type
     resolve(oop obj) {
-      // obj->increase_access_counter();
       typedef RawAccessBarrier<decorators & RAW_DECORATOR_MASK> Raw;
       return Raw::resolve(obj);
     }
@@ -977,7 +972,6 @@ namespace AccessInternal {
     inline static typename EnableIf<
       !HasDecorator<decorators, INTERNAL_BT_TO_SPACE_INVARIANT>::value, oop>::type
     resolve(oop obj) {
-      // obj->increase_access_counter();
       return RuntimeDispatch<decorators, oop, BARRIER_RESOLVE>::resolve(obj);
     }
   };

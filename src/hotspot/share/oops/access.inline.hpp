@@ -62,7 +62,6 @@ namespace AccessInternal {
 
     static void oop_access_barrier(void* addr, oop value) {
       typedef typename HeapOopType<decorators>::type OopType;
-      value->increase_access_counter();
       if (HasDecorator<decorators, IN_HEAP>::value) {
         GCBarrierType::oop_store_in_heap(reinterpret_cast<OopType*>(addr), value);
       } else {
@@ -128,8 +127,6 @@ namespace AccessInternal {
     static bool access_barrier(arrayOop src_obj, size_t src_offset_in_bytes, T* src_raw,
                                arrayOop dst_obj, size_t dst_offset_in_bytes, T* dst_raw,
                                size_t length) {
-      // src_obj->increase_access_counter();
-      // dst_obj->increase_access_counter();
       GCBarrierType::arraycopy_in_heap(src_obj, src_offset_in_bytes, src_raw,
                                        dst_obj, dst_offset_in_bytes, dst_raw,
                                        length);
@@ -141,8 +138,6 @@ namespace AccessInternal {
                                    arrayOop dst_obj, size_t dst_offset_in_bytes, T* dst_raw,
                                    size_t length) {
       typedef typename HeapOopType<decorators>::type OopType;
-      // src_obj->increase_access_counter();
-      // dst_obj->increase_access_counter();
       return GCBarrierType::oop_arraycopy_in_heap(src_obj, src_offset_in_bytes, reinterpret_cast<OopType*>(src_raw),
                                                   dst_obj, dst_offset_in_bytes, reinterpret_cast<OopType*>(dst_raw),
                                                   length);
@@ -153,12 +148,10 @@ namespace AccessInternal {
   struct PostRuntimeDispatch<GCBarrierType, BARRIER_STORE_AT, decorators>: public AllStatic {
     template <typename T>
     static void access_barrier(oop base, ptrdiff_t offset, T value) {
-      // base->increase_access_counter();
       GCBarrierType::store_in_heap_at(base, offset, value);
     }
 
     static void oop_access_barrier(oop base, ptrdiff_t offset, oop value) {
-      // base->increase_access_counter();
       GCBarrierType::oop_store_in_heap_at(base, offset, value);
     }
   };
@@ -167,12 +160,10 @@ namespace AccessInternal {
   struct PostRuntimeDispatch<GCBarrierType, BARRIER_LOAD_AT, decorators>: public AllStatic {
     template <typename T>
     static T access_barrier(oop base, ptrdiff_t offset) {
-      // base->increase_access_counter();
       return GCBarrierType::template load_in_heap_at<T>(base, offset);
     }
 
     static oop oop_access_barrier(oop base, ptrdiff_t offset) {
-      // base->increase_access_counter();
       return GCBarrierType::oop_load_in_heap_at(base, offset);
     }
   };
@@ -181,12 +172,10 @@ namespace AccessInternal {
   struct PostRuntimeDispatch<GCBarrierType, BARRIER_ATOMIC_XCHG_AT, decorators>: public AllStatic {
     template <typename T>
     static T access_barrier(T new_value, oop base, ptrdiff_t offset) {
-      // base->increase_access_counter();
       return GCBarrierType::atomic_xchg_in_heap_at(new_value, base, offset);
     }
 
     static oop oop_access_barrier(oop new_value, oop base, ptrdiff_t offset) {
-      // base->increase_access_counter();
       return GCBarrierType::oop_atomic_xchg_in_heap_at(new_value, base, offset);
     }
   };
@@ -195,12 +184,10 @@ namespace AccessInternal {
   struct PostRuntimeDispatch<GCBarrierType, BARRIER_ATOMIC_CMPXCHG_AT, decorators>: public AllStatic {
     template <typename T>
     static T access_barrier(T new_value, oop base, ptrdiff_t offset, T compare_value) {
-      // base->increase_access_counter();
       return GCBarrierType::atomic_cmpxchg_in_heap_at(new_value, base, offset, compare_value);
     }
 
     static oop oop_access_barrier(oop new_value, oop base, ptrdiff_t offset, oop compare_value) {
-      // base->increase_access_counter();
       return GCBarrierType::oop_atomic_cmpxchg_in_heap_at(new_value, base, offset, compare_value);
     }
   };
