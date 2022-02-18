@@ -73,3 +73,8 @@ void VM_ShenandoahStatsCollection::doit() {
   ShenandoahGCPauseMark mark(_gc_id, SvcGCMarker::OTHER);
   ShenandoahHeap::heap()->entry_stats_collection();
 }
+
+void VM_ShenandoahStatsLogging::doit() {
+  ShenandoahGCPauseMark mark(_gc_id, SvcGCMarker::OTHER);
+  ShenandoahHeap::heap()->entry_stats_logging();
+}

@@ -398,6 +398,7 @@ public:
   void vmop_entry_init_updaterefs();
   void vmop_entry_final_updaterefs();
   void vmop_entry_stats_collection();
+  void vmop_entry_stats_logging();
   void vmop_entry_full(GCCause::Cause cause);
   void vmop_degenerated(ShenandoahDegenPoint point);
 
@@ -408,6 +409,7 @@ public:
   void entry_init_updaterefs();
   void entry_final_updaterefs();
   void entry_stats_collection();
+  void entry_stats_logging();
   void entry_full(GCCause::Cause cause);
   void entry_degenerated(int point);
 
@@ -429,6 +431,7 @@ private:
   void op_init_updaterefs();
   void op_final_updaterefs();
   void op_stats_collection();
+  void op_stats_logging();
   void op_full(GCCause::Cause cause);
   void op_degenerated(ShenandoahDegenPoint point);
   void op_degenerated_fail();

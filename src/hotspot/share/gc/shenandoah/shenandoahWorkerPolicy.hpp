@@ -66,6 +66,10 @@ public:
   // Calculate workers for stw stats collection
   static uint calc_workers_for_stats_collection();
 
+
+  // Calculate workers for stw stats collection
+  static uint calc_workers_for_stats_logging();
+
   // Calculate workers for concurrent precleaning
   static uint calc_workers_for_conc_preclean();
 

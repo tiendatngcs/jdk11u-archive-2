@@ -2522,6 +2522,87 @@ void ShenandoahHeap::op_stats_collection() {
   }
 }
 
+void ShenandoahHeap::op_stats_logging() {
+  assert(ShenandoahSafepoint::is_at_shenandoah_safepoint(), "must be at safepoint");
+  ShenandoahHeap* heap = ShenandoahHeap::heap();
+
+  ShenandoahRegionIterator regions;
+  regions.reset();
+  HeapWord* obj_addr = NULL;
+  ShenandoahHeapRegion* r = regions.next();
+  ShenandoahMarkingContext* const ctx = heap->complete_marking_context();
+  while (r != NULL) {
+    // if (r->is_active() && !r->is_cset()) {
+    //   tty->print_cr("Iterating region %lu", r->index());
+    //   // r->oop_iterate(&cl);
+    //   _heap->marked_object_iterate(r, )
+
+    // }
+    ShenandoahStatsCountingObjectClosure cl(heap);
+    HeapWord* tams = ctx->top_at_mark_start(r);
+    marked_object_iterate(r, &cl, tams);
+    r = regions.next();
+  }
+
+
+
+  // Cycle is complete
+
+  log_info(gc)("Dat log --- cycle is complete\n"
+                "Current gc epoch: %lu\n"
+                "heap: ______\n"
+                "capacity: %lu\n"
+                "soft_max_capacity: %lu\n"
+                "used: %lu\n"
+                "used_by_regions: %lu\n"
+                "committed: %lu\n"
+                "bytes_allocated_since_gc_start: %lu\n"
+                "bytes_evacuated_since_gc_start: %lu\n"
+                "total_marked_objects: %lu\n", oopDesc::static_gc_epoch, heap->capacity(), heap->soft_max_capacity(), heap->used(), heap->used_by_regions(), heap->committed(), heap->bytes_allocated_since_gc_start(), heap->bytes_evacuated_since_gc_start(), heap->total_marked_objects());
+  for (JavaThreadIteratorWithHandle jtiwh; JavaThread *thread = jtiwh.next(); ) {
+    // thread->tlab().accumulate_statistics();
+    // thread->tlab().initialize_statistics();
+    // thread->tlab().used_bytes();
+    // thread->
+    PLAB* gclab = ShenandoahThreadLocalData::gclab(thread);
+    tty->print_cr("jthread tlab capacity %lu, free %lu", gclab->word_sz(), gclab->words_remaining());
+  }
+
+  assert(SafepointSynchronize::is_at_safepoint(), "Must be at a safepoint");
+  for (NonJavaThread::Iterator njti; !njti.end(); njti.step()) {
+    Thread *thread = njti.current();
+    PLAB* gclab = ShenandoahThreadLocalData::gclab(thread);
+    tty->print_cr("non-jthread tlab capacity %lu, free %lu", gclab->word_sz(), gclab->words_remaining());
+  }
+  log_info(gc)("Obj count ac histogram");
+  for (int i = 0; i < 30; i++){
+    log_info(gc)("\t%d: %lu", i, heap->histogram()[i]);
+  }
+
+  log_info(gc)("Obj size ac histogram");
+  for (int i = 0; i < 30; i++){
+    log_info(gc)("\t%d: %lu", i, heap->size_histogram()[i]);
+  }
+
+  log_info(gc)("Valid/invalid oop stats\n"
+                "valid_count: %lu bytes\n"
+                "valid_size: %lu bytes\n"
+                "invalid_count: %lu bytes\n"
+                "invalid_size: %lu bytes\n"
+                "total_count: %lu bytes\n"
+                "total_size: %lu bytes\n", heap->oop_stats(true, true), heap->oop_stats(true, false), heap->oop_stats(false, true), heap->oop_stats(false, false), heap->oop_stats(true, true)+heap->oop_stats(false, true), heap->oop_stats(true, false)+heap->oop_stats(false, false));
+
+
+
+
+  heap->reset_histogram();
+  heap->reset_oop_stats();
+  heap->reset_bytes_evacuated_since_gc_start();
+  heap->reset_used_by_regions();
+  heap->reset_total_marked_objects();
+  oopDesc::static_gc_epoch += 1;
+}
+
 void ShenandoahHeap::print_extended_on(outputStream *st) const {
   print_on(st);
   print_heap_regions_on(st);
@@ -2654,6 +2735,15 @@ void ShenandoahHeap::vmop_entry_stats_collection() {
   VMThread::execute(&op);
 }
 
+void ShenandoahHeap::vmop_entry_stats_logging() {
+  TraceCollectorStats tcs(monitoring_support()->stw_collection_counters());
+  ShenandoahGCPhase phase(ShenandoahPhaseTimings::stats_logging_gross);
+
+  try_inject_alloc_failure();
+  VM_ShenandoahStatsLogging op;
+  VMThread::execute(&op);
+}
+
 void ShenandoahHeap::vmop_entry_full(GCCause::Cause cause) {
   TraceCollectorStats tcs(monitoring_support()->full_stw_collection_counters());
   ShenandoahGCPhase phase(ShenandoahPhaseTimings::full_gc_gross);
@@ -2737,6 +2827,20 @@ void ShenandoahHeap::entry_stats_collection() {
                               "stats collection");
 
   op_stats_collection();
+}
+
+void ShenandoahHeap::entry_stats_logging() {
+  static const char* msg = "Pause Stats Logging";
+  ShenandoahPausePhase gc_phase(msg);
+  EventMark em("%s", msg);
+
+  ShenandoahGCPhase phase(ShenandoahPhaseTimings::stats_logging);
+
+  ShenandoahWorkerScope scope(workers(),
+                              ShenandoahWorkerPolicy::calc_workers_for_stats_logging(),
+                              "stats collection");
+
+  op_stats_logging();
 }
 
 void ShenandoahHeap::entry_full(GCCause::Cause cause) {

@@ -115,6 +115,9 @@ class outputStream;
   f(stats_collection_gross,                         "Pause Stats Collection (G)")      \
   f(stats_collection,                               "Pause Stats Collection (N")       \
                                                                                        \
+  f(stats_logging_gross,                         "Pause Stats Logging (G)")            \
+  f(stats_logging,                               "Pause Stats Logging (N")             \
+                                                                                       \
   f(degen_gc_gross,                                 "Pause Degenerated GC (G)")        \
   f(degen_gc,                                       "Pause Degenerated GC (N)")        \
   f(degen_gc_update_roots,                          "  Degen Update Roots")            \

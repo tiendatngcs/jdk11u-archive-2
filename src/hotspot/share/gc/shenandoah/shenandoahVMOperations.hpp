@@ -112,4 +112,12 @@ public:
   virtual void doit();
 };
 
+class VM_ShenandoahStatsLogging: public VM_ShenandoahOperation {
+public:
+  VM_ShenandoahStatsLogging() : VM_ShenandoahOperation() {};
+  VM_Operation::VMOp_Type type() const { return VMOp_ShenandoahStatsLogging; }
+  const char* name()             const { return "Shenandoah Stats Logging"; }
+  virtual void doit();
+};
+
 #endif //SHARE_VM_GC_SHENANDOAH_VM_OPERATIONS_SHENANDOAH_HPP
