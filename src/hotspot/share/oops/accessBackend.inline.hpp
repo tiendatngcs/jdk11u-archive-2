@@ -66,7 +66,7 @@ inline void RawAccessBarrier<decorators>::oop_store(void* addr, T value) {
 template <DecoratorSet decorators>
 template <typename T>
 inline void RawAccessBarrier<decorators>::oop_store_at(oop base, ptrdiff_t offset, T value) {
-  // base->increase_access_counter();
+  base->increase_access_counter();
   oop_store(field_addr(base, offset), value);
 }
 
@@ -81,7 +81,7 @@ inline T RawAccessBarrier<decorators>::oop_load(void* addr) {
 template <DecoratorSet decorators>
 template <typename T>
 inline T RawAccessBarrier<decorators>::oop_load_at(oop base, ptrdiff_t offset) {
-  // base->increase_access_counter();
+  base->increase_access_counter();
   return oop_load<T>(field_addr(base, offset));
 }
 
@@ -100,7 +100,7 @@ inline T RawAccessBarrier<decorators>::oop_atomic_cmpxchg(T new_value, void* add
 template <DecoratorSet decorators>
 template <typename T>
 inline T RawAccessBarrier<decorators>::oop_atomic_cmpxchg_at(T new_value, oop base, ptrdiff_t offset, T compare_value) {
-  // base->increase_access_counter();
+  base->increase_access_counter();
   return oop_atomic_cmpxchg(new_value, field_addr(base, offset), compare_value);
 }
 
@@ -116,7 +116,7 @@ inline T RawAccessBarrier<decorators>::oop_atomic_xchg(T new_value, void* addr) 
 template <DecoratorSet decorators>
 template <typename T>
 inline T RawAccessBarrier<decorators>::oop_atomic_xchg_at(T new_value, oop base, ptrdiff_t offset) {
-  // base->increase_access_counter();
+  base->increase_access_counter();
   return oop_atomic_xchg(new_value, field_addr(base, offset));
 }
 
