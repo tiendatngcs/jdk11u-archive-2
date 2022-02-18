@@ -173,10 +173,10 @@ class oopDesc {
   void obj_field_put_raw(int offset, oop value);
   void obj_field_put_volatile(int offset, oop value);
 
-  Metadata* metadata_field(int offset) const;
+  Metadata* metadata_field(int offset) ;
   void metadata_field_put(int offset, Metadata* value);
 
-  Metadata* metadata_field_acquire(int offset) const;
+  Metadata* metadata_field_acquire(int offset) ;
   void release_metadata_field_put(int offset, Metadata* value);
 
   jbyte byte_field(int offset) const;
@@ -203,37 +203,37 @@ class oopDesc {
   jdouble double_field(int offset) const;
   void double_field_put(int offset, jdouble contents);
 
-  address address_field(int offset) const;
+  address address_field(int offset) ;
   void address_field_put(int offset, address contents);
 
-  oop obj_field_acquire(int offset) const;
+  oop obj_field_acquire(int offset);
   void release_obj_field_put(int offset, oop value);
 
-  jbyte byte_field_acquire(int offset) const;
+  jbyte byte_field_acquire(int offset) ;
   void release_byte_field_put(int offset, jbyte contents);
 
-  jchar char_field_acquire(int offset) const;
+  jchar char_field_acquire(int offset) ;
   void release_char_field_put(int offset, jchar contents);
 
-  jboolean bool_field_acquire(int offset) const;
+  jboolean bool_field_acquire(int offset) ;
   void release_bool_field_put(int offset, jboolean contents);
   
-  jint int_field_acquire(int offset) const;
+  jint int_field_acquire(int offset) ;
   void release_int_field_put(int offset, jint contents);
 
-  jshort short_field_acquire(int offset) const;
+  jshort short_field_acquire(int offset) ;
   void release_short_field_put(int offset, jshort contents);
 
-  jlong long_field_acquire(int offset) const;
+  jlong long_field_acquire(int offset) ;
   void release_long_field_put(int offset, jlong contents);
 
-  jfloat float_field_acquire(int offset) const;
+  jfloat float_field_acquire(int offset) ;
   void release_float_field_put(int offset, jfloat contents);
 
-  jdouble double_field_acquire(int offset) const;
+  jdouble double_field_acquire(int offset) ;
   void release_double_field_put(int offset, jdouble contents);
 
-  address address_field_acquire(int offset) const;
+  address address_field_acquire(int offset) ;
   void release_address_field_put(int offset, address contents);
 
   // printing functions for VM debugging

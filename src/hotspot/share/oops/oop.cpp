@@ -228,7 +228,7 @@ oop oopDesc::oop_or_null(address addr) {
   return NULL;
 }
 
-oop oopDesc::obj_field_acquire(int offset) const {
+oop oopDesc::obj_field_acquire(int offset) {
   _access_counter+=1;
   return HeapAccess<MO_ACQUIRE>::oop_load_at(as_oop(), offset);
 }
@@ -246,11 +246,11 @@ void oopDesc::obj_field_put_volatile(int offset, oop value) {
   HeapAccess<MO_SEQ_CST>::oop_store_at(as_oop(), offset, value);
 }
 
-address oopDesc::address_field(int offset) const {
+address oopDesc::address_field(int offset) {
   _access_counter+=1;
   return HeapAccess<>::load_at(as_oop(), offset);
 }
-address oopDesc::address_field_acquire(int offset) const {
+address oopDesc::address_field_acquire(int offset) {
   _access_counter+=1;
   return HeapAccess<MO_ACQUIRE>::load_at(as_oop(), offset);
 }
@@ -264,7 +264,7 @@ void oopDesc::release_address_field_put(int offset, address value)    {
   HeapAccess<MO_RELEASE>::store_at(as_oop(), offset, value);
 }
 
-Metadata* oopDesc::metadata_field(int offset) const {
+Metadata* oopDesc::metadata_field(int offset) {
   _access_counter+=1;
   return HeapAccess<>::load_at(as_oop(), offset);
 }
@@ -273,7 +273,7 @@ void oopDesc::metadata_field_put(int offset, Metadata* value) {
   HeapAccess<>::store_at(as_oop(), offset, value);
 }
 
-Metadata* oopDesc::metadata_field_acquire(int offset) const {
+Metadata* oopDesc::metadata_field_acquire(int offset) {
   _access_counter+=1;
   return HeapAccess<MO_ACQUIRE>::load_at(as_oop(), offset);
 }
@@ -282,7 +282,7 @@ void oopDesc::release_metadata_field_put(int offset, Metadata* value) {
   HeapAccess<MO_RELEASE>::store_at(as_oop(), offset, value);
 }
 
-jbyte oopDesc::byte_field_acquire(int offset) const                   {
+jbyte oopDesc::byte_field_acquire(int offset)                   {
   _access_counter+=1;
   return HeapAccess<MO_ACQUIRE>::load_at(as_oop(), offset);
 }
@@ -291,7 +291,7 @@ void oopDesc::release_byte_field_put(int offset, jbyte value)         {
   HeapAccess<MO_RELEASE>::store_at(as_oop(), offset, value);
 }
 
-jchar oopDesc::char_field_acquire(int offset) const                   {
+jchar oopDesc::char_field_acquire(int offset)                   {
   _access_counter+=1;
   return HeapAccess<MO_ACQUIRE>::load_at(as_oop(), offset);
 }
@@ -300,7 +300,7 @@ void oopDesc::release_char_field_put(int offset, jchar value)         {
   HeapAccess<MO_RELEASE>::store_at(as_oop(), offset, value);
 }
 
-jboolean oopDesc::bool_field_acquire(int offset) const                {
+jboolean oopDesc::bool_field_acquire(int offset)                {
   _access_counter+=1;
   return HeapAccess<MO_ACQUIRE>::load_at(as_oop(), offset);
 }
@@ -309,7 +309,7 @@ void oopDesc::release_bool_field_put(int offset, jboolean value)      {
   HeapAccess<MO_RELEASE>::store_at(as_oop(), offset, jboolean(value & 1));
 }
 
-jint oopDesc::int_field_acquire(int offset) const                     {
+jint oopDesc::int_field_acquire(int offset)                     {
   _access_counter+=1;
   return HeapAccess<MO_ACQUIRE>::load_at(as_oop(), offset);
 }
@@ -318,7 +318,7 @@ void oopDesc::release_int_field_put(int offset, jint value)           {
   HeapAccess<MO_RELEASE>::store_at(as_oop(), offset, value);
 }
 
-jshort oopDesc::short_field_acquire(int offset) const                 {
+jshort oopDesc::short_field_acquire(int offset)                 {
   _access_counter+=1;
   return HeapAccess<MO_ACQUIRE>::load_at(as_oop(), offset);
 }
@@ -327,7 +327,7 @@ void oopDesc::release_short_field_put(int offset, jshort value)       {
   HeapAccess<MO_RELEASE>::store_at(as_oop(), offset, value);
 }
 
-jlong oopDesc::long_field_acquire(int offset) const                   {
+jlong oopDesc::long_field_acquire(int offset)                   {
   _access_counter+=1;
   return HeapAccess<MO_ACQUIRE>::load_at(as_oop(), offset);
 }
@@ -336,7 +336,7 @@ void oopDesc::release_long_field_put(int offset, jlong value)         {
   HeapAccess<MO_RELEASE>::store_at(as_oop(), offset, value);
 }
 
-jfloat oopDesc::float_field_acquire(int offset) const                 {
+jfloat oopDesc::float_field_acquire(int offset)                 {
   _access_counter+=1;
   return HeapAccess<MO_ACQUIRE>::load_at(as_oop(), offset);
 }
@@ -345,7 +345,7 @@ void oopDesc::release_float_field_put(int offset, jfloat value)       {
   HeapAccess<MO_RELEASE>::store_at(as_oop(), offset, value);
 }
 
-jdouble oopDesc::double_field_acquire(int offset) const               {
+jdouble oopDesc::double_field_acquire(int offset)               {
   _access_counter+=1;
   return HeapAccess<MO_ACQUIRE>::load_at(as_oop(), offset);
 }
