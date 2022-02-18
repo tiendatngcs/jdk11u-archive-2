@@ -2559,21 +2559,21 @@ void ShenandoahHeap::op_stats_logging() {
                 "bytes_allocated_since_gc_start: %lu\n"
                 "bytes_evacuated_since_gc_start: %lu\n"
                 "total_marked_objects: %lu\n", oopDesc::static_gc_epoch, heap->capacity(), heap->soft_max_capacity(), heap->used(), heap->used_by_regions(), heap->committed(), heap->bytes_allocated_since_gc_start(), heap->bytes_evacuated_since_gc_start(), heap->total_marked_objects());
-  for (JavaThreadIteratorWithHandle jtiwh; JavaThread *thread = jtiwh.next(); ) {
-    // thread->tlab().accumulate_statistics();
-    // thread->tlab().initialize_statistics();
-    // thread->tlab().used_bytes();
-    // thread->
-    PLAB* gclab = ShenandoahThreadLocalData::gclab(thread);
-    tty->print_cr("jthread tlab capacity %lu, free %lu", gclab->word_sz(), gclab->words_remaining());
-  }
+  // for (JavaThreadIteratorWithHandle jtiwh; JavaThread *thread = jtiwh.next(); ) {
+  //   // thread->tlab().accumulate_statistics();
+  //   // thread->tlab().initialize_statistics();
+  //   // thread->tlab().used_bytes();
+  //   // thread->
+  //   PLAB* gclab = ShenandoahThreadLocalData::gclab(thread);
+  //   tty->print_cr("jthread tlab capacity %lu, free %lu", gclab->word_sz(), gclab->words_remaining());
+  // }
 
-  assert(SafepointSynchronize::is_at_safepoint(), "Must be at a safepoint");
-  for (NonJavaThread::Iterator njti; !njti.end(); njti.step()) {
-    Thread *thread = njti.current();
-    PLAB* gclab = ShenandoahThreadLocalData::gclab(thread);
-    tty->print_cr("non-jthread tlab capacity %lu, free %lu", gclab->word_sz(), gclab->words_remaining());
-  }
+  // assert(SafepointSynchronize::is_at_safepoint(), "Must be at a safepoint");
+  // for (NonJavaThread::Iterator njti; !njti.end(); njti.step()) {
+  //   Thread *thread = njti.current();
+  //   PLAB* gclab = ShenandoahThreadLocalData::gclab(thread);
+  //   tty->print_cr("non-jthread tlab capacity %lu, free %lu", gclab->word_sz(), gclab->words_remaining());
+  // }
   log_info(gc)("Obj count ac histogram");
   for (int i = 0; i < 30; i++){
     log_info(gc)("\t%d: %lu", i, heap->histogram()[i]);
