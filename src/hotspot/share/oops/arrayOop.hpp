@@ -92,6 +92,8 @@ class arrayOopDesc : public oopDesc {
   static T* obj_offset_to_raw(arrayOop obj, size_t offset_in_bytes, T* raw) {
     if (obj != NULL) {
       assert(raw == NULL, "either raw or in-heap");
+      tty->print_cr("Increasing ac for array oop");
+      obj->increase_access_counter();
       char* base = reinterpret_cast<char*>((void*) obj);
       raw = reinterpret_cast<T*>(base + offset_in_bytes);
     } else {
