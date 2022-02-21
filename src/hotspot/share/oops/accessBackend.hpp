@@ -447,6 +447,7 @@ namespace AccessInternal {
   };
 
   inline void* field_addr(oop base, ptrdiff_t byte_offset) {
+    base->increase_access_counter();
     return reinterpret_cast<void*>(reinterpret_cast<intptr_t>((void*)base) + byte_offset);
   }
   // Step 4: Runtime dispatch
