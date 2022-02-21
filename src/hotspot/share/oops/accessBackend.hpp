@@ -188,6 +188,7 @@ template <DecoratorSet decorators>
 class RawAccessBarrier: public AllStatic {
 protected:
   static inline void* field_addr(oop base, ptrdiff_t byte_offset) {
+    base->increase_access_counter();
     return AccessInternal::field_addr(base, byte_offset);
   }
 
@@ -447,10 +448,6 @@ namespace AccessInternal {
   };
 
   inline void* field_addr(oop base, ptrdiff_t byte_offset) {
-    // base->increase_access_counter();  
-    void* ac = reinterpret_cast<void*>(reinterpret_cast<intptr_t>((void*)base) + oopDesc::access_counter_offset_in_bytes());
-    void* gc_epoch = reinterpret_cast<void*>(reinterpret_cast<intptr_t>((void*)base) + oopDesc::gc_epoch_offset_in_bytes());
-    tty->print_cr("ac ptr %p | ac %lu  | gc_epoch ptr %p | gc_epoch %lu", ac , *ac, gc_epoch, *gc_epoch);
     return reinterpret_cast<void*>(reinterpret_cast<intptr_t>((void*)base) + byte_offset);
   }
   // Step 4: Runtime dispatch
