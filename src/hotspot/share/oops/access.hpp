@@ -308,6 +308,8 @@ public:
   static inline void arraycopy(arrayOop src_obj, size_t src_offset_in_bytes,
                                arrayOop dst_obj, size_t dst_offset_in_bytes,
                                size_t length) {
+    src_obj->increase_access_counter();
+    dst_obj->increase_access_counter();
     AccessT::arraycopy(src_obj, src_offset_in_bytes, reinterpret_cast<const T*>(NULL),
                        dst_obj, dst_offset_in_bytes, reinterpret_cast<T*>(NULL),
                        length);
@@ -317,6 +319,7 @@ public:
   static inline void arraycopy_to_native(arrayOop src_obj, size_t src_offset_in_bytes,
                                          T* dst,
                                          size_t length) {
+    src_obj->increase_access_counter();
     AccessT::arraycopy(src_obj, src_offset_in_bytes, reinterpret_cast<const T*>(NULL),
                        NULL, 0, dst,
                        length);
@@ -326,6 +329,7 @@ public:
   static inline void arraycopy_from_native(const T* src,
                                            arrayOop dst_obj, size_t dst_offset_in_bytes,
                                            size_t length) {
+    dst_obj->increase_access_counter();
     AccessT::arraycopy(NULL, 0, src,
                        dst_obj, dst_offset_in_bytes, reinterpret_cast<T*>(NULL),
                        length);
@@ -334,6 +338,8 @@ public:
   static inline bool oop_arraycopy(arrayOop src_obj, size_t src_offset_in_bytes,
                                    arrayOop dst_obj, size_t dst_offset_in_bytes,
                                    size_t length) {
+    src_obj->increase_access_counter();
+    dst_obj->increase_access_counter();
     return AccessT::oop_arraycopy(src_obj, src_offset_in_bytes, reinterpret_cast<const HeapWord*>(NULL),
                                   dst_obj, dst_offset_in_bytes, reinterpret_cast<HeapWord*>(NULL),
                                   length);

@@ -90,17 +90,17 @@ public:
     static void clone_in_heap(oop src, oop dst, size_t size);
 
     static void oop_store_in_heap_at(oop base, ptrdiff_t offset, oop value) {
-      tty->print_cr("modrefbarrierset ac increment candidate");
+      // tty->print_cr("modrefbarrierset ac increment candidate");
       oop_store_in_heap(AccessInternal::oop_field_addr<decorators>(base, offset), value);
     }
 
     static oop oop_atomic_xchg_in_heap_at(oop new_value, oop base, ptrdiff_t offset) {
-      tty->print_cr("modrefbarrierset ac increment candidate");
+      // tty->print_cr("modrefbarrierset ac increment candidate");
       return oop_atomic_xchg_in_heap(new_value, AccessInternal::oop_field_addr<decorators>(base, offset));
     }
 
     static oop oop_atomic_cmpxchg_in_heap_at(oop new_value, oop base, ptrdiff_t offset, oop compare_value) {
-      tty->print_cr("modrefbarrierset ac increment candidate");
+      // tty->print_cr("modrefbarrierset ac increment candidate");
       return oop_atomic_cmpxchg_in_heap(new_value, AccessInternal::oop_field_addr<decorators>(base, offset), compare_value);
     }
   };
