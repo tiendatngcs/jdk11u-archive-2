@@ -167,8 +167,8 @@ class oopDesc {
 
   // Access to fields in a instanceOop through these methods.
   template <DecoratorSet decorator>
-  oop obj_field_access(int offset) const;
-  oop obj_field(int offset) const;
+  oop obj_field_access(int offset);
+  oop obj_field(int offset);
   void obj_field_put(int offset, oop value);
   void obj_field_put_raw(int offset, oop value);
   void obj_field_put_volatile(int offset, oop value);
@@ -179,28 +179,28 @@ class oopDesc {
   Metadata* metadata_field_acquire(int offset) ;
   void release_metadata_field_put(int offset, Metadata* value);
 
-  jbyte byte_field(int offset) const;
+  jbyte byte_field(int offset);
   void byte_field_put(int offset, jbyte contents);
 
-  jchar char_field(int offset) const;
+  jchar char_field(int offset);
   void char_field_put(int offset, jchar contents);
 
-  jboolean bool_field(int offset) const;
+  jboolean bool_field(int offset);
   void bool_field_put(int offset, jboolean contents);
 
-  jint int_field(int offset) const;
+  jint int_field(int offset);
   void int_field_put(int offset, jint contents);
 
-  jshort short_field(int offset) const;
+  jshort short_field(int offset);
   void short_field_put(int offset, jshort contents);
 
-  jlong long_field(int offset) const;
+  jlong long_field(int offset);
   void long_field_put(int offset, jlong contents);
 
-  jfloat float_field(int offset) const;
+  jfloat float_field(int offset);
   void float_field_put(int offset, jfloat contents);
 
-  jdouble double_field(int offset) const;
+  jdouble double_field(int offset);
   void double_field_put(int offset, jdouble contents);
 
   address address_field(int offset) ;
