@@ -135,8 +135,6 @@ protected:
                                    size_t length) {
     verify_decorators<ARRAYCOPY_DECORATOR_MASK | IN_HEAP |
                       AS_DECORATOR_MASK | IS_ARRAY | IS_DEST_UNINITIALIZED>();
-    src_obj->increase_access_counter();
-    dst_obj->increase_access_counter();
     return AccessInternal::arraycopy<decorators | INTERNAL_VALUE_IS_OOP>(src_obj, src_offset_in_bytes, src_raw,
                                                                          dst_obj, dst_offset_in_bytes, dst_raw,
                                                                          length);
@@ -148,8 +146,6 @@ protected:
                                size_t length) {
     verify_decorators<ARRAYCOPY_DECORATOR_MASK | IN_HEAP |
                       AS_DECORATOR_MASK | IS_ARRAY>();
-    src_obj->increase_access_counter();
-    dst_obj->increase_access_counter();
     AccessInternal::arraycopy<decorators>(src_obj, src_offset_in_bytes, src_raw,
                                           dst_obj, dst_offset_in_bytes, dst_raw,
                                           length);
