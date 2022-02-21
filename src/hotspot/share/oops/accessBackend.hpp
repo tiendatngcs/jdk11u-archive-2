@@ -188,7 +188,7 @@ template <DecoratorSet decorators>
 class RawAccessBarrier: public AllStatic {
 protected:
   static inline void* field_addr(oop base, ptrdiff_t byte_offset) {
-    base->increase_access_counter();
+    // base->increase_access_counter();
     return AccessInternal::field_addr(base, byte_offset);
   }
 

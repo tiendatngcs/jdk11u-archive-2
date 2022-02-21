@@ -94,6 +94,7 @@ inline bool ModRefBarrierSet::AccessBarrier<decorators, BarrierSetT>::
 oop_arraycopy_in_heap(arrayOop src_obj, size_t src_offset_in_bytes, T* src_raw,
                       arrayOop dst_obj, size_t dst_offset_in_bytes, T* dst_raw,
                       size_t length) {
+  tty->print_cr("modrefbarrierset ac increment candidate");
   BarrierSetT *bs = barrier_set_cast<BarrierSetT>(barrier_set());
 
   src_raw = arrayOopDesc::obj_offset_to_raw(src_obj, src_offset_in_bytes, src_raw);
