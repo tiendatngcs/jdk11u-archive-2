@@ -483,7 +483,14 @@ inline void ShenandoahHeap::marked_object_iterate(ShenandoahHeapRegion* region, 
     oop obj = oop(cs);
     assert(oopDesc::is_oop(obj), "sanity");
     assert(ctx->is_marked(obj), "object expected to be marked");
-    int size = obj->size();
+    assert(obj->klass() != NULL, "must have valid klass?");
+    if (ctx->allocated_after_mark_start(obj)) {
+      tty->print_cr("object is allocated after mark start");
+    }
+    // int size = obj->size();
+    int size = obj->klass()->oop_size(obj);
+    tty->print_cr("size %d", size);
+    
 
     // if (is_update_refs_in_progress()) update_histogram(obj);
     cl->do_object(obj);
