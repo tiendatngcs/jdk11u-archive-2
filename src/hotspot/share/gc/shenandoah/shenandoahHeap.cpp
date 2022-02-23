@@ -748,20 +748,21 @@ void ShenandoahHeap::update_histogram(oop obj) {
   // oop_check_to_reset_access_counter(obj);
   intptr_t ac = obj->access_counter();
   intptr_t gc_epoch = obj->gc_epoch();
+  int obj_size = obj->klass()->oop_size(obj);
   tty->print_cr("examinating oop %p | ac %lu | gc_epoch %lu", (oopDesc*)obj, ac, gc_epoch);
 
   if (ac == 0 && gc_epoch == 0 && oopDesc::static_gc_epoch != 0) {
     ResourceMark rm;
-    tty->print_cr("untouched oop | ac %lu | gc_epoch %lu | size %d", ac, gc_epoch, obj->klass()->oop_size(obj));
+    tty->print_cr("untouched oop | ac %lu | gc_epoch %lu | size %d", ac, gc_epoch, obj_size);
     tty->print_cr("%s", obj->klass()->external_name());
-    increase_oop_stats(false, false, obj->size()*HeapWordSize);
+    increase_oop_stats(false, false, obj_size*HeapWordSize);
     increase_oop_stats(false, true, 1);
   } else {
-    increase_oop_stats(true, false, obj->size()*HeapWordSize);
+    increase_oop_stats(true, false, obj_size*HeapWordSize);
     increase_oop_stats(true, true, 1);
     if (ac == 0){
       _histogram[0] += 1;
-      _size_histogram[0] += obj->size();
+      _size_histogram[0] += obj_size;
       return;
     }
     int idx = static_cast<int>(log2(ac)) + 1;
@@ -770,12 +771,12 @@ void ShenandoahHeap::update_histogram(oop obj) {
     if (idx >= arr_size) {
       // Atomic::add(1, &_histogram[arr_size-1]);
       _histogram[arr_size-1] += 1;
-      _size_histogram[arr_size-1] += obj->size();
+      _size_histogram[arr_size-1] += obj_size;
     }
     else {
       // Atomic::add(1, &_histogram[idx]);
       _histogram[idx] += 1;
-      _size_histogram[idx] += obj->size();
+      _size_histogram[idx] += obj_size;
     }
   }
 }
