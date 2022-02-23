@@ -381,13 +381,13 @@ void ShenandoahHeapRegion::oop_iterate(OopIterateClosure* blk) {
   }
 }
 
-void ShenandoahHeapRegion::iterate(ObjectClosure* blk) {
+void ShenandoahHeapRegion::iterate(ObjectClosure* blkm, HeapWord* limit) {
   if (!is_active()) return;
   if (is_humongous_continuation()) return;
   if (is_humongous()) {
     iterate_humongous(blk);
   } else {
-    iterate_objects(blk);
+    iterate_objects(blk, limit);
   }
 }
 
@@ -402,12 +402,16 @@ void ShenandoahHeapRegion::oop_iterate_objects(OopIterateClosure* blk) {
   }
 }
 
-void ShenandoahHeapRegion::iterate_objects(ObjectClosure* blk) {
+void ShenandoahHeapRegion::iterate_objects(ObjectClosure* blk, HeapWord* limit) {
   assert(! is_humongous(), "no humongous region here");
   HeapWord* obj_addr = bottom();
   HeapWord* t = top();
+  if (!limit) {
+    limit = t;
+  }
+  assert(limit != NULL, "Limit should not be null");
   // Could call objects iterate, but this is easier.
-  while (obj_addr < t) {
+  while (obj_addr < limit) {
     oop obj = oop(obj_addr);
     int size = obj->size();
     blk->do_object(obj);

@@ -357,7 +357,7 @@ public:
   void recycle();
 
   void oop_iterate(OopIterateClosure* cl);
-  void iterate(ObjectClosure* cl);
+  void iterate(ObjectClosure* cl, HeapWord* limit = NULL);
 
   HeapWord* block_start(const void* p) const;
   size_t block_size(const HeapWord* p) const;
@@ -394,7 +394,7 @@ private:
   void do_uncommit();
 
   void oop_iterate_objects(OopIterateClosure* cl);
-  void iterate_objects(ObjectClosure* cl);
+  void iterate_objects(ObjectClosure* cl, HeapWord* limit = NULL);
   void oop_iterate_humongous(OopIterateClosure* cl);
   void iterate_humongous(ObjectClosure* cl);
 
