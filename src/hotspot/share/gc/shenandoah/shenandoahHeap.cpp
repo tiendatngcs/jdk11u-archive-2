@@ -2364,6 +2364,20 @@ void ShenandoahHeap::update_heap_references(bool concurrent) {
   workers()->run_task(&task);
 }
 
+class ShenandoahStatsCollectingObjectClosure : public ObjectClosure {
+private:
+  ShenandoahHeap* const _heap;
+  // Thread* const _thread;
+public:
+  ShenandoahStatsCollectingObjectClosure(ShenandoahHeap* heap) :
+    _heap(heap) {}
+
+  void do_object(oop p) {
+    shenandoah_assert_marked(NULL, p);
+    _heap->update_histogram(p);
+  }
+};
+
 void ShenandoahHeap::op_init_updaterefs() {
   assert(ShenandoahSafepoint::is_at_shenandoah_safepoint(), "must be at safepoint");
   tty->print_cr("Evac finished, total evacuated %lu bytes", bytes_evacuated_since_gc_start());
@@ -2388,6 +2402,15 @@ void ShenandoahHeap::op_init_updaterefs() {
 
   if (ShenandoahPacing) {
     pacer()->setup_for_updaterefs();
+  }
+
+  // loop over all live objects in all active regions to collect stats
+  ShenandoahStatsCollectingObjectClosure cl(heap());
+  for (size_t i = 0; i < num_regions(); i++) {
+    ShenandoahHeapRegion r = get_region(i);
+    if (r->is_active() || r->is_cset()) {
+      marked_object_iterate(r, &cl);
+    }
   }
 }
 

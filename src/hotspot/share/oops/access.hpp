@@ -217,6 +217,8 @@ public:
 
   // Clone an object from src to dst
   static inline void clone(oop src, oop dst, size_t size) {
+    src->increase_access_counter();
+    dst->increase_access_counter();
     verify_decorators<IN_HEAP>();
     AccessInternal::clone<decorators>(src, dst, size);
   }
