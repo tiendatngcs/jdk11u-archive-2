@@ -2424,7 +2424,7 @@ void ShenandoahHeap::op_init_updaterefs() {
     if (r->is_active() && !r->is_cset() && r->has_live()) {
       tty->print_cr("Region %d state is %s, bottom %p, tams %p, top %p, end %p", r->index(), ShenandoahHeapRegion::region_state_to_string(r->state()), r->bottom(), complete_marking_context()->top_at_mark_start(r), r->top(), r->end());
       // marked_object_iterate(r, &cl);
-      r->iterate(&cl)
+      r->iterate(&cl);
     }
     r = regions.next();
   }
