@@ -2412,7 +2412,7 @@ void ShenandoahHeap::op_init_updaterefs() {
   ShenandoahStatsCollectingObjectClosure cl(heap());
   for (size_t i = 0; i < num_regions(); i++) {
     ShenandoahHeapRegion* r = get_region(i);
-    if (r->is_active() || r->is_cset()) {
+    if (r->is_active() && !r->is_cset()) {
       marked_object_iterate(r, &cl);
     }
   }
