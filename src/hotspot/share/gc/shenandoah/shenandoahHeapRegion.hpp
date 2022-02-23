@@ -122,24 +122,6 @@ private:
     _REGION_STATES_NUM        // last
   };
 
-  static const char* region_state_to_string(RegionState s) {
-    switch (s) {
-      case _empty_uncommitted:       return "Empty Uncommitted";
-      case _empty_committed:         return "Empty Committed";
-      case _regular:                 return "Regular";
-      case _humongous_start:         return "Humongous Start";
-      case _humongous_cont:          return "Humongous Continuation";
-      case _pinned_humongous_start:  return "Humongous Start, Pinned";
-      case _cset:                    return "Collection Set";
-      case _pinned:                  return "Pinned";
-      case _pinned_cset:             return "Collection Set, Pinned";
-      case _trash:                   return "Trash";
-      default:
-        ShouldNotReachHere();
-        return "";
-    }
-  }
-
   // This method protects from accidental changes in enum order:
   int region_state_to_ordinal(RegionState s) const {
     switch (s) {
@@ -208,6 +190,25 @@ public:
   void record_pin();
   void record_unpin();
   size_t pin_count() const;
+
+
+  static const char* region_state_to_string(RegionState s) {
+    switch (s) {
+      case _empty_uncommitted:       return "Empty Uncommitted";
+      case _empty_committed:         return "Empty Committed";
+      case _regular:                 return "Regular";
+      case _humongous_start:         return "Humongous Start";
+      case _humongous_cont:          return "Humongous Continuation";
+      case _pinned_humongous_start:  return "Humongous Start, Pinned";
+      case _cset:                    return "Collection Set";
+      case _pinned:                  return "Pinned";
+      case _pinned_cset:             return "Collection Set, Pinned";
+      case _trash:                   return "Trash";
+      default:
+        ShouldNotReachHere();
+        return "";
+    }
+  }
 
 private:
   static size_t RegionCount;
