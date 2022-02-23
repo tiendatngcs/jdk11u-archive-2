@@ -45,9 +45,6 @@ private:
 
   void assert_bounds() const NOT_DEBUG_RETURN;
 
-  bool is_mutator_free(size_t idx) const;
-  bool is_collector_free(size_t idx) const;
-
   HeapWord* try_allocate_in(ShenandoahHeapRegion* region, ShenandoahAllocRequest& req, bool& in_new_region);
   HeapWord* allocate_single(ShenandoahAllocRequest& req, bool& in_new_region);
   HeapWord* allocate_contiguous(ShenandoahAllocRequest& req);
@@ -94,6 +91,10 @@ public:
   double external_fragmentation();
 
   void print_on(outputStream* out) const;
+
+
+  bool is_mutator_free(size_t idx) const;
+  bool is_collector_free(size_t idx) const;
 };
 
 #endif //SHARE_VM_GC_SHENANDOAH_SHENANDOAHFREESET_HPP

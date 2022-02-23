@@ -2423,7 +2423,7 @@ void ShenandoahHeap::op_init_updaterefs() {
   while (r != NULL) {
     if (r->is_active() && !r->is_cset() && r->has_live()) {
       size_t idx = r->index();
-      tty->print_cr("Region %lu is_mutator_free %d, is_collector_free %d, is_empty_or_trash %d, state is %s, bottom %p, tams %p, top %p, end %p", idx, free_set()->is_mutator_free(idx), free_set()->is_collector_free(idx), free_set()->is_empty_or_trash(idx), ShenandoahHeapRegion::region_state_to_string(r->state()), r->bottom(), complete_marking_context()->top_at_mark_start(r), r->top(), r->end());
+      tty->print_cr("Region %lu is_mutator_free %d, is_collector_free %d, state is %s, bottom %p, tams %p, top %p, end %p", idx, free_set()->is_mutator_free(idx), free_set()->is_collector_free(idx), ShenandoahHeapRegion::region_state_to_string(r->state()), r->bottom(), complete_marking_context()->top_at_mark_start(r), r->top(), r->end());
       // marked_object_iterate(r, &cl);
       r->iterate(&cl);
     }
