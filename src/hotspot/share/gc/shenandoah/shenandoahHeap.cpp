@@ -2377,7 +2377,7 @@ public:
     _heap(heap) {}
 
   void do_object(oop p) {
-    shenandoah_assert_marked(NULL, p);
+    // shenandoah_assert_marked(NULL, p);
     _heap->update_histogram(p);
   }
 };
