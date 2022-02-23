@@ -744,10 +744,11 @@ void ShenandoahHeap::update_histogram(oop obj) {
   // uintptr_t ac
   if (obj == NULL) return;
   assert(is_oop(obj), "must be oop");
+  assert(obj->klass()!=NULL, "must have valid klass");
   // oop_check_to_reset_access_counter(obj);
   intptr_t ac = obj->access_counter();
   intptr_t gc_epoch = obj->gc_epoch();
-  tty->print_cr("untouched oop | ac %lu | gc_epoch %lu", ac, gc_epoch);
+  tty->print_cr("examinating oop %p | ac %lu | gc_epoch %lu", ac, gc_epoch);
 
   if (ac == 0 && gc_epoch == 0 && oopDesc::static_gc_epoch != 0) {
     ResourceMark rm;
