@@ -748,7 +748,7 @@ void ShenandoahHeap::update_histogram(oop obj) {
   // oop_check_to_reset_access_counter(obj);
   intptr_t ac = obj->access_counter();
   intptr_t gc_epoch = obj->gc_epoch();
-  tty->print_cr("examinating oop %p | ac %lu | gc_epoch %lu", ac, gc_epoch);
+  tty->print_cr("examinating oop %p | ac %lu | gc_epoch %lu", (oopDesc*)obj, ac, gc_epoch);
 
   if (ac == 0 && gc_epoch == 0 && oopDesc::static_gc_epoch != 0) {
     ResourceMark rm;
