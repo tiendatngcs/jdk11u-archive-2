@@ -381,7 +381,7 @@ void ShenandoahHeapRegion::oop_iterate(OopIterateClosure* blk) {
   }
 }
 
-void ShenandoahHeapRegion::iterate(ObjectClosure* blkm, HeapWord* limit) {
+void ShenandoahHeapRegion::iterate(ObjectClosure* blk, HeapWord* limit) {
   if (!is_active()) return;
   if (is_humongous_continuation()) return;
   if (is_humongous()) {
