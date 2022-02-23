@@ -381,6 +381,16 @@ void ShenandoahHeapRegion::oop_iterate(OopIterateClosure* blk) {
   }
 }
 
+void ShenandoahHeapRegion::iterate(ObjectClosure* blk) {
+  if (!is_active()) return;
+  if (is_humongous_continuation()) return;
+  if (is_humongous()) {
+    iterate_humongous(blk);
+  } else {
+    iterate_objects(blk);
+  }
+}
+
 void ShenandoahHeapRegion::oop_iterate_objects(OopIterateClosure* blk) {
   assert(! is_humongous(), "no humongous region here");
   HeapWord* obj_addr = bottom();
@@ -392,6 +402,19 @@ void ShenandoahHeapRegion::oop_iterate_objects(OopIterateClosure* blk) {
   }
 }
 
+void ShenandoahHeapRegion::iterate_objects(ObjectClosure* blk) {
+  assert(! is_humongous(), "no humongous region here");
+  HeapWord* obj_addr = bottom();
+  HeapWord* t = top();
+  // Could call objects iterate, but this is easier.
+  while (obj_addr < t) {
+    oop obj = oop(obj_addr);
+    int size = oopDesc::size_given_klass(obj->klass());
+    blk->do_object(obj);
+    obj_addr += size;
+  }
+}
+
 void ShenandoahHeapRegion::oop_iterate_humongous(OopIterateClosure* blk) {
   assert(is_humongous(), "only humongous region here");
   // Find head.
@@ -399,6 +422,12 @@ void ShenandoahHeapRegion::oop_iterate_humongous(OopIterateClosure* blk) {
   assert(r->is_humongous_start(), "need humongous head here");
   oop obj = oop(r->bottom());
   obj->oop_iterate(blk, MemRegion(bottom(), top()));
+}
+
+void ShenandoahHeapRegion::iterate_humongous(ObjectClosure* blk) {
+  assert(is_humongous_start(), "only humongous start region here");
+  oop obj = oop(bottom());
+  blk->do_object(obj);
 }
 
 ShenandoahHeapRegion* ShenandoahHeapRegion::humongous_start_region() const {

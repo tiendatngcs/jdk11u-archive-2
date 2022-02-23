@@ -2410,12 +2410,23 @@ void ShenandoahHeap::op_init_updaterefs() {
 
   // loop over all live objects in all active regions to collect stats
   ShenandoahStatsCollectingObjectClosure cl(heap());
-  for (size_t i = 0; i < num_regions(); i++) {
-    ShenandoahHeapRegion* r = get_region(i);
-    if (r->is_active() && !r->is_cset() && !r->is_humongous() && r->has_live()) {
-      tty->print_cr("Region state is %s, bottom %p, tams %p, top %p, end %p", ShenandoahHeapRegion::region_state_to_string(r->state()), r->bottom(), complete_marking_context()->top_at_mark_start(r), r->top(), r->end());
-      marked_object_iterate(r, &cl);
+  ShenandoahRegionIterator regions;
+  ShenandoahHeapRegion* r = regions.next();
+  // for (size_t i = 0; i < num_regions(); i++) {
+  //   ShenandoahHeapRegion* r = get_region(i);
+  //   if (r->is_active() && !r->is_cset() && !r->is_humongous() && r->has_live()) {
+  //     tty->print_cr("Region %d state is %s, bottom %p, tams %p, top %p, end %p", r->index(), ShenandoahHeapRegion::region_state_to_string(r->state()), r->bottom(), complete_marking_context()->top_at_mark_start(r), r->top(), r->end());
+  //     marked_object_iterate(r, &cl);
+  //   }
+  // }
+
+  while (r != NULL) {
+    if (r->is_active() && !r->is_cset() && r->has_live()) {
+      tty->print_cr("Region %d state is %s, bottom %p, tams %p, top %p, end %p", r->index(), ShenandoahHeapRegion::region_state_to_string(r->state()), r->bottom(), complete_marking_context()->top_at_mark_start(r), r->top(), r->end());
+      // marked_object_iterate(r, &cl);
+      r->iterate(&cl)
     }
+    r = regions.next();
   }
 }
 
