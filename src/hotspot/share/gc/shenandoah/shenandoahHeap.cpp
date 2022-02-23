@@ -2412,8 +2412,8 @@ void ShenandoahHeap::op_init_updaterefs() {
   ShenandoahStatsCollectingObjectClosure cl(heap());
   for (size_t i = 0; i < num_regions(); i++) {
     ShenandoahHeapRegion* r = get_region(i);
-    if (r->is_active() && !r->is_cset() && !r->is_humongous()) {
-      tty->print_cr("Region state is %d", r->state());
+    if (r->is_active() && !r->is_cset() && !r->is_humongous() && r->has_live()) {
+      tty->print_cr("Region state is %s, bottom %p, tams %p, top %p, end %p", r->region_state_to_string(), r->bottom(), complete_marking_context()->top_at_mark_start(r), r->top(), r->end());
       marked_object_iterate(r, &cl);
     }
   }
