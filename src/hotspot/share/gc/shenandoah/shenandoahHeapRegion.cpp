@@ -409,7 +409,7 @@ void ShenandoahHeapRegion::iterate_objects(ObjectClosure* blk) {
   // Could call objects iterate, but this is easier.
   while (obj_addr < t) {
     oop obj = oop(obj_addr);
-    int size = oopDesc::size_given_klass(obj->klass());
+    int size = obj->size();
     blk->do_object(obj);
     obj_addr += size;
   }
