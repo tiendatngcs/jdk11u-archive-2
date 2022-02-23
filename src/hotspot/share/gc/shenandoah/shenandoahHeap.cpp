@@ -749,7 +749,7 @@ void ShenandoahHeap::update_histogram(oop obj) {
   intptr_t ac = obj->access_counter();
   intptr_t gc_epoch = obj->gc_epoch();
   int obj_size = obj->klass()->oop_size(obj);
-  tty->print_cr("examinating oop %p | ac %lu | gc_epoch %lu", (oopDesc*)obj, ac, gc_epoch);
+  // tty->print_cr("examinating oop %p | ac %lu | gc_epoch %lu", (oopDesc*)obj, ac, gc_epoch);
 
   if (ac == 0 && gc_epoch == 0 && oopDesc::static_gc_epoch != 0) {
     ResourceMark rm;
@@ -2412,7 +2412,8 @@ void ShenandoahHeap::op_init_updaterefs() {
   ShenandoahStatsCollectingObjectClosure cl(heap());
   for (size_t i = 0; i < num_regions(); i++) {
     ShenandoahHeapRegion* r = get_region(i);
-    if (r->is_active() && !r->is_cset()) {
+    if (r->is_active() && !r->is_cset() && !r->is_humongous()) {
+      tty->print_cr("Region state is %d", r->state());
       marked_object_iterate(r, &cl);
     }
   }
