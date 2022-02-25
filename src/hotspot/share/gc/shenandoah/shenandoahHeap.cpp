@@ -741,10 +741,11 @@ void ShenandoahHeap::increase_oop_stats(bool is_valid, bool is_count, size_t inc
 }
 
 void ShenandoahHeap::update_histogram(oop obj) {
-  // uintptr_t ac
   if (obj == NULL) return;
   assert(is_oop(obj), "must be oop");
   assert(obj->klass()!=NULL, "must have valid klass");
+  if (obj->is_dummy()) return;
+
   // oop_check_to_reset_access_counter(obj);
   intptr_t ac = obj->access_counter();
   intptr_t gc_epoch = obj->gc_epoch();
