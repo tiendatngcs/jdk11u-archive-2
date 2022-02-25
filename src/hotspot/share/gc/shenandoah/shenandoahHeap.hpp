@@ -166,7 +166,7 @@ private:
   volatile size_t _used;
   volatile size_t _committed;
   volatile size_t _bytes_allocated_since_gc_start;
-  volatile size_t _bytes_evacuated_since_gc_start;
+  volatile size_t _bytes_allocated_since_objects_scan;
   volatile size_t _used_by_regions;
   volatile size_t _total_marked_objects;
   shenandoah_padding(1);
@@ -187,15 +187,15 @@ public:
   void increase_committed(size_t bytes);
   void decrease_committed(size_t bytes);
   void increase_allocated(size_t bytes);
-  void increase_evacuated(size_t bytes);
+  void increase_allocated_since_objects_scan(size_t bytes);
   void increase_used_by_regions(size_t bytes);
   void increase_total_marked_objects(size_t bytes);
 
   size_t bytes_allocated_since_gc_start();
   void reset_bytes_allocated_since_gc_start();
   
-  size_t bytes_evacuated_since_gc_start();
-  void reset_bytes_evacuated_since_gc_start();
+  size_t bytes_allocated_since_objects_scan();
+  void reset_bytes_allocated_since_objects_scan();
 
   size_t used_by_regions();
   void reset_used_by_regions();
@@ -300,6 +300,7 @@ private:
   ShenandoahSharedFlag   _full_gc_in_progress;
   ShenandoahSharedFlag   _full_gc_move_in_progress;
   ShenandoahSharedFlag   _progress_last_gc;
+  ShenandoahSharedFlag   _record_allocation_after_heap_scan;
 
   void set_gc_state_all_threads(char state);
   void set_gc_state_mask(uint mask, bool value);
@@ -315,6 +316,7 @@ public:
   void set_full_gc_in_progress(bool in_progress);
   void set_full_gc_move_in_progress(bool in_progress);
   void set_has_forwarded_objects(bool cond);
+  void set_record_allocation_after_heap_scan(bool value);
 
   inline bool is_stable() const;
   inline bool is_idle() const;

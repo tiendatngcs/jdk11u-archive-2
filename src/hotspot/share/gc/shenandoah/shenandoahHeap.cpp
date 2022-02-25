@@ -453,7 +453,7 @@ ShenandoahHeap::ShenandoahHeap(ShenandoahCollectorPolicy* policy) :
   _used(0),
   _committed(0),
   _bytes_allocated_since_gc_start(0),
-  _bytes_evacuated_since_gc_start(0),
+  _bytes_allocated_since_objects_scan(0),
   _used_by_regions(0),
   _total_marked_objects(0),
   _valid_size(0),
@@ -693,8 +693,8 @@ void ShenandoahHeap::increase_allocated(size_t bytes) {
   Atomic::add(bytes, &_bytes_allocated_since_gc_start);
 }
 
-void ShenandoahHeap::increase_evacuated(size_t bytes) {
-  Atomic::add(bytes, &_bytes_evacuated_since_gc_start);
+void ShenandoahHeap::increase_allocated_since_objects_scan(size_t bytes) {
+  Atomic::add(bytes, &_bytes_allocated_since_objects_scan);
 }
 
 void ShenandoahHeap::increase_used_by_regions(size_t bytes) {
@@ -2010,6 +2010,14 @@ void ShenandoahHeap::set_evacuation_in_progress(bool in_progress) {
   set_gc_state_mask(EVACUATION, in_progress);
 }
 
+void ShenandoahHeap::set_record_allocation_after_heap_scan(bool value) {
+  if (value) {
+    _record_allocation_after_heap_scan.set();
+  } else {
+    _record_allocation_after_heap_scan.unset();
+  }
+}
+
 void ShenandoahHeap::ref_processing_init() {
   assert(_max_workers > 0, "Sanity");
 
@@ -2192,12 +2200,12 @@ void ShenandoahHeap::reset_bytes_allocated_since_gc_start() {
   OrderAccess::release_store_fence(&_bytes_allocated_since_gc_start, (size_t)0);
 }
 
-size_t ShenandoahHeap::bytes_evacuated_since_gc_start() {
-  return OrderAccess::load_acquire(&_bytes_evacuated_since_gc_start);
+size_t ShenandoahHeap::bytes_allocated_since_objects_scan() {
+  return OrderAccess::load_acquire(&_bytes_allocated_since_objects_scan);
 }
 
-void ShenandoahHeap::reset_bytes_evacuated_since_gc_start() {
-  OrderAccess::release_store_fence(&_bytes_evacuated_since_gc_start, (size_t)0);
+void ShenandoahHeap::reset_bytes_allocated_since_objects_scan() {
+  OrderAccess::release_store_fence(&_bytes_allocated_since_objects_scan, (size_t)0);
 }
 
 size_t ShenandoahHeap::used_by_regions() {
@@ -2384,7 +2392,7 @@ public:
 
 void ShenandoahHeap::op_init_updaterefs() {
   assert(ShenandoahSafepoint::is_at_shenandoah_safepoint(), "must be at safepoint");
-  tty->print_cr("Evac finished, total evacuated %lu bytes", bytes_evacuated_since_gc_start());
+  tty->print_cr("Evac finished, total evacuated %lu bytes", bytes_allocated_since_objects_scan());
 
   set_evacuation_in_progress(false);
 
@@ -2420,16 +2428,24 @@ void ShenandoahHeap::op_init_updaterefs() {
   //   }
   // }
 
+
+  // We need to reset all TLABs because we'd lose marks on all objects allocated in them.
+  {
+    ShenandoahGCSubPhase phase(ShenandoahPhaseTimings::make_parsable);
+    make_parsable(true);
+  }
+
   while (r != NULL) {
-    if (r->is_active() && !r->is_cset() && r->has_live()) {
+    if (r->is_active() && !r->is_cset()) {
       size_t idx = r->index();
       HeapWord* tams = complete_marking_context()->top_at_mark_start(r);
       tty->print_cr("Region %lu is_mutator_free %d, is_collector_free %d, state is %s, bottom %p, tams %p, top %p, end %p", idx, free_set()->is_mutator_free(idx), free_set()->is_collector_free(idx), ShenandoahHeapRegion::region_state_to_string(r->state()), r->bottom(), tams, r->top(), r->end());
       // marked_object_iterate(r, &cl);
-      r->iterate(&cl, tams);
+      r->iterate(&cl);
     }
     r = regions.next();
   }
+  set_record_allocation_after_heap_scan(true);
 }
 
 class ShenandoahFinalUpdateRefsUpdateRegionStateClosure : public ShenandoahHeapRegionClosure {
@@ -2585,6 +2601,10 @@ void ShenandoahHeap::op_stats_logging() {
   //   r = regions.next();
   // }
 
+  for (size_t i = 0; i < _heap->num_regions(); i++) {
+    increase_used_by_regions(get_region(i)->used());
+  }
+
 
 
   // Cycle is complete
@@ -2598,8 +2618,8 @@ void ShenandoahHeap::op_stats_logging() {
                 "used_by_regions: %lu\n"
                 "committed: %lu\n"
                 "bytes_allocated_since_gc_start: %lu\n"
-                "bytes_evacuated_since_gc_start: %lu\n"
-                "total_marked_objects: %lu\n", oopDesc::static_gc_epoch, heap->capacity(), heap->soft_max_capacity(), heap->used(), heap->used_by_regions(), heap->committed(), heap->bytes_allocated_since_gc_start(), heap->bytes_evacuated_since_gc_start(), heap->total_marked_objects());
+                "bytes_allocated_since_objects_scan: %lu\n"
+                "total_marked_objects: %lu\n", oopDesc::static_gc_epoch, heap->capacity(), heap->soft_max_capacity(), heap->used(), heap->used_by_regions(), heap->committed(), heap->bytes_allocated_since_gc_start(), heap->bytes_allocated_since_objects_scan(), heap->total_marked_objects());
   // for (JavaThreadIteratorWithHandle jtiwh; JavaThread *thread = jtiwh.next(); ) {
   //   // thread->tlab().accumulate_statistics();
   //   // thread->tlab().initialize_statistics();
@@ -2638,7 +2658,7 @@ void ShenandoahHeap::op_stats_logging() {
 
   heap->reset_histogram();
   heap->reset_oop_stats();
-  heap->reset_bytes_evacuated_since_gc_start();
+  heap->reset_bytes_allocated_since_objects_scan();
   heap->reset_used_by_regions();
   heap->reset_total_marked_objects();
   oopDesc::static_gc_epoch += 1;

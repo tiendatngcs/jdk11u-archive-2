@@ -451,8 +451,8 @@ void ShenandoahControlThread::service_concurrent_normal_cycle(GCCause::Cause cau
   //               "used_by_regions: %lu\n"
   //               "committed: %lu\n"
   //               "bytes_allocated_since_gc_start: %lu\n"
-  //               "bytes_evacuated_since_gc_start: %lu\n"
-  //               "total_marked_objects: %lu\n", oopDesc::static_gc_epoch, heap->capacity(), heap->soft_max_capacity(), heap->used(), heap->used_by_regions(), heap->committed(), heap->bytes_allocated_since_gc_start(), heap->bytes_evacuated_since_gc_start(), heap->total_marked_objects());
+  //               "bytes_allocated_since_objects_scan: %lu\n"
+  //               "total_marked_objects: %lu\n", oopDesc::static_gc_epoch, heap->capacity(), heap->soft_max_capacity(), heap->used(), heap->used_by_regions(), heap->committed(), heap->bytes_allocated_since_gc_start(), heap->bytes_allocated_since_objects_scan(), heap->total_marked_objects());
   // for (JavaThreadIteratorWithHandle jtiwh; JavaThread *thread = jtiwh.next(); ) {
   //   // thread->tlab().accumulate_statistics();
   //   // thread->tlab().initialize_statistics();
@@ -491,7 +491,7 @@ void ShenandoahControlThread::service_concurrent_normal_cycle(GCCause::Cause cau
 
   // heap->reset_histogram();
   // heap->reset_oop_stats();
-  // heap->reset_bytes_evacuated_since_gc_start();
+  // heap->reset_bytes_allocated_since_objects_scan();
   // heap->reset_used_by_regions();
   // heap->reset_total_marked_objects();
   // oopDesc::static_gc_epoch += 1;
