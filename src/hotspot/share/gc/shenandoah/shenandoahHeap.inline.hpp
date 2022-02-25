@@ -314,7 +314,7 @@ inline oop ShenandoahHeap::evacuate_object(oop p, Thread* thread) {
     // Successfully evacuated. Our copy is now the public one!
     // update_histogram(p);
     shenandoah_assert_correct(NULL, copy_val);
-    increase_allocated_since_objects_scan(copy_val->size() * HeapWordSize);
+    // increase_allocated_since_objects_scan(copy_val->size() * HeapWordSize);
     // tty->print_cr("Evacuated oop size %d bytes, orig region %lu, new region %lu, total evacuated %lu", copy_val->size()*HeapWordSize, heap_region_index_containing(p), heap_region_index_containing(copy_val), bytes_allocated_since_objects_scan());
     return copy_val;
   }  else {
@@ -388,6 +388,10 @@ inline bool ShenandoahHeap::is_full_gc_move_in_progress() const {
 
 inline bool ShenandoahHeap::is_update_refs_in_progress() const {
   return _gc_state.is_set(UPDATEREFS);
+}
+
+inline bool ShenandoahHeap::is_after_heap_scan() const {
+  return _after_heap_scan.is_set();
 }
 
 template<class T>

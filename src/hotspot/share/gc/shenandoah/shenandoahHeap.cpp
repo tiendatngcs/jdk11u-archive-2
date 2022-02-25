@@ -801,6 +801,9 @@ void ShenandoahHeap::notify_mutator_alloc_words(size_t words, bool waste) {
     increase_used(bytes);
   }
   increase_allocated(bytes);
+  if (is_after_heap_scan()){
+    increase_allocated_since_objects_scan(bytes);
+  }
   if (ShenandoahPacing) {
     control_thread()->pacing_notify_alloc(words);
     if (waste) {
@@ -2010,11 +2013,11 @@ void ShenandoahHeap::set_evacuation_in_progress(bool in_progress) {
   set_gc_state_mask(EVACUATION, in_progress);
 }
 
-void ShenandoahHeap::set_record_allocation_after_heap_scan(bool value) {
+void ShenandoahHeap::set_after_heap_scan(bool value) {
   if (value) {
-    _record_allocation_after_heap_scan.set();
+    _after_heap_scan.set();
   } else {
-    _record_allocation_after_heap_scan.unset();
+    _after_heap_scan.unset();
   }
 }
 
@@ -2445,7 +2448,7 @@ void ShenandoahHeap::op_init_updaterefs() {
     }
     r = regions.next();
   }
-  set_record_allocation_after_heap_scan(true);
+  set_after_heap_scan(true);
 }
 
 class ShenandoahFinalUpdateRefsUpdateRegionStateClosure : public ShenandoahHeapRegionClosure {
@@ -2661,6 +2664,7 @@ void ShenandoahHeap::op_stats_logging() {
   heap->reset_bytes_allocated_since_objects_scan();
   heap->reset_used_by_regions();
   heap->reset_total_marked_objects();
+  heap->set_after_heap_scan(false);
   oopDesc::static_gc_epoch += 1;
 }
 
