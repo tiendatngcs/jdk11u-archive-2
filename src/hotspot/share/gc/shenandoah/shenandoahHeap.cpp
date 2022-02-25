@@ -2431,7 +2431,7 @@ void ShenandoahHeap::op_init_updaterefs() {
 
   // We need to reset all TLABs because we'd lose marks on all objects allocated in them.
   {
-    ShenandoahGCSubPhase phase(ShenandoahPhaseTimings::make_parsable);
+    // ShenandoahGCSubPhase phase(ShenandoahPhaseTimings::make_parsable);
     make_parsable(true);
   }
 
