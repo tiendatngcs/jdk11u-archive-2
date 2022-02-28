@@ -2678,7 +2678,7 @@ void ShenandoahHeap::op_stats_logging() {
                 heap->oop_stats(true, true, false),
                 heap->oop_stats(true, false, false),
                 heap->oop_stats(false, true, false),
-                heap->oop_stats(false, false, false);
+                heap->oop_stats(false, false, false));
 
 
   heap->reset_histogram();
