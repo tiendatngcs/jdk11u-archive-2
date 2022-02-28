@@ -728,6 +728,7 @@ void ShenandoahHeap::increase_oop_stats(oop obj) {
   assert(heap_region_containing(obj)->is_cset(), "Obj must be in collecting region");
   bool is_below_tams = !complete_marking_context()->allocated_after_mark_start(obj);
   if (is_below_tams){
+    assert(complete_marking_context()->mark_bit_map()->isMarked(obj), "Must be marked below tams to be evac");
     if (obj->is_valid()) {
       _valid_count_below_tams += 1;
       _valid_size_below_tams += obj->size();
@@ -743,6 +744,7 @@ void ShenandoahHeap::increase_oop_stats(oop obj) {
       _invalid_size_below_tams += obj->size();
     }
   } else {
+    assert(!complete_marking_context()->mark_bit_map()->isMarked(obj), "Obj is not marked above tams");
     if (obj->is_valid()) {
       _valid_count_above_tams += 1;
       _valid_size_above_tams += obj->size();
