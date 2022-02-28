@@ -771,7 +771,7 @@ void ShenandoahHeap::update_histogram(oop obj) {
     // tty->print_cr("%s", obj->klass()->external_name());
     // increase_oop_stats(false, false, obj_size*HeapWordSize);
     // increase_oop_stats(false, true, 1);
-    continue;
+    // do nothing
   } else {
     // increase_oop_stats(true, false, obj_size*HeapWordSize);
     // increase_oop_stats(true, true, 1);
