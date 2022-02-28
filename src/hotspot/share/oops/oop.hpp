@@ -131,6 +131,7 @@ class oopDesc {
   inline bool is_objArray()            const;
   inline bool is_typeArray()           const;
   inline bool is_dummy();
+  inline bool is_valid();
 
   // type test operations that don't require inclusion of oop.inline.hpp.
   bool is_instance_noinline()          const;

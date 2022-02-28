@@ -171,10 +171,17 @@ private:
   volatile size_t _total_marked_objects;
   shenandoah_padding(1);
 
-  size_t _valid_size;
-  size_t _valid_count;
-  size_t _invalid_size;
-  size_t _invalid_count;
+  size_t _valid_count_below_tams;
+  size_t _valid_size_below_tams;
+
+  size_t _invalid_count_below_tams;
+  size_t _invalid_size_below_tams;
+
+  size_t _valid_count_above_tams;
+  size_t _valid_size_above_tams;
+
+  size_t _invalid_count_above_tams;
+  size_t _invalid_size_above_tams;
 
   size_t _histogram[30];
   size_t _size_histogram[30];
@@ -213,14 +220,13 @@ public:
 
   void set_soft_max_capacity(size_t v);
 
-  void set_oop_stats(bool is_valid, bool is_count, size_t new_value);
-  void increase_oop_stats(bool is_valid, bool is_count, size_t increment);
+  void increase_oop_stats(oop obj);
 
   void update_histogram(oop obj);
   void reset_histogram();
   void reset_oop_stats();
 
-  size_t oop_stats(bool is_valid, bool is_count) const;
+  size_t oop_stats(bool is_valid, bool is_count, bool is_below_tams) const;
 
   const size_t* histogram()   const;
   const size_t* size_histogram() const;
