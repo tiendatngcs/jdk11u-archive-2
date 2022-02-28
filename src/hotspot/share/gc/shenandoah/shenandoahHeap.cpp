@@ -726,12 +726,19 @@ void ShenandoahHeap::increase_total_marked_objects(size_t bytes) {
 ///// stats keeping mechanics
 void ShenandoahHeap::increase_oop_stats(oop obj) {
   assert(heap_region_containing(obj)->is_cset(), "Obj must be in collecting region");
-  bool is_below_tams = complete_marking_context()->allocated_after_mark_start(obj);
+  bool is_below_tams = !complete_marking_context()->allocated_after_mark_start(obj);
   if (is_below_tams){
     if (obj->is_valid()) {
       _valid_count_below_tams += 1;
       _valid_size_below_tams += obj->size();
     } else {
+      ResourceMark rm;
+      tty->print_cr("untouched oop | ac %lu | gc_epoch %lu | size %d",
+                    obj->access_counter(),
+                    obj->gc_epoch(),
+                    obj->size());
+      tty->print_cr("%s", obj->klass()->external_name());
+
       _invalid_count_below_tams += 1;
       _invalid_size_below_tams += obj->size();
     }
@@ -759,11 +766,12 @@ void ShenandoahHeap::update_histogram(oop obj) {
   // tty->print_cr("examinating oop %p | ac %lu | gc_epoch %lu", (oopDesc*)obj, ac, gc_epoch);
 
   if (!obj->is_valid()) {
-    ResourceMark rm;
-    tty->print_cr("untouched oop | ac %lu | gc_epoch %lu | size %d", ac, gc_epoch, obj_size);
-    tty->print_cr("%s", obj->klass()->external_name());
+    // ResourceMark rm;
+    // tty->print_cr("untouched oop | ac %lu | gc_epoch %lu | size %d", ac, gc_epoch, obj_size);
+    // tty->print_cr("%s", obj->klass()->external_name());
     // increase_oop_stats(false, false, obj_size*HeapWordSize);
     // increase_oop_stats(false, true, 1);
+    continue;
   } else {
     // increase_oop_stats(true, false, obj_size*HeapWordSize);
     // increase_oop_stats(true, true, 1);
