@@ -169,6 +169,7 @@ private:
   volatile size_t _bytes_allocated_since_objects_scan;
   volatile size_t _used_by_regions;
   volatile size_t _total_marked_objects;
+  volatile size_t _total_object_size;
   shenandoah_padding(1);
 
   size_t _valid_count_below_tams;
@@ -197,6 +198,7 @@ public:
   void increase_allocated_since_objects_scan(size_t bytes);
   void increase_used_by_regions(size_t bytes);
   void increase_total_marked_objects(size_t bytes);
+  void increase_total_object_size(size_t bytes);
 
   size_t bytes_allocated_since_gc_start();
   void reset_bytes_allocated_since_gc_start();
@@ -209,6 +211,9 @@ public:
 
   size_t total_marked_objects();
   void reset_total_marked_objects();
+
+  size_t total_object_size();
+  void reset_total_object_size();
 
   size_t min_capacity()      const;
   size_t max_capacity()      const;

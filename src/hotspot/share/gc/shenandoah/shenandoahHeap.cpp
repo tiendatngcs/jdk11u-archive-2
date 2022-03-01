@@ -456,6 +456,7 @@ ShenandoahHeap::ShenandoahHeap(ShenandoahCollectorPolicy* policy) :
   _bytes_allocated_since_objects_scan(0),
   _used_by_regions(0),
   _total_marked_objects(0),
+  _total_object_size(0),
   _valid_count_below_tams(0),
   _valid_size_below_tams(0),
   _invalid_count_below_tams(0),
@@ -722,6 +723,10 @@ void ShenandoahHeap::increase_total_marked_objects(size_t bytes) {
   Atomic::add(bytes, &_total_marked_objects);
 }
 
+void ShenandoahHeap::increase_total_object_size(size_t bytes) {
+  Atomic::add(bytes, &_total_object_size);
+}
+
 
 ///// stats keeping mechanics
 void ShenandoahHeap::increase_oop_stats(oop obj) {
@@ -756,16 +761,18 @@ void ShenandoahHeap::increase_oop_stats(oop obj) {
 }
 
 void ShenandoahHeap::update_histogram(oop obj) {
+  // for full heap object scan, include all objects, even dummy.
   if (obj == NULL) return;
   assert(is_oop(obj), "must be oop");
   assert(obj->klass()!=NULL, "must have valid klass");
-  if (obj->is_dummy()) return;
+  // if (obj->is_dummy()) return;
 
   // oop_check_to_reset_access_counter(obj);
   intptr_t ac = obj->access_counter();
   intptr_t gc_epoch = obj->gc_epoch();
   int obj_size = obj->klass()->oop_size(obj);
   // tty->print_cr("examinating oop %p | ac %lu | gc_epoch %lu", (oopDesc*)obj, ac, gc_epoch);
+  increase_total_object_size(obj->size() * HeapWordSize);
 
   if (!obj->is_valid()) {
     // ResourceMark rm;
@@ -2251,6 +2258,14 @@ void ShenandoahHeap::reset_total_marked_objects() {
   OrderAccess::release_store_fence(&_total_marked_objects, (size_t)0);
 }
 
+size_t ShenandoahHeap::total_object_size() {
+  return OrderAccess::load_acquire(&_total_object_size);
+}
+
+void ShenandoahHeap::reset_total_object_size() {
+  OrderAccess::release_store_fence(&_total_object_size, (size_t)0);
+}
+
 void ShenandoahHeap::set_degenerated_gc_in_progress(bool in_progress) {
   _degenerated_gc_in_progress.set_cond(in_progress);
 }
@@ -2646,7 +2661,18 @@ void ShenandoahHeap::op_stats_logging() {
                 "committed: %lu\n"
                 "bytes_allocated_since_gc_start: %lu\n"
                 "bytes_allocated_since_objects_scan: %lu\n"
-                "total_marked_objects: %lu\n", oopDesc::static_gc_epoch, heap->capacity(), heap->soft_max_capacity(), heap->used(), heap->used_by_regions(), heap->committed(), heap->bytes_allocated_since_gc_start(), heap->bytes_allocated_since_objects_scan(), heap->total_marked_objects());
+                "total_marked_objects: %lu\n"
+                "total_object_size: %lu\n",
+                oopDesc::static_gc_epoch,
+                heap->capacity(),
+                heap->soft_max_capacity(),
+                heap->used(),
+                heap->used_by_regions(),
+                heap->committed(),
+                heap->bytes_allocated_since_gc_start(),
+                heap->bytes_allocated_since_objects_scan(),
+                heap->total_marked_objects(),
+                heap->total_object_size());
   // for (JavaThreadIteratorWithHandle jtiwh; JavaThread *thread = jtiwh.next(); ) {
   //   // thread->tlab().accumulate_statistics();
   //   // thread->tlab().initialize_statistics();
@@ -2696,6 +2722,7 @@ void ShenandoahHeap::op_stats_logging() {
   heap->reset_bytes_allocated_since_objects_scan();
   heap->reset_used_by_regions();
   heap->reset_total_marked_objects();
+  heap->reset_total_object_size();
   heap->set_after_heap_scan(false);
   oopDesc::static_gc_epoch += 1;
 }
