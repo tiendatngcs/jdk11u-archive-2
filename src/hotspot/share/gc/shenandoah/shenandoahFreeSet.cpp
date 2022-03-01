@@ -354,10 +354,11 @@ void ShenandoahFreeSet::recycle_trash() {
     if (r->is_trash()) {
       ShenandoahHeapLocker locker(_heap->lock());
       try_recycle_trashed(r);
-    } else if (r->is_active()) {
-      ShenandoahHeapLocker locker(_heap->lock());
-      _heap->increase_used_by_regions(r->used());
-    }
+    } 
+    // else if (r->is_active()) {
+    //   ShenandoahHeapLocker locker(_heap->lock());
+    //   _heap->increase_used_by_regions(r->used());
+    // }
     SpinPause(); // allow allocators to take the lock
   }
 }

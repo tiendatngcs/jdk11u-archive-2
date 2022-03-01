@@ -739,11 +739,11 @@ void ShenandoahHeap::increase_oop_stats(oop obj) {
       _valid_size_below_tams += obj->size();
     } else {
       ResourceMark rm;
-      tty->print_cr("untouched oop | ac %lu | gc_epoch %lu | size %d",
+      tty->print_cr("untouched oop during evac | ac %lu | gc_epoch %lu | size %d | name %s",
                     obj->access_counter(),
                     obj->gc_epoch(),
-                    obj->size());
-      tty->print_cr("%s", obj->klass()->external_name());
+                    obj->size(),
+                    obj->klass()->external_name());
 
       _invalid_count_below_tams += 1;
       _invalid_size_below_tams += obj->size();
@@ -775,11 +775,14 @@ void ShenandoahHeap::update_histogram(oop obj) {
   increase_total_object_size(obj->size() * HeapWordSize);
 
   if (!obj->is_valid()) {
-    // ResourceMark rm;
-    // tty->print_cr("untouched oop | ac %lu | gc_epoch %lu | size %d", ac, gc_epoch, obj_size);
-    // tty->print_cr("%s", obj->klass()->external_name());
-    // increase_oop_stats(false, false, obj_size*HeapWordSize);
-    // increase_oop_stats(false, true, 1);
+    if (complete_marking_context()->mark_bit_map()->isMarked(obj)) {
+      ResourceMark rm;
+      tty->print_cr("untouched oop during heap scan | ac %lu | gc_epoch %lu | size %d | name %s",
+                    obj->access_counter(),
+                    obj->gc_epoch(),
+                    obj->size(),
+                    obj->klass()->external_name());
+    }
     // do nothing
   } else {
     // increase_oop_stats(true, false, obj_size*HeapWordSize);
@@ -2644,7 +2647,9 @@ void ShenandoahHeap::op_stats_logging() {
   // }
 
   for (size_t i = 0; i < _heap->num_regions(); i++) {
-    increase_used_by_regions(get_region(i)->used());
+    if (get_region(i)->is_active()) {
+      increase_used_by_regions(get_region(i)->used());
+    }
   }
 
 
