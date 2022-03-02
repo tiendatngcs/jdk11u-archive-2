@@ -46,6 +46,15 @@ class arrayOopDesc : public oopDesc {
 
   // Interpreter/Compiler offsets
 
+
+  // Check whether an element of a typeArrayOop with the given type must be
+  // aligned 0 mod 8.  The typeArrayOop itself must be aligned at least this
+  // strongly.
+  static bool element_type_should_be_aligned(BasicType type) {
+    return type == T_DOUBLE || type == T_LONG;
+  }
+
+ public:
   // Header size computation.
   // The header is considered the oop part of this type plus the length.
   // Returns the aligned header_size_in_bytes.  This is not equivalent to
@@ -62,14 +71,6 @@ class arrayOopDesc : public oopDesc {
     return (int)hs;
   }
 
-  // Check whether an element of a typeArrayOop with the given type must be
-  // aligned 0 mod 8.  The typeArrayOop itself must be aligned at least this
-  // strongly.
-  static bool element_type_should_be_aligned(BasicType type) {
-    return type == T_DOUBLE || type == T_LONG;
-  }
-
- public:
   // The _length field is not declared in C++.  It is allocated after the
   // declared nonstatic fields in arrayOopDesc if not compressed, otherwise
   // it occupies the second half of the _klass field in oopDesc.
