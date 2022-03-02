@@ -738,12 +738,14 @@ void ShenandoahHeap::increase_oop_stats(oop obj) {
       _valid_count_below_tams += 1;
       _valid_size_below_tams += obj->size();
     } else {
-      ResourceMark rm;
-      tty->print_cr("untouched oop during evac | ac %lu | gc_epoch %lu | size %d | name %s",
-                    obj->access_counter(),
-                    obj->gc_epoch(),
-                    obj->size(),
-                    obj->klass()->external_name());
+      if (obj->is_dummy()) {
+        ResourceMark rm;
+        tty->print_cr("untouched dummy oop during evac | ac %lu | gc_epoch %lu | size %d | name %s",
+                      obj->access_counter(),
+                      obj->gc_epoch(),
+                      obj->size(),
+                      obj->klass()->external_name());
+      }
 
       _invalid_count_below_tams += 1;
       _invalid_size_below_tams += obj->size();
@@ -776,12 +778,12 @@ void ShenandoahHeap::update_histogram(oop obj) {
 
   if (!obj->is_valid()) {
     if (complete_marking_context()->mark_bit_map()->isMarked(obj)) {
-      ResourceMark rm;
-      tty->print_cr("untouched oop during heap scan | ac %lu | gc_epoch %lu | size %d | name %s",
-                    obj->access_counter(),
-                    obj->gc_epoch(),
-                    obj->size(),
-                    obj->klass()->external_name());
+      // ResourceMark rm;
+      // tty->print_cr("untouched oop during heap scan | ac %lu | gc_epoch %lu | size %d | name %s",
+      //               obj->access_counter(),
+      //               obj->gc_epoch(),
+      //               obj->size(),
+      //               obj->klass()->external_name());
     }
     // do nothing
   } else {
