@@ -740,10 +740,11 @@ void ShenandoahHeap::increase_oop_stats(oop obj) {
     } else {
       if (!obj->is_dummy()) {
         ResourceMark rm;
-        tty->print_cr("untouched non-dummy oop during evac | ac %lu | gc_epoch %lu | size %d | name %s",
+        tty->print_cr("untouched non-dummy oop during evac | ac %lu | gc_epoch %lu | size %d | header_size %d | name %s",
                       obj->access_counter(),
                       obj->gc_epoch(),
                       obj->size(),
+                      arrayOopDesc::header_size_in_bytes(),
                       obj->klass()->external_name());
       }
 

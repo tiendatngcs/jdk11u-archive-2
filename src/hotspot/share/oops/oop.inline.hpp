@@ -322,7 +322,7 @@ bool oopDesc::is_objArray()  const { return klass()->is_objArray_klass();  }
 bool oopDesc::is_typeArray() const { return klass()->is_typeArray_klass(); }
 bool oopDesc::is_dummy()           {
   if (klass()->is_array_klass()) {
-    return size() == header_size() + 1;
+    return size() * HeapWordSize == header_size_in_bytes();
   }
   return size() == header_size();
 }
