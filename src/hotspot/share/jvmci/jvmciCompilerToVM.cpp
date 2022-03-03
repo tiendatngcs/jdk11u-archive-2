@@ -181,6 +181,7 @@ C2V_VMENTRY(jbyteArray, getBytecode, (JNIEnv *, jobject, jobject jvmci_method))
 
   int code_size = method->code_size();
   typeArrayOop reconstituted_code = oopFactory::new_byteArray(code_size, CHECK_NULL);
+  tty->print_cr("jvmciCompilerToVM: Creating a byteArray");
 
   guarantee(method->method_holder()->is_rewritten(), "Method's holder should be rewritten");
   // iterate over all bytecodes and replace non-Java bytecodes
@@ -736,18 +737,21 @@ C2V_VMENTRY(jint, getMetadata, (JNIEnv *jniEnv, jobject, jobject target, jobject
 
   if (code_metadata.get_nr_pc_desc() > 0) {
     typeArrayHandle pcArrayOop = oopFactory::new_byteArray_handle(sizeof(PcDesc) * code_metadata.get_nr_pc_desc(), CHECK_(JVMCIEnv::cache_full));
+    tty->print_cr("jvmciCompilerToVM: Creating a byteArray");
     memcpy(pcArrayOop->byte_at_addr(0), code_metadata.get_pc_desc(), sizeof(PcDesc) * code_metadata.get_nr_pc_desc());
     HotSpotMetaData::set_pcDescBytes(metadata_handle, pcArrayOop());
   }
 
   if (code_metadata.get_scopes_size() > 0) {
     typeArrayHandle scopesArrayOop = oopFactory::new_byteArray_handle(code_metadata.get_scopes_size(), CHECK_(JVMCIEnv::cache_full));
+    tty->print_cr("jvmciCompilerToVM: Creating a byteArray");
     memcpy(scopesArrayOop->byte_at_addr(0), code_metadata.get_scopes_desc(), code_metadata.get_scopes_size());
     HotSpotMetaData::set_scopesDescBytes(metadata_handle, scopesArrayOop());
   }
 
   RelocBuffer* reloc_buffer = code_metadata.get_reloc_buffer();
   typeArrayHandle relocArrayOop = oopFactory::new_byteArray_handle((int) reloc_buffer->size(), CHECK_(JVMCIEnv::cache_full));
+  tty->print_cr("jvmciCompilerToVM: Creating a byteArray");
   if (reloc_buffer->size() > 0) {
     memcpy(relocArrayOop->byte_at_addr(0), reloc_buffer->begin(), reloc_buffer->size());
   }
@@ -759,6 +763,7 @@ C2V_VMENTRY(jint, getMetadata, (JNIEnv *jniEnv, jobject, jobject target, jobject
     ImmutableOopMapBuilder builder(oopMapSet);
     int oopmap_size = builder.heap_size();
     typeArrayHandle oopMapArrayHandle = oopFactory::new_byteArray_handle(oopmap_size, CHECK_(JVMCIEnv::cache_full));
+    tty->print_cr("jvmciCompilerToVM: Creating a byteArray");
     builder.generate_into((address) oopMapArrayHandle->byte_at_addr(0));
     HotSpotMetaData::set_oopMaps(metadata_handle, oopMapArrayHandle());
   }
@@ -780,6 +785,7 @@ C2V_VMENTRY(jint, getMetadata, (JNIEnv *jniEnv, jobject, jobject target, jobject
   ExceptionHandlerTable* handler = code_metadata.get_exception_table();
   int table_size = handler->size_in_bytes();
   typeArrayHandle exceptionArrayOop = oopFactory::new_byteArray_handle(table_size, CHECK_(JVMCIEnv::cache_full));
+  tty->print_cr("jvmciCompilerToVM: Creating a byteArray");
 
   if (table_size > 0) {
     handler->copy_bytes_to((address) exceptionArrayOop->byte_at_addr(0));
