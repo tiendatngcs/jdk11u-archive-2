@@ -753,7 +753,7 @@ void ShenandoahHeap::increase_oop_stats(oop obj) {
                         obj->access_counter(),
                         obj->gc_epoch(),
                         obj->size(),
-                        obj->header_size();
+                        obj->header_size(),
                         obj->klass()->external_name());
         }
       }
