@@ -50,14 +50,14 @@ private:
   static BasicType bt() { return TypeToBT::to_basic_type<T>(); }
 
  protected:
-  jchar*    char_base()   const;
-  jboolean* bool_base()   const;
-  jbyte*    byte_base()   const;
-  jint*     int_base()    const;
-  jlong*    long_base()   const;
-  jshort*   short_base()  const;
-  jfloat*   float_base()  const;
-  jdouble*  double_base() const;
+  jchar*    char_base()   ;
+  jboolean* bool_base()   ;
+  jbyte*    byte_base()   ;
+  jint*     int_base()    ;
+  jlong*    long_base()   ;
+  jshort*   short_base()  ;
+  jfloat*   float_base()  ;
+  jdouble*  double_base() ;
 
   friend class TypeArrayKlass;
 
@@ -67,15 +67,15 @@ private:
     return arrayOopDesc::base_offset_in_bytes(bt<T>()) + sizeof(T) * index;
   }
 
-  jbyte* byte_at_addr(int which) const;
-  jboolean* bool_at_addr(int which) const;
-  jchar* char_at_addr(int which) const;
-  jint* int_at_addr(int which) const;
-  jshort* short_at_addr(int which) const;
-  jushort* ushort_at_addr(int which) const;
-  jlong* long_at_addr(int which) const;
-  jfloat* float_at_addr(int which) const;
-  jdouble* double_at_addr(int which) const;
+  jbyte* byte_at_addr(int which) ;
+  jboolean* bool_at_addr(int which) ;
+  jchar* char_at_addr(int which) ;
+  jint* int_at_addr(int which) ;
+  jshort* short_at_addr(int which) ;
+  jushort* ushort_at_addr(int which) ;
+  jlong* long_at_addr(int which) ;
+  jfloat* float_at_addr(int which) ;
+  jdouble* double_at_addr(int which) ;
 
   jbyte byte_at(int which) const;
   void byte_at_put(int which, jbyte contents);

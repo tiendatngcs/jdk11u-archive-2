@@ -36,11 +36,13 @@ inline HeapWord* objArrayOopDesc::base_raw() const { return (HeapWord*) arrayOop
 
 template <class T> T* objArrayOopDesc::obj_at_addr(int index) const {
   assert(is_within_bounds(index), "index %d out of bounds %d", index, length());
+  increase_access_counter();
   return &((T*)base())[index];
 }
 
 template <class T> T* objArrayOopDesc::obj_at_addr_raw(int index) const {
   assert(is_within_bounds(index), "index %d out of bounds %d", index, length());
+  increase_access_counter();
   return &((T*)base_raw())[index];
 }
 

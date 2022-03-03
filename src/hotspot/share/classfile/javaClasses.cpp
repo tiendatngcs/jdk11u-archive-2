@@ -252,6 +252,7 @@ Handle java_lang_String::basic_create(int length, bool is_latin1, TRAPS) {
   Handle h_obj(THREAD, obj);
   int arr_length = is_latin1 ? length : length << 1; // 2 bytes per UTF16.
   typeArrayOop buffer = oopFactory::new_byteArray(arr_length, CHECK_NH);;
+  tty->print_cr("New buffer created for String object");
 
   // Point the String at the char array
   obj = h_obj();
@@ -313,8 +314,10 @@ Handle java_lang_String::create_from_str(const char* utf8_str, TRAPS) {
       const jbyte* src = reinterpret_cast<const jbyte*>(utf8_str);
       ArrayAccess<>::arraycopy_from_native(src, value(h_obj()), typeArrayOopDesc::element_offset<jbyte>(0), length);
     } else if (is_latin1) {
+      tty->print_cr("Create oop from str is_latin1");
       UTF8::convert_to_unicode(utf8_str, value(h_obj())->byte_at_addr(0), length);
     } else {
+      tty->print_cr("Create oop from str else");
       UTF8::convert_to_unicode(utf8_str, value(h_obj())->char_at_addr(0), length);
     }
   }
@@ -360,8 +363,10 @@ Handle java_lang_String::create_from_symbol(Symbol* symbol, TRAPS) {
       const jbyte* src = reinterpret_cast<const jbyte*>(utf8_str);
       ArrayAccess<>::arraycopy_from_native(src, value(h_obj()), typeArrayOopDesc::element_offset<jbyte>(0), length);
     } else if (is_latin1) {
+      tty->print_cr("Create oop from symbol is_latin1");
       UTF8::convert_to_unicode(utf8_str, value(h_obj())->byte_at_addr(0), length);
     } else {
+      tty->print_cr("Create oop from symbol else");
       UTF8::convert_to_unicode(utf8_str, value(h_obj())->char_at_addr(0), length);
     }
   }
@@ -403,6 +408,7 @@ Handle java_lang_String::create_from_platform_dependent_str(const char* str, TRA
     ThreadToNativeFromVM ttn(thread);
     js = (_to_java_string_fn)(thread->jni_environment(), str);
   }
+  tty->print_cr("create_from_platform_dependent_str");
   return Handle(THREAD, JNIHandles::resolve(js));
 }
 
