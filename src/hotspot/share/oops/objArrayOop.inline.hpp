@@ -34,13 +34,13 @@
 inline HeapWord* objArrayOopDesc::base() const { return (HeapWord*) arrayOopDesc::base(T_OBJECT); }
 inline HeapWord* objArrayOopDesc::base_raw() const { return (HeapWord*) arrayOopDesc::base_raw(T_OBJECT); }
 
-template <class T> T* objArrayOopDesc::obj_at_addr(int index) const {
+template <class T> T* objArrayOopDesc::obj_at_addr(int index) {
   assert(is_within_bounds(index), "index %d out of bounds %d", index, length());
   increase_access_counter();
   return &((T*)base())[index];
 }
 
-template <class T> T* objArrayOopDesc::obj_at_addr_raw(int index) const {
+template <class T> T* objArrayOopDesc::obj_at_addr_raw(int index) {
   assert(is_within_bounds(index), "index %d out of bounds %d", index, length());
   increase_access_counter();
   return &((T*)base_raw())[index];

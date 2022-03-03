@@ -40,8 +40,8 @@ class objArrayOopDesc : public arrayOopDesc {
   friend class CSetMarkOopClosure;
   friend class G1ParScanPartialArrayClosure;
 
-  template <class T> T* obj_at_addr(int index) const;
-  template <class T> T* obj_at_addr_raw(int index) const;
+  template <class T> T* obj_at_addr(int index);
+  template <class T> T* obj_at_addr_raw(int index);
 
   template <class T>
   static ptrdiff_t obj_at_offset(int index) {
