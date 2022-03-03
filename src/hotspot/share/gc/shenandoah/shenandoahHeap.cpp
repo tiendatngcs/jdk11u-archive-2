@@ -2450,7 +2450,7 @@ public:
 
 void ShenandoahHeap::op_init_updaterefs() {
   assert(ShenandoahSafepoint::is_at_shenandoah_safepoint(), "must be at safepoint");
-  tty->print_cr("Evac finished, total evacuated %lu bytes", bytes_allocated_since_objects_scan());
+  tty->print_cr("Evac finished");
 
   set_evacuation_in_progress(false);
 
