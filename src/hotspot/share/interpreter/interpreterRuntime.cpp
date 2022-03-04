@@ -253,6 +253,7 @@ IRT_END
 IRT_ENTRY(void, InterpreterRuntime::anewarray(JavaThread* thread, ConstantPool* pool, int index, jint size))
   Klass*    klass = pool->klass_at(index, CHECK);
   objArrayOop obj = oopFactory::new_objArray(klass, size, CHECK);
+  ResourceMark rm;
   tty->print_cr("InterpreterRuntime::anewarray type %s, type %d", klass->external_name(), size);
   thread->set_vm_result(obj);
 IRT_END
