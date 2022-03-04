@@ -3686,6 +3686,9 @@ void TemplateTable::fast_storefield(TosState state) {
     do_oop_store(_masm, field, rax, _bs->kind());
     break;
   case Bytecodes::_fast_lputfield:
+    __ pusha();
+    oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+    __ popa();
 #ifdef _LP64
     __ access_store_at(T_LONG, IN_HEAP, field, noreg /* ltos */, noreg, noreg);
 #else
@@ -3693,24 +3696,45 @@ void TemplateTable::fast_storefield(TosState state) {
 #endif
     break;
   case Bytecodes::_fast_iputfield:
+    __ pusha();
+    oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+    __ popa();
     __ access_store_at(T_INT, IN_HEAP, field, rax, noreg, noreg);
     break;
   case Bytecodes::_fast_zputfield:
+    __ pusha();
+    oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+    __ popa();
     __ access_store_at(T_BOOLEAN, IN_HEAP, field, rax, noreg, noreg);
     break;
   case Bytecodes::_fast_bputfield:
+    __ pusha();
+    oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+    __ popa();
     __ access_store_at(T_BYTE, IN_HEAP, field, rax, noreg, noreg);
     break;
   case Bytecodes::_fast_sputfield:
+    __ pusha();
+    oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+    __ popa();
     __ access_store_at(T_SHORT, IN_HEAP, field, rax, noreg, noreg);
     break;
   case Bytecodes::_fast_cputfield:
+    __ pusha();
+    oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+    __ popa();
     __ access_store_at(T_CHAR, IN_HEAP, field, rax, noreg, noreg);
     break;
   case Bytecodes::_fast_fputfield:
+    __ pusha();
+    oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+    __ popa();
     __ access_store_at(T_FLOAT, IN_HEAP, field, noreg /* ftos*/, noreg, noreg);
     break;
   case Bytecodes::_fast_dputfield:
+    __ pusha();
+    oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+    __ popa();
     __ access_store_at(T_DOUBLE, IN_HEAP, field, noreg /* dtos*/, noreg, noreg);
     break;
   default:
@@ -3786,6 +3810,9 @@ void TemplateTable::fast_accessfield(TosState state) {
     __ verify_oop(rax);
     break;
   case Bytecodes::_fast_lgetfield:
+    __ pusha();
+    oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+    __ popa();
 #ifdef _LP64
     __ access_load_at(T_LONG, IN_HEAP, noreg /* ltos */, field, noreg, noreg);
 #else
@@ -3793,21 +3820,39 @@ void TemplateTable::fast_accessfield(TosState state) {
 #endif
     break;
   case Bytecodes::_fast_igetfield:
+    __ pusha();
+    oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+    __ popa();
     __ access_load_at(T_INT, IN_HEAP, rax, field, noreg, noreg);
     break;
   case Bytecodes::_fast_bgetfield:
+    __ pusha();
+    oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+    __ popa();
     __ access_load_at(T_BYTE, IN_HEAP, rax, field, noreg, noreg);
     break;
   case Bytecodes::_fast_sgetfield:
+    __ pusha();
+    oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+    __ popa();
     __ access_load_at(T_SHORT, IN_HEAP, rax, field, noreg, noreg);
     break;
   case Bytecodes::_fast_cgetfield:
+    __ pusha();
+    oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+    __ popa();
     __ access_load_at(T_CHAR, IN_HEAP, rax, field, noreg, noreg);
     break;
   case Bytecodes::_fast_fgetfield:
+    __ pusha();
+    oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+    __ popa();
     __ access_load_at(T_FLOAT, IN_HEAP, noreg /* ftos */, field, noreg, noreg);
     break;
   case Bytecodes::_fast_dgetfield:
+    __ pusha();
+    oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+    __ popa();
     __ access_load_at(T_DOUBLE, IN_HEAP, noreg /* dtos */, field, noreg, noreg);
     break;
   default:
@@ -3847,6 +3892,9 @@ void TemplateTable::fast_xaccess(TosState state) {
   const Address field = Address(rax, rbx, Address::times_1, 0*wordSize);
   switch (state) {
   case itos:
+    __ pusha();
+    oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+    __ popa();
     __ access_load_at(T_INT, IN_HEAP, rax, field, noreg, noreg);
     break;
   case atos:
@@ -3857,6 +3905,9 @@ void TemplateTable::fast_xaccess(TosState state) {
     __ verify_oop(rax);
     break;
   case ftos:
+    __ pusha();
+    oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+    __ popa();
     __ access_load_at(T_FLOAT, IN_HEAP, noreg /* ftos */, field, noreg, noreg);
     break;
   default:
