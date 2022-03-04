@@ -411,10 +411,10 @@ Handle java_lang_String::create_from_platform_dependent_str(const char* str, TRA
   // Dat mod
   oop resolved_oop = JNIHandles::resolve(js);
   tty->print_cr("str oop | ac %lu | gc_epoch %lu | size %d | name %s",
-                obj->access_counter(),
-                obj->gc_epoch(),
-                obj->size(),
-                obj->klass()->external_name());
+                resolved_oop->access_counter(),
+                resolved_oop->gc_epoch(),
+                resolved_oop->size(),
+                resolved_oop->klass()->external_name());
   resolved_oop->increase_access_counter();
   //
   return Handle(THREAD, resolved_oop);

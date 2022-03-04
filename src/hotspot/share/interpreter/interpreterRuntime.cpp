@@ -245,7 +245,7 @@ IRT_END
 
 IRT_ENTRY(void, InterpreterRuntime::newarray(JavaThread* thread, BasicType type, jint size))
   oop obj = oopFactory::new_typeArray(type, size, CHECK);
-  tty->print_cr("InterpreterRuntime::newarray type %lu, type %lu", type , size);
+  tty->print_cr("InterpreterRuntime::newarray type %d, type %d", type , size);
   thread->set_vm_result(obj);
 IRT_END
 
@@ -253,7 +253,7 @@ IRT_END
 IRT_ENTRY(void, InterpreterRuntime::anewarray(JavaThread* thread, ConstantPool* pool, int index, jint size))
   Klass*    klass = pool->klass_at(index, CHECK);
   objArrayOop obj = oopFactory::new_objArray(klass, size, CHECK);
-  tty->print_cr("InterpreterRuntime::anewarray type %s, type %lu", klass->external_name(), size);
+  tty->print_cr("InterpreterRuntime::anewarray type %s, type %d", klass->external_name(), size);
   thread->set_vm_result(obj);
 IRT_END
 
