@@ -3071,6 +3071,9 @@ void TemplateTable::getfield_or_static(int byte_no, bool is_static, RewriteContr
 
   __ jcc(Assembler::notZero, notByte);
   // btos
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
   __ access_load_at(T_BYTE, IN_HEAP, rax, field, noreg, noreg);
   __ push(btos);
   // Rewrite bytecode to be faster
@@ -3084,6 +3087,9 @@ void TemplateTable::getfield_or_static(int byte_no, bool is_static, RewriteContr
   __ jcc(Assembler::notEqual, notBool);
 
   // ztos (same code as btos)
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
   __ access_load_at(T_BOOLEAN, IN_HEAP, rax, field, noreg, noreg);
   __ push(ztos);
   // Rewrite bytecode to be faster
@@ -3111,6 +3117,9 @@ void TemplateTable::getfield_or_static(int byte_no, bool is_static, RewriteContr
   __ cmpl(flags, itos);
   __ jcc(Assembler::notEqual, notInt);
   // itos
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
   __ access_load_at(T_INT, IN_HEAP, rax, field, noreg, noreg);
   __ push(itos);
   // Rewrite bytecode to be faster
@@ -3123,6 +3132,9 @@ void TemplateTable::getfield_or_static(int byte_no, bool is_static, RewriteContr
   __ cmpl(flags, ctos);
   __ jcc(Assembler::notEqual, notChar);
   // ctos
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
   __ access_load_at(T_CHAR, IN_HEAP, rax, field, noreg, noreg);
   __ push(ctos);
   // Rewrite bytecode to be faster
@@ -3135,6 +3147,9 @@ void TemplateTable::getfield_or_static(int byte_no, bool is_static, RewriteContr
   __ cmpl(flags, stos);
   __ jcc(Assembler::notEqual, notShort);
   // stos
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
   __ access_load_at(T_SHORT, IN_HEAP, rax, field, noreg, noreg);
   __ push(stos);
   // Rewrite bytecode to be faster
@@ -3149,6 +3164,9 @@ void TemplateTable::getfield_or_static(int byte_no, bool is_static, RewriteContr
   // ltos
     // Generate code as if volatile (x86_32).  There just aren't enough registers to
     // save that information and this code is faster than the test.
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
   __ access_load_at(T_LONG, IN_HEAP | MO_RELAXED, noreg /* ltos */, field, noreg, noreg);
   __ push(ltos);
   // Rewrite bytecode to be faster
@@ -3159,6 +3177,9 @@ void TemplateTable::getfield_or_static(int byte_no, bool is_static, RewriteContr
   __ cmpl(flags, ftos);
   __ jcc(Assembler::notEqual, notFloat);
   // ftos
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
 
   __ access_load_at(T_FLOAT, IN_HEAP, noreg /* ftos */, field, noreg, noreg);
   __ push(ftos);
@@ -3174,6 +3195,9 @@ void TemplateTable::getfield_or_static(int byte_no, bool is_static, RewriteContr
   __ jcc(Assembler::notEqual, notDouble);
 #endif
   // dtos
+  __ pusha();
+  oop_increase_access_counter(_masm, r9, r8, _bs->kind());
+  __ popa();
   __ access_load_at(T_DOUBLE, IN_HEAP, noreg /* dtos */, field, noreg, noreg);
   __ push(dtos);
   // Rewrite bytecode to be faster
@@ -3338,6 +3362,10 @@ void TemplateTable::putfield_or_static(int byte_no, bool is_static, RewriteContr
   {
     __ pop(btos);
     if (!is_static) pop_and_check_object(obj);
+    // Store into the field
+    __ pusha();
+    oop_increase_access_counter(_masm, obj, r8, _bs->kind());
+    __ popa();
     __ access_store_at(T_BYTE, IN_HEAP, field, rax, noreg, noreg);
     if (!is_static && rc == may_rewrite) {
       patch_bytecode(Bytecodes::_fast_bputfield, bc, rbx, true, byte_no);
@@ -3353,6 +3381,10 @@ void TemplateTable::putfield_or_static(int byte_no, bool is_static, RewriteContr
   {
     __ pop(ztos);
     if (!is_static) pop_and_check_object(obj);
+    // Store into the field
+    __ pusha();
+    oop_increase_access_counter(_masm, obj, r8, _bs->kind());
+    __ popa();
     __ access_store_at(T_BOOLEAN, IN_HEAP, field, rax, noreg, noreg);
     if (!is_static && rc == may_rewrite) {
       patch_bytecode(Bytecodes::_fast_zputfield, bc, rbx, true, byte_no);
@@ -3387,6 +3419,10 @@ void TemplateTable::putfield_or_static(int byte_no, bool is_static, RewriteContr
   {
     __ pop(itos);
     if (!is_static) pop_and_check_object(obj);
+    // Store into the field
+    __ pusha();
+    oop_increase_access_counter(_masm, obj, r8, _bs->kind());
+    __ popa();
     __ access_store_at(T_INT, IN_HEAP, field, rax, noreg, noreg);
     if (!is_static && rc == may_rewrite) {
       patch_bytecode(Bytecodes::_fast_iputfield, bc, rbx, true, byte_no);
@@ -3402,6 +3438,10 @@ void TemplateTable::putfield_or_static(int byte_no, bool is_static, RewriteContr
   {
     __ pop(ctos);
     if (!is_static) pop_and_check_object(obj);
+    // Store into the field
+    __ pusha();
+    oop_increase_access_counter(_masm, obj, r8, _bs->kind());
+    __ popa();
     __ access_store_at(T_CHAR, IN_HEAP, field, rax, noreg, noreg);
     if (!is_static && rc == may_rewrite) {
       patch_bytecode(Bytecodes::_fast_cputfield, bc, rbx, true, byte_no);
@@ -3417,6 +3457,10 @@ void TemplateTable::putfield_or_static(int byte_no, bool is_static, RewriteContr
   {
     __ pop(stos);
     if (!is_static) pop_and_check_object(obj);
+    // Store into the field
+    __ pusha();
+    oop_increase_access_counter(_masm, obj, r8, _bs->kind());
+    __ popa();
     __ access_store_at(T_SHORT, IN_HEAP, field, rax, noreg, noreg);
     if (!is_static && rc == may_rewrite) {
       patch_bytecode(Bytecodes::_fast_sputfield, bc, rbx, true, byte_no);
@@ -3433,6 +3477,10 @@ void TemplateTable::putfield_or_static(int byte_no, bool is_static, RewriteContr
   {
     __ pop(ltos);
     if (!is_static) pop_and_check_object(obj);
+    // Store into the field
+    __ pusha();
+    oop_increase_access_counter(_masm, obj, r8, _bs->kind());
+    __ popa();
     __ access_store_at(T_LONG, IN_HEAP, field, noreg /* ltos*/, noreg, noreg);
     if (!is_static && rc == may_rewrite) {
       patch_bytecode(Bytecodes::_fast_lputfield, bc, rbx, true, byte_no);
@@ -3474,6 +3522,10 @@ void TemplateTable::putfield_or_static(int byte_no, bool is_static, RewriteContr
   {
     __ pop(ftos);
     if (!is_static) pop_and_check_object(obj);
+    // Store into the field
+    __ pusha();
+    oop_increase_access_counter(_masm, obj, r8, _bs->kind());
+    __ popa();
     __ access_store_at(T_FLOAT, IN_HEAP, field, noreg /* ftos */, noreg, noreg);
     if (!is_static && rc == may_rewrite) {
       patch_bytecode(Bytecodes::_fast_fputfield, bc, rbx, true, byte_no);
@@ -3491,6 +3543,10 @@ void TemplateTable::putfield_or_static(int byte_no, bool is_static, RewriteContr
   {
     __ pop(dtos);
     if (!is_static) pop_and_check_object(obj);
+    // Store into the field
+    __ pusha();
+    oop_increase_access_counter(_masm, obj, r8, _bs->kind());
+    __ popa();
     __ access_store_at(T_DOUBLE, IN_HEAP, field, noreg /* dtos */, noreg, noreg);
     if (!is_static && rc == may_rewrite) {
       patch_bytecode(Bytecodes::_fast_dputfield, bc, rbx, true, byte_no);
