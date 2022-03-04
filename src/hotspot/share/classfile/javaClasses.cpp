@@ -410,6 +410,7 @@ Handle java_lang_String::create_from_platform_dependent_str(const char* str, TRA
   }
   // Dat mod
   oop resolved_oop = JNIHandles::resolve(js);
+  ResourceMark rm;
   tty->print_cr("str oop | ac %lu | gc_epoch %lu | size %d | name %s",
                 resolved_oop->access_counter(),
                 resolved_oop->gc_epoch(),
