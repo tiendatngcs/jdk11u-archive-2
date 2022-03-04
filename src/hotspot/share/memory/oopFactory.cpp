@@ -56,6 +56,7 @@ typeArrayOop oopFactory::new_typeArray(BasicType type, int length, TRAPS) {
   Klass* type_asKlassOop = Universe::typeArrayKlassObj(type);
   TypeArrayKlass* type_asArrayKlass = TypeArrayKlass::cast(type_asKlassOop);
   typeArrayOop result = type_asArrayKlass->allocate(length, THREAD);
+  result->increase_access_counter();
   return result;
 }
 
@@ -68,6 +69,7 @@ typeArrayOop oopFactory::new_symbolArray(int length, TRAPS) {
   Klass* type_asKlassOop = Universe::typeArrayKlassObj(type);
   TypeArrayKlass* type_asArrayKlass = TypeArrayKlass::cast(type_asKlassOop);
   typeArrayOop result = type_asArrayKlass->allocate(length, THREAD);
+  result->increase_access_counter();
   return result;
 }
 
@@ -75,17 +77,21 @@ typeArrayOop oopFactory::new_typeArray_nozero(BasicType type, int length, TRAPS)
   Klass* type_asKlassOop = Universe::typeArrayKlassObj(type);
   TypeArrayKlass* type_asArrayKlass = TypeArrayKlass::cast(type_asKlassOop);
   typeArrayOop result = type_asArrayKlass->allocate_common(length, false, THREAD);
+  result->increase_access_counter();
   return result;
 }
 
 
 objArrayOop oopFactory::new_objArray(Klass* klass, int length, TRAPS) {
   assert(klass->is_klass(), "must be instance class");
+  objArrayOop returning_oop;
   if (klass->is_array_klass()) {
-    return ArrayKlass::cast(klass)->allocate_arrayArray(1, length, THREAD);
+    returning_oop = ArrayKlass::cast(klass)->allocate_arrayArray(1, length, THREAD);
   } else {
-    return InstanceKlass::cast(klass)->allocate_objArray(1, length, THREAD);
+    returning_oop = InstanceKlass::cast(klass)->allocate_objArray(1, length, THREAD);
   }
+  returning_oop->increase_access_counter();
+  return returning_oop;
 }
 
 objArrayHandle oopFactory::new_objArray_handle(Klass* klass, int length, TRAPS) {
