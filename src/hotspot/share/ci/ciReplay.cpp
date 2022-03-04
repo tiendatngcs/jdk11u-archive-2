@@ -757,6 +757,7 @@ class CompileReplay : public StackObj {
   // static fields but it's impossible to properly rerun the static
   // initiailizer.
   void process_staticfield(TRAPS) {
+    tty->print_cr("Processing static field");
     InstanceKlass* k = (InstanceKlass *)parse_klass(CHECK);
 
     if (k == NULL || ReplaySuppressInitializers == 0 ||

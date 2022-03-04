@@ -259,6 +259,7 @@ JRT_BLOCK_ENTRY(void, OptoRuntime::new_array_C(Klass* array_type, int len, JavaT
   // a GC can trash the oop in C's return register.  The generated stub will
   // fetch the oop from TLS after any possible GC.
   deoptimize_caller_frame(thread, HAS_PENDING_EXCEPTION);
+  tty->print_cr("OptoRuntime::new_array_C");
   thread->set_vm_result(result);
   JRT_BLOCK_END;
 
@@ -287,6 +288,7 @@ JRT_BLOCK_ENTRY(void, OptoRuntime::new_array_nozero_C(Klass* array_type, int len
   // a GC can trash the oop in C's return register.  The generated stub will
   // fetch the oop from TLS after any possible GC.
   deoptimize_caller_frame(thread, HAS_PENDING_EXCEPTION);
+  tty->print_cr("OptoRuntime::new_array_nozero_C");
   thread->set_vm_result(result);
   JRT_BLOCK_END;
 

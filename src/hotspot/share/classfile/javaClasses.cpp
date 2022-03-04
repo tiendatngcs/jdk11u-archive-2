@@ -252,7 +252,7 @@ Handle java_lang_String::basic_create(int length, bool is_latin1, TRAPS) {
   Handle h_obj(THREAD, obj);
   int arr_length = is_latin1 ? length : length << 1; // 2 bytes per UTF16.
   typeArrayOop buffer = oopFactory::new_byteArray(arr_length, CHECK_NH);;
-  tty->print_cr("New buffer created for String object");
+  // tty->print_cr("New buffer created for String object");
 
   // Point the String at the char array
   obj = h_obj();
@@ -408,8 +408,16 @@ Handle java_lang_String::create_from_platform_dependent_str(const char* str, TRA
     ThreadToNativeFromVM ttn(thread);
     js = (_to_java_string_fn)(thread->jni_environment(), str);
   }
-  tty->print_cr("create_from_platform_dependent_str");
-  return Handle(THREAD, JNIHandles::resolve(js));
+  // Dat mod
+  oop resolved_oop = JNIHandles::resolve(js);
+  tty->print_cr("str oop | ac %lu | gc_epoch %lu | size %d | name %s",
+                obj->access_counter(),
+                obj->gc_epoch(),
+                obj->size(),
+                obj->klass()->external_name());
+  resolved_oop->increase_access_counter();
+  //
+  return Handle(THREAD, resolved_oop);
 }
 
 // Converts a Java String to a native C string that can be used for
