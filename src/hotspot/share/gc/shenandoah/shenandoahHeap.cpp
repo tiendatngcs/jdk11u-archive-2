@@ -738,25 +738,25 @@ void ShenandoahHeap::increase_oop_stats(oop obj) {
       _valid_count_below_tams += 1;
       _valid_size_below_tams += obj->size();
     } else {
-      if (!obj->is_dummy()) {
-        ResourceMark rm;
-        if (obj->klass()->is_array_klass()){
-          tty->print_cr("untouched non-dummy oop during evac | ac %lu | gc_epoch %lu | size %d | header_size %d | name %s",
-                        obj->access_counter(),
-                        obj->gc_epoch(),
-                        obj->size(),
-                        arrayOopDesc::header_size_in_bytes()/HeapWordSize,
-                        obj->klass()->external_name());
+      // if (!obj->is_dummy()) {
+      //   ResourceMark rm;
+      //   if (obj->klass()->is_array_klass()){
+      //     tty->print_cr("untouched non-dummy oop during evac | ac %lu | gc_epoch %lu | size %d | header_size %d | name %s",
+      //                   obj->access_counter(),
+      //                   obj->gc_epoch(),
+      //                   obj->size(),
+      //                   arrayOopDesc::header_size_in_bytes()/HeapWordSize,
+      //                   obj->klass()->external_name());
 
-        } else {
-          tty->print_cr("untouched non-dummy oop during evac | ac %lu | gc_epoch %lu | size %d | header_size %d | name %s",
-                        obj->access_counter(),
-                        obj->gc_epoch(),
-                        obj->size(),
-                        obj->header_size(),
-                        obj->klass()->external_name());
-        }
-      }
+      //   } else {
+      //     tty->print_cr("untouched non-dummy oop during evac | ac %lu | gc_epoch %lu | size %d | header_size %d | name %s",
+      //                   obj->access_counter(),
+      //                   obj->gc_epoch(),
+      //                   obj->size(),
+      //                   obj->header_size(),
+      //                   obj->klass()->external_name());
+      //   }
+      // }
 
       _invalid_count_below_tams += 1;
       _invalid_size_below_tams += obj->size();

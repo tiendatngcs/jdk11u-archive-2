@@ -871,6 +871,7 @@ template <bool CANCELLABLE>
 void ShenandoahConcurrentMark::mark_loop_prework(uint w, ShenandoahTaskTerminator *t, ShenandoahTaskTerminator *sel_t, ReferenceProcessor *rp,
                                                  bool strdedup) {
   ShenandoahObjToScanQueue* q = get_queue(w);
+  ShenandoahObjToScanQueue* sel_q = get_selected_queue(w);
 
   ShenandoahLiveData* ld = _heap->get_liveness_cache(w);
 
@@ -880,36 +881,44 @@ void ShenandoahConcurrentMark::mark_loop_prework(uint w, ShenandoahTaskTerminato
     if (_heap->has_forwarded_objects()) {
       if (strdedup) {
         ShenandoahMarkUpdateRefsMetadataDedupClosure cl(q, rp);
-        mark_loop_work<ShenandoahMarkUpdateRefsMetadataDedupClosure, CANCELLABLE>(&cl, ld, w, t, sel_t);
+        ShenandoahMarkUpdateRefsMetadataDedupClosure sel_cl(sel_q, rp);
+        mark_loop_work<ShenandoahMarkUpdateRefsMetadataDedupClosure, CANCELLABLE>(&cl, &sel_cl, ld, w, t, sel_t);
       } else {
         ShenandoahMarkUpdateRefsMetadataClosure cl(q, rp);
-        mark_loop_work<ShenandoahMarkUpdateRefsMetadataClosure, CANCELLABLE>(&cl, ld, w, t, sel_t);
+        ShenandoahMarkUpdateRefsMetadataClosure sel_cl(sel_q, rp);
+        mark_loop_work<ShenandoahMarkUpdateRefsMetadataClosure, CANCELLABLE>(&cl, &sel_cl, ld, w, t, sel_t);
       }
     } else {
       if (strdedup) {
         ShenandoahMarkRefsMetadataDedupClosure cl(q, rp);
-        mark_loop_work<ShenandoahMarkRefsMetadataDedupClosure, CANCELLABLE>(&cl, ld, w, t, sel_t);
+        ShenandoahMarkRefsMetadataDedupClosure sel_cl(sel_q, rp);
+        mark_loop_work<ShenandoahMarkRefsMetadataDedupClosure, CANCELLABLE>(&cl, &sel_cl, ld, w, t, sel_t);
       } else {
         ShenandoahMarkRefsMetadataClosure cl(q, rp);
-        mark_loop_work<ShenandoahMarkRefsMetadataClosure, CANCELLABLE>(&cl, ld, w, t, sel_t);
+        ShenandoahMarkRefsMetadataClosure sel_cl(sel_q, rp);
+        mark_loop_work<ShenandoahMarkRefsMetadataClosure, CANCELLABLE>(&cl, &sel_cl, ld, w, t, sel_t);
       }
     }
   } else {
     if (_heap->has_forwarded_objects()) {
       if (strdedup) {
         ShenandoahMarkUpdateRefsDedupClosure cl(q, rp);
-        mark_loop_work<ShenandoahMarkUpdateRefsDedupClosure, CANCELLABLE>(&cl, ld, w, t, sel_t);
+        ShenandoahMarkUpdateRefsDedupClosure sel_cl(sel_q, rp);
+        mark_loop_work<ShenandoahMarkUpdateRefsDedupClosure, CANCELLABLE>(&cl, &sel_cl, ld, w, t, sel_t);
       } else {
         ShenandoahMarkUpdateRefsClosure cl(q, rp);
-        mark_loop_work<ShenandoahMarkUpdateRefsClosure, CANCELLABLE>(&cl, ld, w, t, sel_t);
+        ShenandoahMarkUpdateRefsClosure sel_cl(sel_q, rp);
+        mark_loop_work<ShenandoahMarkUpdateRefsClosure, CANCELLABLE>(&cl, &sel_cl, ld, w, t, sel_t);
       }
     } else {
       if (strdedup) {
         ShenandoahMarkRefsDedupClosure cl(q, rp);
-        mark_loop_work<ShenandoahMarkRefsDedupClosure, CANCELLABLE>(&cl, ld, w, t, sel_t);
+        ShenandoahMarkRefsDedupClosure sel_cl(sel_q, rp);
+        mark_loop_work<ShenandoahMarkRefsDedupClosure, CANCELLABLE>(&cl, &sel_cl, ld, w, t, sel_t);
       } else {
         ShenandoahMarkRefsClosure cl(q, rp);
-        mark_loop_work<ShenandoahMarkRefsClosure, CANCELLABLE>(&cl, ld, w, t, sel_t);
+        ShenandoahMarkRefsClosure sel_cl(sel_q, rp);
+        mark_loop_work<ShenandoahMarkRefsClosure, CANCELLABLE>(&cl, &sel_cl, ld, w, t, sel_t);
       }
     }
   }
@@ -918,7 +927,7 @@ void ShenandoahConcurrentMark::mark_loop_prework(uint w, ShenandoahTaskTerminato
 }
 
 template <class T, bool CANCELLABLE>
-void ShenandoahConcurrentMark::mark_loop_work(T* cl, ShenandoahLiveData* live_data, uint worker_id, ShenandoahTaskTerminator *terminator, ShenandoahTaskTerminator *selected_terminator) {
+void ShenandoahConcurrentMark::mark_loop_work(T* cl, T* sel_cl, ShenandoahLiveData* live_data, uint worker_id, ShenandoahTaskTerminator *terminator, ShenandoahTaskTerminator *selected_terminator) {
   int seed = 17;
   uintx stride = ShenandoahMarkLoopStride;
 
@@ -971,7 +980,7 @@ void ShenandoahConcurrentMark::mark_loop_work(T* cl, ShenandoahLiveData* live_da
 
     for (uint i = 0; i < stride; i++) {
       if (sel_q->pop(t)) {
-        do_task<T>(sel_q, cl, live_data, &t);
+        do_task<T>(sel_q, sel_cl, live_data, &t, true);
       } else {
         assert(sel_q->is_empty(), "Must be empty");
         sel_q = sel_queues->claim_next();
@@ -1057,7 +1066,7 @@ void ShenandoahConcurrentMark::mark_loop_work(T* cl, ShenandoahLiveData* live_da
     for (uint i = 0; i < stride; i++) {
       if (sel_q->pop(t) ||
           sel_queues->steal(worker_id, &seed, t)) {
-        do_task<T>(sel_q, cl, live_data, &t);
+        do_task<T>(sel_q, sel_cl, live_data, &t, true);
         work++;
       } else {
         break;

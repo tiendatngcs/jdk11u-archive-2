@@ -1058,6 +1058,7 @@ JVM_ENTRY(jobjectArray, JVM_GetClassInterfaces(JNIEnv *env, jclass cls))
   // Special handling for primitive objects
   if (java_lang_Class::is_primitive(mirror)) {
     // Primitive objects does not have any interfaces
+    // probable untouched oop
     objArrayOop r = oopFactory::new_objArray(SystemDictionary::Class_klass(), 0, CHECK_NULL);
     return (jobjectArray) JNIHandles::make_local(env, r);
   }

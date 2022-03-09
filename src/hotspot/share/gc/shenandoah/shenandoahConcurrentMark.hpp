@@ -45,7 +45,7 @@ public:
 //
 private:
   template <class T>
-  inline void do_task(ShenandoahObjToScanQueue* q, T* cl, ShenandoahLiveData* live_data, ShenandoahMarkTask* task);
+  inline void do_task(ShenandoahObjToScanQueue* q, T* cl, ShenandoahLiveData* live_data, ShenandoahMarkTask* task, bool print_oop=false);
 
   template <class T>
   inline void do_chunked_array_start(ShenandoahObjToScanQueue* q, T* cl, oop array);
@@ -56,7 +56,7 @@ private:
   inline void count_liveness(ShenandoahLiveData* live_data, oop obj);
 
   template <class T, bool CANCELLABLE>
-  void mark_loop_work(T* cl, ShenandoahLiveData* live_data, uint worker_id, ShenandoahTaskTerminator *t, ShenandoahTaskTerminator *sel_t);
+  void mark_loop_work(T* cl, T* sel_cl, ShenandoahLiveData* live_data, uint worker_id, ShenandoahTaskTerminator *t, ShenandoahTaskTerminator *sel_t);
 
   template <bool CANCELLABLE>
   void mark_loop_prework(uint worker_id, ShenandoahTaskTerminator *terminator, ShenandoahTaskTerminator *selected_terminator, ReferenceProcessor *rp, bool strdedup);
