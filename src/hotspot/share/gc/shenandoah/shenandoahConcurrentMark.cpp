@@ -160,7 +160,7 @@ public:
     ShenandoahHeap* heap = ShenandoahHeap::heap();
     ShenandoahConcurrentWorkerSession worker_session(worker_id);
     ShenandoahSuspendibleThreadSetJoiner stsj(ShenandoahSuspendibleWorkers);
-    ShenandoahObjToScanQueue* q = _cm->get_queue(worker_id);
+    // ShenandoahObjToScanQueue* q = _cm->get_queue(worker_id);
     ReferenceProcessor* rp;
     if (heap->process_references()) {
       rp = heap->ref_processor();
@@ -284,7 +284,9 @@ public:
                    false, // not cancellable
                    _dedup_string);
 
-    assert(_cm->task_queues()->is_empty() && _cm->selected_task_queues()->is_empty(), "Should be empty");
+    assert(_cm->task_queues()->is_empty(), "Should be empty");
+    assert(_cm->selected_task_queues()->is_empty(), "Should be empty");
+    
   }
 };
 
@@ -714,6 +716,7 @@ void ShenandoahConcurrentMark::weak_refs_work_doit(bool full_gc) {
   rp->set_active_mt_degree(nworkers);
 
   assert(task_queues()->is_empty(), "Should be empty");
+  assert(selected_task_queues()->is_empty(), "Should be empty");
 
   // complete_gc and keep_alive closures instantiated here are only needed for
   // single-threaded path in RP. They share the queue 0 for tracking work, which
@@ -988,7 +991,7 @@ void ShenandoahConcurrentMark::mark_loop_work(T* cl, T* sel_cl, ShenandoahLiveDa
       }
     }
   }
-  sel_q = get_queue(worker_id);
+  sel_q = get_selected_queue(worker_id);
   // ------------------------------------------------------------
 
   ShenandoahConcMarkSATBBufferClosure drain_satb(q);
@@ -1023,16 +1026,6 @@ void ShenandoahConcurrentMark::mark_loop_work(T* cl, T* sel_cl, ShenandoahLiveDa
       }
     }
 
-    // for (uint i = 0; i < stride; i++) {
-    //   if (sel_q->pop(t) ||
-    //       sel_queues->steal(worker_id, &seed, t)) {
-    //     do_task<T>(sel_q, cl, live_data, &t);
-    //     work++;
-    //   } else {
-    //     break;
-    //   }
-    // }
-
     if (work == 0) {
       // No work encountered in current stride, try to terminate.
       // Need to leave the STS here otherwise it might block safepoints.
@@ -1053,15 +1046,6 @@ void ShenandoahConcurrentMark::mark_loop_work(T* cl, T* sel_cl, ShenandoahLiveDa
     }
 
     uint work = 0;
-    // for (uint i = 0; i < stride; i++) {
-    //   if (q->pop(t) ||
-    //       queues->steal(worker_id, &seed, t)) {
-    //     do_task<T>(q, cl, live_data, &t);
-    //     work++;
-    //   } else {
-    //     break;
-    //   }
-    // }
 
     for (uint i = 0; i < stride; i++) {
       if (sel_q->pop(t) ||
