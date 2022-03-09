@@ -1014,6 +1014,46 @@ void ShenandoahConcurrentMark::mark_loop_work(T* cl, ShenandoahLiveData* live_da
       }
     }
 
+    // for (uint i = 0; i < stride; i++) {
+    //   if (sel_q->pop(t) ||
+    //       sel_queues->steal(worker_id, &seed, t)) {
+    //     do_task<T>(sel_q, cl, live_data, &t);
+    //     work++;
+    //   } else {
+    //     break;
+    //   }
+    // }
+
+    if (work == 0) {
+      // No work encountered in current stride, try to terminate.
+      // Need to leave the STS here otherwise it might block safepoints.
+      ShenandoahSuspendibleThreadSetLeaver stsl(CANCELLABLE && ShenandoahSuspendibleWorkers);
+      ShenandoahTerminatorTerminator tt(heap);
+      // if (terminator->offer_termination(&tt)) return;
+      if (terminator->offer_termination(&tt)) break;
+    }
+  }
+
+  while (true) {
+    if (CANCELLABLE && heap->check_cancelled_gc_and_yield()) {
+      return;
+    }
+
+    while (satb_mq_set.completed_buffers_num() > 0) {
+      satb_mq_set.apply_closure_to_completed_buffer(&drain_satb);
+    }
+
+    uint work = 0;
+    // for (uint i = 0; i < stride; i++) {
+    //   if (q->pop(t) ||
+    //       queues->steal(worker_id, &seed, t)) {
+    //     do_task<T>(q, cl, live_data, &t);
+    //     work++;
+    //   } else {
+    //     break;
+    //   }
+    // }
+
     for (uint i = 0; i < stride; i++) {
       if (sel_q->pop(t) ||
           sel_queues->steal(worker_id, &seed, t)) {
@@ -1029,7 +1069,7 @@ void ShenandoahConcurrentMark::mark_loop_work(T* cl, ShenandoahLiveData* live_da
       // Need to leave the STS here otherwise it might block safepoints.
       ShenandoahSuspendibleThreadSetLeaver stsl(CANCELLABLE && ShenandoahSuspendibleWorkers);
       ShenandoahTerminatorTerminator tt(heap);
-      if (terminator->offer_termination(&tt) && selected_terminator->offer_termination(&tt)) return;
+      if (selected_terminator->offer_termination(&tt)) return;
       // if (terminator->offer_termination(&tt)) break;
     }
   }
