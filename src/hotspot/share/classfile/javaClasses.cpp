@@ -416,7 +416,8 @@ Handle java_lang_String::create_from_platform_dependent_str(const char* str, TRA
                 resolved_oop->gc_epoch(),
                 resolved_oop->size(),
                 resolved_oop->klass()->external_name());
-  resolved_oop->increase_access_counter();
+  // sus
+  // resolved_oop->increase_access_counter();
   //
   return Handle(THREAD, resolved_oop);
 }
