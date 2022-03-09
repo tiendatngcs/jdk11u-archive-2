@@ -53,9 +53,10 @@ public:
 class ShenandoahPushWorkerQueuesScope : public ShenandoahPushWorkerScope {
 private:
   ShenandoahObjToScanQueueSet* _queues;
+  ShenandoahObjToScanQueueSet* _selected_queues;
 
 public:
-  ShenandoahPushWorkerQueuesScope(WorkGang* workers, ShenandoahObjToScanQueueSet* queues, uint nworkers, bool do_check = true);
+  ShenandoahPushWorkerQueuesScope(WorkGang* workers, ShenandoahObjToScanQueueSet* queues, ShenandoahObjToScanQueueSet* selected_queues, uint nworkers, bool do_check = true);
   ~ShenandoahPushWorkerQueuesScope();
 };
 

@@ -304,6 +304,7 @@ void ShenandoahConcurrentMark::mark_roots(ShenandoahPhaseTimings::Phase root_pha
   ShenandoahAllRootScanner root_proc(nworkers, root_phase);
   TASKQUEUE_STATS_ONLY(task_queues()->reset_taskqueue_stats());
   task_queues()->reserve(nworkers);
+  selected_task_queues()->reserve(nworkers);
 
   if (heap->has_forwarded_objects()) {
     ShenandoahInitMarkRootsTask<RESOLVE> mark_roots(&root_proc);
@@ -659,11 +660,12 @@ public:
 
     ShenandoahHeap* heap = ShenandoahHeap::heap();
     ShenandoahConcurrentMark* cm = heap->concurrent_mark();
-    ShenandoahPushWorkerQueuesScope scope(_workers, cm->task_queues(),
+    ShenandoahPushWorkerQueuesScope scope(_workers, cm->task_queues(), cm->selected_task_queues(),
                                           ergo_workers,
                                           /* do_check = */ false);
     uint nworkers = _workers->active_workers();
     cm->task_queues()->reserve(nworkers);
+    cm->selected_task_queues()->reserve(nworkers);
     ShenandoahTaskTerminator terminator(nworkers, cm->task_queues());
     ShenandoahTaskTerminator selected_terminator(nworkers, cm->selected_task_queues());
     ShenandoahRefProcTaskProxy proc_task_proxy(task, &terminator, &selected_terminator);
@@ -838,6 +840,7 @@ void ShenandoahConcurrentMark::preclean_weak_refs() {
   uint nworkers = workers->active_workers();
   assert(nworkers == 1, "This code uses only a single worker");
   task_queues()->reserve(nworkers);
+  selected_task_queues()->reserve(nworkers);
 
   ShenandoahPrecleanTask task(rp);
   workers->run_task(&task);

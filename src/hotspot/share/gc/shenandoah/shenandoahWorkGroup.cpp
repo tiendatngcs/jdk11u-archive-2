@@ -70,14 +70,16 @@ ShenandoahPushWorkerScope::~ShenandoahPushWorkerScope() {
   assert(nworkers == _old_workers, "Must be able to restore");
 }
 
-ShenandoahPushWorkerQueuesScope::ShenandoahPushWorkerQueuesScope(WorkGang* workers, ShenandoahObjToScanQueueSet* queues, uint nworkers, bool check) :
-  ShenandoahPushWorkerScope(workers, nworkers, check), _queues(queues) {
+ShenandoahPushWorkerQueuesScope::ShenandoahPushWorkerQueuesScope(WorkGang* workers, ShenandoahObjToScanQueueSet* queues, ShenandoahObjToScanQueueSet* selected_queues, uint nworkers, bool check) :
+  ShenandoahPushWorkerScope(workers, nworkers, check), _queues(queues), _selected_queues(selected_queues) {
   _queues->reserve(_n_workers);
+  _selected_queues->reserve(_n_workers);
 }
 
 ShenandoahPushWorkerQueuesScope::~ShenandoahPushWorkerQueuesScope() {
   // Restore old worker value
   _queues->reserve(_old_workers);
+  _selected_queues->reserve(_old_workers);
 }
 
 AbstractGangWorker* ShenandoahWorkGang::install_worker(uint which) {
