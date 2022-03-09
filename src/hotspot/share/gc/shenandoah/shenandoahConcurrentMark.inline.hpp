@@ -275,4 +275,56 @@ inline void ShenandoahConcurrentMark::mark_through_ref(T *p, ShenandoahHeap* hea
   }
 }
 
+// template<class T, UpdateRefsMode UPDATE_REFS, StringDedupMode STRING_DEDUP>
+// inline void ShenandoahConcurrentMark::selective_mark_through_ref(T *p, ShenandoahHeap* heap, ShenandoahObjToScanQueue* q, ShenandoahMarkingContext* const mark_context) {
+//   T o = RawAccess<>::oop_load(p);
+//   if (!CompressedOops::is_null(o)) {
+//     oop obj = CompressedOops::decode_not_null(o);
+//     switch (UPDATE_REFS) {
+//     case NONE:
+//       break;
+//     case RESOLVE:
+//       obj = ShenandoahBarrierSet::resolve_forwarded_not_null(obj);
+//       break;
+//     case SIMPLE:
+//       // We piggy-back reference updating to the marking tasks.
+//       obj = heap->update_with_forwarded_not_null(p, obj);
+//       break;
+//     case CONCURRENT:
+//       obj = heap->maybe_update_with_forwarded_not_null(p, obj);
+//       break;
+//     default:
+//       ShouldNotReachHere();
+//     }
+
+//     // Note: Only when concurrently updating references can obj be different
+//     // (that is, really different, not just different from-/to-space copies of the same)
+//     // from the one we originally loaded. Mutator thread can beat us by writing something
+//     // else into the location. In that case, we would mark through that updated value,
+//     // on the off-chance it is not handled by other means (e.g. via SATB). However,
+//     // if that write was NULL, we don't need to do anything else.
+//     if (UPDATE_REFS != CONCURRENT || !CompressedOops::is_null(obj)) {
+//       shenandoah_assert_not_forwarded(p, obj);
+//       shenandoah_assert_not_in_cset_except(p, obj, heap->cancelled_gc());
+
+//       if (mark_context->mark(obj)) {
+//         // heap->update_histogram(obj);
+//         // tty->print_cr("Marked oop size %d bytes, region %lu, is humongous %s, total marked %lu", obj->size()*HeapWordSize, heap->heap_region_index_containing(obj), heap->heap_region_containing(obj)->is_humongous() ? "true" : "false", (heap->oop_stats(true, false)+heap->oop_stats(false, false)));
+//         if (heap->heap_region_containing(obj)->is_humongous()){
+//           tty->print_cr("Humongous oop detected size %d bytes, region %lu", obj->size()*HeapWordSize, heap->heap_region_index_containing(obj));
+//         }
+//         bool pushed = q->push(ShenandoahMarkTask(obj));
+//         assert(pushed, "overflow queue should always succeed pushing");
+
+//         if ((STRING_DEDUP == ENQUEUE_DEDUP) && ShenandoahStringDedup::is_candidate(obj)) {
+//           assert(ShenandoahStringDedup::is_enabled(), "Must be enabled");
+//           ShenandoahStringDedup::enqueue_candidate(obj);
+//         }
+//       }
+
+//       shenandoah_assert_marked(p, obj);
+//     }
+//   }
+// }
+
 #endif // SHARE_VM_GC_SHENANDOAH_SHENANDOAHCONCURRENTMARK_INLINE_HPP

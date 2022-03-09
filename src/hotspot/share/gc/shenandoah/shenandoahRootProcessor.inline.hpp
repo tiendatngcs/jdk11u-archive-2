@@ -122,57 +122,82 @@ ShenandoahRootScanner<ITR>::ShenandoahRootScanner(uint n_workers, ShenandoahPhas
 }
 
 template <typename ITR>
-void ShenandoahRootScanner<ITR>::roots_do(uint worker_id, OopClosure* oops) {
+void ShenandoahRootScanner<ITR>::roots_do(uint worker_id, OopClosure* oops, OopClosure* sel_oops) {
   CLDToOopClosure clds_cl(oops);
   MarkingCodeBlobClosure blobs_cl(oops, !CodeBlobToOopClosure::FixRelocations);
-  roots_do(worker_id, oops, &clds_cl, &blobs_cl);
+
+  CLDToOopClosure sel_clds_cl(sel_oops);
+  MarkingCodeBlobClosure sel_blobs_cl(sel_oops, !CodeBlobToOopClosure::FixRelocations);
+  
+  roots_do(worker_id, oops, sel_oops, &clds_cl, &sel_clds_cl, &blobs_cl, &sel_blobs_cl);
 }
 
 template <typename ITR>
-void ShenandoahRootScanner<ITR>::strong_roots_do(uint worker_id, OopClosure* oops) {
+void ShenandoahRootScanner<ITR>::strong_roots_do(uint worker_id, OopClosure* oops, OopClosure* sel_oops) {
   CLDToOopClosure clds_cl(oops);
   MarkingCodeBlobClosure blobs_cl(oops, !CodeBlobToOopClosure::FixRelocations);
-  strong_roots_do(worker_id, oops, &clds_cl, &blobs_cl);
+
+
+  CLDToOopClosure sel_clds_cl(sel_oops);
+  MarkingCodeBlobClosure sel_blobs_cl(sel_oops, !CodeBlobToOopClosure::FixRelocations);
+
+
+  strong_roots_do(worker_id, oops, sel_oops, &clds_cl, &sel_clds_cl, &blobs_cl, &sel_blobs_cl);
 }
 
 template <typename ITR>
-void ShenandoahRootScanner<ITR>::roots_do(uint worker_id, OopClosure* oops, CLDClosure* clds, CodeBlobClosure* code, ThreadClosure *tc) {
+void ShenandoahRootScanner<ITR>::roots_do(uint worker_id, OopClosure* oops, OopClosure* sel_oops, CLDClosure* clds, CLDClosure* sel_clds, CodeBlobClosure* code, CodeBlobClosure* sel_code, ThreadClosure* tc, ThreadClosure* sel_tc) {
   assert(!ShenandoahHeap::heap()->unload_classes(),
           "Expect class unloading when Shenandoah cycle is running");
   assert(clds != NULL, "Only possible with CLD closure");
 
   AlwaysTrueClosure always_true;
   ShenandoahParallelOopsDoThreadClosure tc_cl(oops, code, tc);
+  ShenandoahParallelOopsDoThreadClosure sel_tc_cl(sel_oops, sel_code, sel_tc);
 
   ResourceMark rm;
 
   // Process serial-claiming roots first
   _serial_roots.oops_do(oops, worker_id);
+  // _serial_roots.oops_do(sel_oops, worker_id);
+
   _jni_roots.oops_do(oops, worker_id);
+  // _jni_roots.oops_do(sel_oops, worker_id);
 
   // Process light-weight/limited parallel roots then
   _dedup_roots.oops_do(&always_true, oops, worker_id);
+  // _dedup_roots.oops_do(&always_true, sel_oops, worker_id);
+  
   _cld_roots.cld_do(clds, worker_id);
+  // _cld_roots.cld_do(sel_clds, worker_id);
 
   // Process heavy-weight/fully parallel roots the last
   _thread_roots.threads_do(&tc_cl, worker_id);
+  // _thread_roots.threads_do(&sel_tc_cl, worker_id);
 }
 
 template <typename ITR>
-void ShenandoahRootScanner<ITR>::strong_roots_do(uint worker_id, OopClosure* oops, CLDClosure* clds, CodeBlobClosure* code, ThreadClosure* tc) {
+void ShenandoahRootScanner<ITR>::strong_roots_do(uint worker_id, OopClosure* oops, OopClosure* sel_oops, CLDClosure* clds, CLDClosure* sel_clds, CodeBlobClosure* code, CodeBlobClosure* sel_code, ThreadClosure* tc, ThreadClosure* sel_tc) {
   assert(ShenandoahHeap::heap()->unload_classes(), "Should be used during class unloading");
   ShenandoahParallelOopsDoThreadClosure tc_cl(oops, code, tc);
+  ShenandoahParallelOopsDoThreadClosure sel_tc_cl(sel_oops, sel_code, sel_tc);
+
   ResourceMark rm;
 
   // Process serial-claiming roots first
   _serial_roots.oops_do(oops, worker_id);
+  // _serial_roots.oops_do(sel_oops, worker_id);
+
   _jni_roots.oops_do(oops, worker_id);
+  // _jni_roots.oops_do(sel_oops, worker_id);
 
   // Process light-weight/limited parallel roots then
   _cld_roots.always_strong_cld_do(clds, worker_id);
+  // _cld_roots.always_strong_cld_do(sel_clds, worker_id);
 
   // Process heavy-weight/fully parallel roots the last
   _thread_roots.threads_do(&tc_cl, worker_id);
+  // _thread_roots.threads_do(&sel_tc_cl, worker_id);
 }
 
 template <typename IsAlive, typename KeepAlive>

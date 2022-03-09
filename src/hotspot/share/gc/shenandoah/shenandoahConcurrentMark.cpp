@@ -95,16 +95,19 @@ public:
 
     ShenandoahHeap* heap = ShenandoahHeap::heap();
     ShenandoahObjToScanQueueSet* queues = heap->concurrent_mark()->task_queues();
+    ShenandoahObjToScanQueueSet* selected_queues = heap->concurrent_mark()->selected_task_queues();
     assert(queues->get_reserved() > worker_id, "Queue has not been reserved for worker id: %d", worker_id);
 
     ShenandoahObjToScanQueue* q = queues->queue(worker_id);
+    ShenandoahObjToScanQueue* sel_q = selected_queues->queue(worker_id);
 
     ShenandoahInitMarkRootsClosure<UPDATE_REFS> mark_cl(q);
-    do_work(heap, &mark_cl, worker_id);
+    ShenandoahInitMarkRootsClosure<UPDATE_REFS> sel_mark_cl(sel_q);
+    do_work(heap, &mark_cl, &sel_mark_cl, worker_id);
   }
 
 private:
-  void do_work(ShenandoahHeap* heap, OopClosure* oops, uint worker_id) {
+  void do_work(ShenandoahHeap* heap, OopClosure* oops, OopClosure* sel_oops, uint worker_id) {
     // The rationale for selecting the roots to scan is as follows:
     //   a. With unload_classes = true, we only want to scan the actual strong roots from the
     //      code cache. This will allow us to identify the dead classes, unload them, *and*
@@ -115,9 +118,9 @@ private:
     //      which we will never visit during mark. Without code cache invalidation, as in (a),
     //      we risk executing that code cache blob, and crashing.
     if (heap->unload_classes()) {
-      _rp->strong_roots_do(worker_id, oops);
+      _rp->strong_roots_do(worker_id, oops, sel_oops);
     } else {
-      _rp->roots_do(worker_id, oops);
+      _rp->roots_do(worker_id, oops, sel_oops);
     }
   }
 };
@@ -380,11 +383,16 @@ void ShenandoahConcurrentMark::initialize(uint workers) {
   uint num_queues = MAX2(workers, 1U);
 
   _task_queues = new ShenandoahObjToScanQueueSet((int) num_queues);
+  _selected_task_queues = new ShenandoahObjToScanQueueSet((int) num_queues);
 
   for (uint i = 0; i < num_queues; ++i) {
     ShenandoahObjToScanQueue* task_queue = new ShenandoahObjToScanQueue();
     task_queue->initialize();
     _task_queues->register_queue(i, task_queue);
+
+    ShenandoahObjToScanQueue* selected_task_queue = new ShenandoahObjToScanQueue();
+    selected_task_queue->initialize();
+    _selected_task_queues->register_queue(i, selected_task_queue);
   }
 
   ShenandoahBarrierSet::satb_mark_queue_set().set_buffer_size(ShenandoahSATBBufferSize);

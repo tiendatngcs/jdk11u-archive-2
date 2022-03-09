@@ -35,6 +35,7 @@ class ShenandoahConcurrentMark: public CHeapObj<mtGC> {
 private:
   ShenandoahHeap* _heap;
   ShenandoahObjToScanQueueSet* _task_queues;
+  ShenandoahObjToScanQueueSet* _selected_task_queues;
 
 public:
   void initialize(uint workers);
@@ -105,6 +106,7 @@ public:
 public:
   ShenandoahObjToScanQueue* get_queue(uint worker_id);
   ShenandoahObjToScanQueueSet* task_queues() { return _task_queues; }
+  ShenandoahObjToScanQueueSet* selected_task_queues() { return _selected_task_queues; }
 
 };
 
