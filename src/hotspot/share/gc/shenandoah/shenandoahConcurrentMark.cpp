@@ -960,7 +960,7 @@ void ShenandoahConcurrentMark::mark_loop_work(T* cl, T* sel_cl, ShenandoahLiveDa
 
     for (uint i = 0; i < stride; i++) {
       if (q->pop(t)) {
-        do_task<T>(q, cl, live_data, &t);
+        do_task<T>(q, cl, live_data, &t, true);
       } else {
         assert(q->is_empty(), "Must be empty");
         q = queues->claim_next();
@@ -1016,7 +1016,7 @@ void ShenandoahConcurrentMark::mark_loop_work(T* cl, T* sel_cl, ShenandoahLiveDa
     for (uint i = 0; i < stride; i++) {
       if (q->pop(t) ||
           queues->steal(worker_id, &seed, t)) {
-        do_task<T>(q, cl, live_data, &t);
+        do_task<T>(q, cl, live_data, &t, true);
         work++;
       } else {
         break;
