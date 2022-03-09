@@ -284,7 +284,7 @@ public:
                    false, // not cancellable
                    _dedup_string);
 
-    assert(_cm->task_queues()->is_empty(), "Should be empty");
+    assert(_cm->task_queues()->is_empty() && _cm->selected_task_queues()->is_empty(), "Should be empty");
   }
 };
 
@@ -615,13 +615,15 @@ class ShenandoahRefProcTaskProxy : public AbstractGangTask {
 private:
   AbstractRefProcTaskExecutor::ProcessTask& _proc_task;
   ShenandoahTaskTerminator* _terminator;
+  ShenandoahTaskTerminator* _selected_terminator;
 
 public:
   ShenandoahRefProcTaskProxy(AbstractRefProcTaskExecutor::ProcessTask& proc_task,
-                             ShenandoahTaskTerminator* t) :
+                             ShenandoahTaskTerminator* t, ShenandoahTaskTerminator* sel_t) :
     AbstractGangTask("Shenandoah Process Weak References"),
     _proc_task(proc_task),
-    _terminator(t) {
+    _terminator(t),
+    _selected_terminator(sel_t) {
   }
 
   void work(uint worker_id) {
@@ -629,7 +631,7 @@ public:
     HandleMark hm;
     assert(ShenandoahSafepoint::is_at_shenandoah_safepoint(), "Must be at a safepoint");
     ShenandoahHeap* heap = ShenandoahHeap::heap();
-    ShenandoahCMDrainMarkingStackClosure complete_gc(worker_id, _terminator);
+    ShenandoahCMDrainMarkingStackClosure complete_gc(worker_id, _terminator, _selected_terminator);
     if (heap->has_forwarded_objects()) {
       ShenandoahForwardedIsAliveClosure is_alive;
       ShenandoahCMKeepAliveUpdateClosure keep_alive(heap->concurrent_mark()->get_queue(worker_id));
@@ -663,7 +665,8 @@ public:
     uint nworkers = _workers->active_workers();
     cm->task_queues()->reserve(nworkers);
     ShenandoahTaskTerminator terminator(nworkers, cm->task_queues());
-    ShenandoahRefProcTaskProxy proc_task_proxy(task, &terminator);
+    ShenandoahTaskTerminator selected_terminator(nworkers, cm->selected_task_queues());
+    ShenandoahRefProcTaskProxy proc_task_proxy(task, &terminator, &selected_terminator);
     _workers->run_task(&proc_task_proxy);
   }
 };
