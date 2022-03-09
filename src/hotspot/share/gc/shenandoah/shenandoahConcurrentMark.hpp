@@ -56,18 +56,18 @@ private:
   inline void count_liveness(ShenandoahLiveData* live_data, oop obj);
 
   template <class T, bool CANCELLABLE>
-  void mark_loop_work(T* cl, ShenandoahLiveData* live_data, uint worker_id, ShenandoahTaskTerminator *t);
+  void mark_loop_work(T* cl, ShenandoahLiveData* live_data, uint worker_id, ShenandoahTaskTerminator *t, ShenandoahTaskTerminator *sel_t);
 
   template <bool CANCELLABLE>
-  void mark_loop_prework(uint worker_id, ShenandoahTaskTerminator *terminator, ReferenceProcessor *rp, bool strdedup);
+  void mark_loop_prework(uint worker_id, ShenandoahTaskTerminator *terminator, ShenandoahTaskTerminator *selected_terminator, ReferenceProcessor *rp, bool strdedup);
 
 public:
-  void mark_loop(uint worker_id, ShenandoahTaskTerminator* terminator, ReferenceProcessor *rp,
+  void mark_loop(uint worker_id, ShenandoahTaskTerminator* terminator, ShenandoahTaskTerminator* selected_terminator, ReferenceProcessor *rp,
                  bool cancellable, bool strdedup) {
     if (cancellable) {
-      mark_loop_prework<true>(worker_id, terminator, rp, strdedup);
+      mark_loop_prework<true>(worker_id, terminator, selected_terminator, rp, strdedup);
     } else {
-      mark_loop_prework<false>(worker_id, terminator, rp, strdedup);
+      mark_loop_prework<false>(worker_id, terminator, selected_terminator, rp, strdedup);
     }
   }
 
@@ -105,6 +105,7 @@ public:
 //
 public:
   ShenandoahObjToScanQueue* get_queue(uint worker_id);
+  ShenandoahObjToScanQueue* get_selected_queue(uint worker_id);
   ShenandoahObjToScanQueueSet* task_queues() { return _task_queues; }
   ShenandoahObjToScanQueueSet* selected_task_queues() { return _selected_task_queues; }
 

@@ -149,10 +149,11 @@ class ShenandoahConcurrentMarkingTask : public AbstractGangTask {
 private:
   ShenandoahConcurrentMark* _cm;
   ShenandoahTaskTerminator* _terminator;
+  ShenandoahTaskTerminator* _selected_terminator;
 
 public:
-  ShenandoahConcurrentMarkingTask(ShenandoahConcurrentMark* cm, ShenandoahTaskTerminator* terminator) :
-    AbstractGangTask("Shenandoah Concurrent Mark"), _cm(cm), _terminator(terminator) {
+  ShenandoahConcurrentMarkingTask(ShenandoahConcurrentMark* cm, ShenandoahTaskTerminator* terminator, ShenandoahTaskTerminator* selected_terminator) :
+    AbstractGangTask("Shenandoah Concurrent Mark"), _cm(cm), _terminator(terminator), _selected_terminator(selected_terminator) {
   }
 
   void work(uint worker_id) {
@@ -169,7 +170,7 @@ public:
     }
 
     _cm->concurrent_scan_code_roots(worker_id, rp);
-    _cm->mark_loop(worker_id, _terminator, rp,
+    _cm->mark_loop(worker_id, _terminator, _selected_terminator, rp,
                    true, // cancellable
                    ShenandoahStringDedup::is_enabled()); // perform string dedup
   }
@@ -217,12 +218,13 @@ class ShenandoahFinalMarkingTask : public AbstractGangTask {
 private:
   ShenandoahConcurrentMark* _cm;
   ShenandoahTaskTerminator* _terminator;
+  ShenandoahTaskTerminator* _selected_terminator;
   bool                      _dedup_string;
   ShenandoahSharedFlag      _claimed_syncroots;
 
 public:
-  ShenandoahFinalMarkingTask(ShenandoahConcurrentMark* cm, ShenandoahTaskTerminator* terminator, bool dedup_string) :
-    AbstractGangTask("Shenandoah Final Mark"), _cm(cm), _terminator(terminator), _dedup_string(dedup_string) {
+  ShenandoahFinalMarkingTask(ShenandoahConcurrentMark* cm, ShenandoahTaskTerminator* terminator, ShenandoahTaskTerminator* selected_terminator, bool dedup_string) :
+    AbstractGangTask("Shenandoah Final Mark"), _cm(cm), _terminator(terminator), _selected_terminator(selected_terminator), _dedup_string(dedup_string) {
   }
 
   void work(uint worker_id) {
@@ -278,7 +280,7 @@ public:
       _cm->concurrent_scan_code_roots(worker_id, rp);
     }
 
-    _cm->mark_loop(worker_id, _terminator, rp,
+    _cm->mark_loop(worker_id, _terminator, _selected_terminator, rp,
                    false, // not cancellable
                    _dedup_string);
 
@@ -448,12 +450,15 @@ void ShenandoahConcurrentMark::mark_from_roots() {
   ReferenceProcessorIsAliveMutator fix_isalive(_heap->ref_processor(), is_alive.is_alive_closure());
 
   task_queues()->reserve(nworkers);
+  selected_task_queues()->reserve(nworkers);
 
   ShenandoahSATBMarkQueueSet& qset = ShenandoahBarrierSet::satb_mark_queue_set();
   ShenandoahFlushSATBHandshakeClosure flush_satb;
   for (uint flushes = 0; flushes < ShenandoahMaxSATBBufferFlushes; flushes++) {
     ShenandoahTaskTerminator terminator(nworkers, task_queues());
-    ShenandoahConcurrentMarkingTask task(this, &terminator);
+    ShenandoahTaskTerminator selected_terminator(nworkers, selected_task_queues());
+
+    ShenandoahConcurrentMarkingTask task(this, &terminator, &selected_terminator);
     workers->run_task(&task);
 
     if (_heap->cancelled_gc()) {
@@ -471,7 +476,7 @@ void ShenandoahConcurrentMark::mark_from_roots() {
     }
   }
 
-  assert(task_queues()->is_empty() || _heap->cancelled_gc(), "Should be empty when not cancelled");
+  assert((task_queues()->is_empty() && selected_task_queues()->is_empty()) || _heap->cancelled_gc(), "Should be empty when not cancelled");
 }
 
 void ShenandoahConcurrentMark::finish_mark_from_roots(bool full_gc) {
@@ -491,6 +496,7 @@ void ShenandoahConcurrentMark::finish_mark_from_roots(bool full_gc) {
                             ShenandoahPhaseTimings::full_gc_mark_finish_queues :
                             ShenandoahPhaseTimings::finish_queues);
     task_queues()->reserve(nworkers);
+    selected_task_queues()->reserve(nworkers);
 
     shenandoah_assert_rp_isalive_not_installed();
     ShenandoahIsAliveSelector is_alive;
@@ -498,7 +504,8 @@ void ShenandoahConcurrentMark::finish_mark_from_roots(bool full_gc) {
 
     StrongRootsScope scope(nworkers);
     ShenandoahTaskTerminator terminator(nworkers, task_queues());
-    ShenandoahFinalMarkingTask task(this, &terminator, ShenandoahStringDedup::is_enabled());
+    ShenandoahTaskTerminator selected_terminator(nworkers, selected_task_queues());
+    ShenandoahFinalMarkingTask task(this, &terminator, &selected_terminator, ShenandoahStringDedup::is_enabled());
     _heap->workers()->run_task(&task);
   }
 
@@ -514,12 +521,14 @@ void ShenandoahConcurrentMark::finish_mark_from_roots(bool full_gc) {
 class ShenandoahCMDrainMarkingStackClosure: public VoidClosure {
   uint _worker_id;
   ShenandoahTaskTerminator* _terminator;
+  ShenandoahTaskTerminator* _selected_terminator;
   bool _reset_terminator;
 
 public:
-  ShenandoahCMDrainMarkingStackClosure(uint worker_id, ShenandoahTaskTerminator* t, bool reset_terminator = false):
+  ShenandoahCMDrainMarkingStackClosure(uint worker_id, ShenandoahTaskTerminator* t, ShenandoahTaskTerminator* sel_t, bool reset_terminator = false):
     _worker_id(worker_id),
     _terminator(t),
+    _selected_terminator(sel_t),
     _reset_terminator(reset_terminator) {
   }
 
@@ -533,7 +542,7 @@ public:
 
     shenandoah_assert_rp_isalive_installed();
 
-    scm->mark_loop(_worker_id, _terminator, rp,
+    scm->mark_loop(_worker_id, _terminator, _selected_terminator, rp,
                    false,   // not cancellable
                    false);  // do not do strdedup
 
@@ -707,7 +716,8 @@ void ShenandoahConcurrentMark::weak_refs_work_doit(bool full_gc) {
   // times, we need to be able to reuse the terminator.
   uint serial_worker_id = 0;
   ShenandoahTaskTerminator terminator(1, task_queues());
-  ShenandoahCMDrainMarkingStackClosure complete_gc(serial_worker_id, &terminator, /* reset_terminator = */ true);
+  ShenandoahTaskTerminator selected_terminator(1, selected_task_queues());
+  ShenandoahCMDrainMarkingStackClosure complete_gc(serial_worker_id, &terminator, &selected_terminator, /* reset_terminator = */ true);
 
   ShenandoahRefProcTaskExecutor executor(workers);
 
@@ -753,11 +763,12 @@ public:
     ShenandoahConcurrentMark* scm = sh->concurrent_mark();
     assert(sh->process_references(), "why else would we be here?");
     ShenandoahTaskTerminator terminator(1, scm->task_queues());
+    ShenandoahTaskTerminator selected_terminator(1, scm->selected_task_queues());
 
     ReferenceProcessor* rp = sh->ref_processor();
     shenandoah_assert_rp_isalive_installed();
 
-    scm->mark_loop(0, &terminator, rp,
+    scm->mark_loop(0, &terminator, &selected_terminator, rp,
                    false, // not cancellable
                    false); // do not do strdedup
   }
@@ -845,8 +856,13 @@ ShenandoahObjToScanQueue* ShenandoahConcurrentMark::get_queue(uint worker_id) {
   return _task_queues->queue(worker_id);
 }
 
+ShenandoahObjToScanQueue* ShenandoahConcurrentMark::get_selected_queue(uint worker_id) {
+  assert(selected_task_queues()->get_reserved() > worker_id, "No reserved queue for worker id: %d", worker_id);
+  return _selected_task_queues->queue(worker_id);
+}
+
 template <bool CANCELLABLE>
-void ShenandoahConcurrentMark::mark_loop_prework(uint w, ShenandoahTaskTerminator *t, ReferenceProcessor *rp,
+void ShenandoahConcurrentMark::mark_loop_prework(uint w, ShenandoahTaskTerminator *t, ShenandoahTaskTerminator *sel_t, ReferenceProcessor *rp,
                                                  bool strdedup) {
   ShenandoahObjToScanQueue* q = get_queue(w);
 
@@ -858,36 +874,36 @@ void ShenandoahConcurrentMark::mark_loop_prework(uint w, ShenandoahTaskTerminato
     if (_heap->has_forwarded_objects()) {
       if (strdedup) {
         ShenandoahMarkUpdateRefsMetadataDedupClosure cl(q, rp);
-        mark_loop_work<ShenandoahMarkUpdateRefsMetadataDedupClosure, CANCELLABLE>(&cl, ld, w, t);
+        mark_loop_work<ShenandoahMarkUpdateRefsMetadataDedupClosure, CANCELLABLE>(&cl, ld, w, t, sel_t);
       } else {
         ShenandoahMarkUpdateRefsMetadataClosure cl(q, rp);
-        mark_loop_work<ShenandoahMarkUpdateRefsMetadataClosure, CANCELLABLE>(&cl, ld, w, t);
+        mark_loop_work<ShenandoahMarkUpdateRefsMetadataClosure, CANCELLABLE>(&cl, ld, w, t, sel_t);
       }
     } else {
       if (strdedup) {
         ShenandoahMarkRefsMetadataDedupClosure cl(q, rp);
-        mark_loop_work<ShenandoahMarkRefsMetadataDedupClosure, CANCELLABLE>(&cl, ld, w, t);
+        mark_loop_work<ShenandoahMarkRefsMetadataDedupClosure, CANCELLABLE>(&cl, ld, w, t, sel_t);
       } else {
         ShenandoahMarkRefsMetadataClosure cl(q, rp);
-        mark_loop_work<ShenandoahMarkRefsMetadataClosure, CANCELLABLE>(&cl, ld, w, t);
+        mark_loop_work<ShenandoahMarkRefsMetadataClosure, CANCELLABLE>(&cl, ld, w, t, sel_t);
       }
     }
   } else {
     if (_heap->has_forwarded_objects()) {
       if (strdedup) {
         ShenandoahMarkUpdateRefsDedupClosure cl(q, rp);
-        mark_loop_work<ShenandoahMarkUpdateRefsDedupClosure, CANCELLABLE>(&cl, ld, w, t);
+        mark_loop_work<ShenandoahMarkUpdateRefsDedupClosure, CANCELLABLE>(&cl, ld, w, t, sel_t);
       } else {
         ShenandoahMarkUpdateRefsClosure cl(q, rp);
-        mark_loop_work<ShenandoahMarkUpdateRefsClosure, CANCELLABLE>(&cl, ld, w, t);
+        mark_loop_work<ShenandoahMarkUpdateRefsClosure, CANCELLABLE>(&cl, ld, w, t, sel_t);
       }
     } else {
       if (strdedup) {
         ShenandoahMarkRefsDedupClosure cl(q, rp);
-        mark_loop_work<ShenandoahMarkRefsDedupClosure, CANCELLABLE>(&cl, ld, w, t);
+        mark_loop_work<ShenandoahMarkRefsDedupClosure, CANCELLABLE>(&cl, ld, w, t, sel_t);
       } else {
         ShenandoahMarkRefsClosure cl(q, rp);
-        mark_loop_work<ShenandoahMarkRefsClosure, CANCELLABLE>(&cl, ld, w, t);
+        mark_loop_work<ShenandoahMarkRefsClosure, CANCELLABLE>(&cl, ld, w, t, sel_t);
       }
     }
   }
@@ -896,13 +912,15 @@ void ShenandoahConcurrentMark::mark_loop_prework(uint w, ShenandoahTaskTerminato
 }
 
 template <class T, bool CANCELLABLE>
-void ShenandoahConcurrentMark::mark_loop_work(T* cl, ShenandoahLiveData* live_data, uint worker_id, ShenandoahTaskTerminator *terminator) {
+void ShenandoahConcurrentMark::mark_loop_work(T* cl, ShenandoahLiveData* live_data, uint worker_id, ShenandoahTaskTerminator *terminator, ShenandoahTaskTerminator *selected_terminator) {
   int seed = 17;
   uintx stride = ShenandoahMarkLoopStride;
 
   ShenandoahHeap* heap = ShenandoahHeap::heap();
   ShenandoahObjToScanQueueSet* queues = task_queues();
+  ShenandoahObjToScanQueueSet* sel_queues = selected_task_queues();
   ShenandoahObjToScanQueue* q;
+  ShenandoahObjToScanQueue* sel_q;
   ShenandoahMarkTask t;
 
   /*
@@ -914,7 +932,11 @@ void ShenandoahConcurrentMark::mark_loop_work(T* cl, ShenandoahLiveData* live_da
    */
   assert(queues->get_reserved() == heap->workers()->active_workers(),
          "Need to reserve proper number of queues: reserved: %u, active: %u", queues->get_reserved(), heap->workers()->active_workers());
+  
+  assert(sel_queues->get_reserved() == heap->workers()->active_workers(),
+         "Need to reserve proper number of queues: reserved: %u, active: %u", sel_queues->get_reserved(), heap->workers()->active_workers());
 
+  // ------------------------------------------------------------
   q = queues->claim_next();
   while (q != NULL) {
     if (CANCELLABLE && heap->check_cancelled_gc_and_yield()) {
@@ -933,12 +955,39 @@ void ShenandoahConcurrentMark::mark_loop_work(T* cl, ShenandoahLiveData* live_da
   }
   q = get_queue(worker_id);
 
+
+
+  sel_q = sel_queues->claim_next();
+  while (sel_q != NULL) {
+    if (CANCELLABLE && heap->check_cancelled_gc_and_yield()) {
+      return;
+    }
+
+    for (uint i = 0; i < stride; i++) {
+      if (sel_q->pop(t)) {
+        do_task<T>(sel_q, cl, live_data, &t);
+      } else {
+        assert(sel_q->is_empty(), "Must be empty");
+        sel_q = sel_queues->claim_next();
+        break;
+      }
+    }
+  }
+  sel_q = get_queue(worker_id);
+  // ------------------------------------------------------------
+
   ShenandoahConcMarkSATBBufferClosure drain_satb(q);
+
+  // ------------------------------------------------------------
+
   ShenandoahSATBMarkQueueSet& satb_mq_set = ShenandoahBarrierSet::satb_mark_queue_set();
 
   /*
    * Normal marking loop:
    */
+
+  // ------------------------------------------------------------
+
   while (true) {
     if (CANCELLABLE && heap->check_cancelled_gc_and_yield()) {
       return;
@@ -959,14 +1008,27 @@ void ShenandoahConcurrentMark::mark_loop_work(T* cl, ShenandoahLiveData* live_da
       }
     }
 
+    for (uint i = 0; i < stride; i++) {
+      if (sel_q->pop(t) ||
+          sel_queues->steal(worker_id, &seed, t)) {
+        do_task<T>(sel_q, cl, live_data, &t);
+        work++;
+      } else {
+        break;
+      }
+    }
+
     if (work == 0) {
       // No work encountered in current stride, try to terminate.
       // Need to leave the STS here otherwise it might block safepoints.
       ShenandoahSuspendibleThreadSetLeaver stsl(CANCELLABLE && ShenandoahSuspendibleWorkers);
       ShenandoahTerminatorTerminator tt(heap);
-      if (terminator->offer_termination(&tt)) return;
+      if (terminator->offer_termination(&tt) && selected_terminator->offer_termination(&tt)) return;
+      // if (terminator->offer_termination(&tt)) break;
     }
   }
+  
+  // ------------------------------------------------------------
 }
 
 bool ShenandoahConcurrentMark::claim_codecache() {
