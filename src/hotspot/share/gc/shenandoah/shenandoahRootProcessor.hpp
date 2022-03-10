@@ -64,7 +64,7 @@ private:
 
 public:
   ShenandoahSerialRoots(ShenandoahPhaseTimings::Phase phase);
-  void oops_do(OopClosure* cl, OopClosure* sel_cl, uint worker_id);
+  void oops_do(OopClosure* cl, uint worker_id, OopClosure* sel_cl=NULL);
 };
 
 class ShenandoahJNIHandleRoots : public ShenandoahSerialRoot {

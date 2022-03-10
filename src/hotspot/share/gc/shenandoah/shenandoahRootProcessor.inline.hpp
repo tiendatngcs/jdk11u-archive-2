@@ -158,7 +158,7 @@ void ShenandoahRootScanner<ITR>::roots_do(uint worker_id, OopClosure* oops, OopC
   ResourceMark rm;
 
   // Process serial-claiming roots first
-  _serial_roots.oops_do(oops, worker_id);
+  _serial_roots.oops_do(oops, worker_id, sel_oops);
   // _serial_roots.oops_do(sel_oops, worker_id);
 
   _jni_roots.oops_do(oops, worker_id);
@@ -186,7 +186,7 @@ void ShenandoahRootScanner<ITR>::strong_roots_do(uint worker_id, OopClosure* oop
 
   // Process serial-claiming roots first
   // _serial_roots.oops_do(oops, worker_id);
-  _serial_roots.oops_do(oops, sel_oops, worker_id);
+  _serial_roots.oops_do(oops, worker_id, sel_oops);
 
   _jni_roots.oops_do(oops, worker_id);
   // _jni_roots.oops_do(sel_oops, worker_id);
