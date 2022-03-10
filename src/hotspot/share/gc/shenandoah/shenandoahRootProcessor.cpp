@@ -61,8 +61,8 @@ ShenandoahSerialRoots::ShenandoahSerialRoots(ShenandoahPhaseTimings::Phase phase
   _jvmti_root(&JvmtiExport::oops_do, phase, ShenandoahPhaseTimings::JVMTIRoots) {
 }
 
-void ShenandoahSerialRoots::oops_do(OopClosure* cl, uint worker_id) {
-  _universe_root.oops_do(cl, worker_id);
+void ShenandoahSerialRoots::oops_do(OopClosure* cl, OopClosure* sel_cl, uint worker_id) {
+  _universe_root.oops_do(sel_cl, worker_id);
   _object_synchronizer_root.oops_do(cl, worker_id);
   _management_root.oops_do(cl, worker_id);
   _system_dictionary_root.oops_do(cl, worker_id);
