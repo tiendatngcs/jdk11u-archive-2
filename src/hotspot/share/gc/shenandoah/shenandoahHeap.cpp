@@ -2475,7 +2475,7 @@ void ShenandoahHeap::op_init_updaterefs() {
   }
 
   // loop over all live objects in all active regions to collect stats
-  ShenandoahStatsCollectingObjectClosure cl(heap());
+  // ShenandoahStatsCollectingObjectClosure cl(heap());
   ShenandoahRegionIterator regions;
   ShenandoahHeapRegion* r = regions.next();
   // for (size_t i = 0; i < num_regions(); i++) {
@@ -2486,23 +2486,26 @@ void ShenandoahHeap::op_init_updaterefs() {
   //   }
   // }
 
-
+  // --------------------------------
+  // my mod
   // We need to reset all TLABs because we'd lose marks on all objects allocated in them.
-  {
-    // ShenandoahGCSubPhase phase(ShenandoahPhaseTimings::make_parsable);
-    make_parsable(true);
-  }
+  // {
+  //   // ShenandoahGCSubPhase phase(ShenandoahPhaseTimings::make_parsable);
+  //   make_parsable(true);
+  // }
 
-  while (r != NULL) {
-    if (r->is_active() && !r->is_cset()) {
-      size_t idx = r->index();
-      HeapWord* tams = complete_marking_context()->top_at_mark_start(r);
-      // tty->print_cr("Region %lu is_mutator_free %d, is_collector_free %d, state is %s, bottom %p, tams %p, top %p, end %p", idx, free_set()->is_mutator_free(idx), free_set()->is_collector_free(idx), ShenandoahHeapRegion::region_state_to_string(r->state()), r->bottom(), tams, r->top(), r->end());
-      // marked_object_iterate(r, &cl);
-      r->iterate(&cl);
-    }
-    r = regions.next();
-  }
+  // while (r != NULL) {
+  //   if (r->is_active() && !r->is_cset()) {
+  //     size_t idx = r->index();
+  //     HeapWord* tams = complete_marking_context()->top_at_mark_start(r);
+  //     // tty->print_cr("Region %lu is_mutator_free %d, is_collector_free %d, state is %s, bottom %p, tams %p, top %p, end %p", idx, free_set()->is_mutator_free(idx), free_set()->is_collector_free(idx), ShenandoahHeapRegion::region_state_to_string(r->state()), r->bottom(), tams, r->top(), r->end());
+  //     // marked_object_iterate(r, &cl);
+  //     r->iterate(&cl);
+  //   }
+  //   r = regions.next();
+  // }
+
+  // --------------------------------
   set_after_heap_scan(true);
 }
 
