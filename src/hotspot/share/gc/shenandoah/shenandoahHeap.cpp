@@ -801,50 +801,51 @@ void ShenandoahHeap::increase_oop_stats_mark(oop obj) {
 }
 
 void ShenandoahHeap::update_histogram(oop obj) {
-  // for full heap object scan, include all objects, even dummy.
-  if (obj == NULL) return;
-  assert(is_oop(obj), "must be oop");
-  // if (obj->is_dummy()) return;
+  // // for full heap object scan, include all objects, even dummy.
+  // if (obj == NULL) return;
+  // assert(is_oop(obj), "must be oop");
+  // // if (obj->is_dummy()) return;
 
-  // oop_check_to_reset_access_counter(obj);
-  intptr_t ac = obj->access_counter();
-  intptr_t gc_epoch = obj->gc_epoch();
-  int obj_size = obj->size();
-  // tty->print_cr("examinating oop %p | ac %lu | gc_epoch %lu", (oopDesc*)obj, ac, gc_epoch);
-  // increase_total_object_size(obj->size() * HeapWordSize);
+  // // oop_check_to_reset_access_counter(obj);
+  // intptr_t ac = obj->access_counter();
+  // intptr_t gc_epoch = obj->gc_epoch();
+  // int obj_size = obj->size();
+  // // tty->print_cr("examinating oop %p | ac %lu | gc_epoch %lu", (oopDesc*)obj, ac, gc_epoch);
+  // // increase_total_object_size(obj->size() * HeapWordSize);
 
-  if (!obj->is_valid()) {
-    // if (complete_marking_context()->mark_bit_map()->isMarked(obj)) {
-    //   // ResourceMark rm;
-    //   // tty->print_cr("untouched oop during heap scan | ac %lu | gc_epoch %lu | size %d | name %s",
-    //   //               obj->access_counter(),
-    //   //               obj->gc_epoch(),
-    //   //               obj->size(),
-    //   //               obj->klass()->external_name());
-    // }
-    // do nothing
-  } else {
-    // increase_oop_stats_evac(true, false, obj_size*HeapWordSize);
-    // increase_oop_stats_evac(true, true, 1);
-    if (ac == 0){
-      _histogram[0] += 1;
-      _size_histogram[0] += obj_size;
-      return;
-    }
-    int idx = static_cast<int>(log2(ac)) + 1;
-    int arr_size = sizeof(_histogram)/sizeof(_histogram[0]);
-    // printf("arr_size %d | ac %lu | idx %d\n", arr_size, ac, idx);
-    if (idx >= arr_size) {
-      // Atomic::add(1, &_histogram[arr_size-1]);
-      _histogram[arr_size-1] += 1;
-      _size_histogram[arr_size-1] += obj_size;
-    }
-    else {
-      // Atomic::add(1, &_histogram[idx]);
-      _histogram[idx] += 1;
-      _size_histogram[idx] += obj_size;
-    }
-  }
+  // if (!obj->is_valid()) {
+  //   // if (complete_marking_context()->mark_bit_map()->isMarked(obj)) {
+  //   //   // ResourceMark rm;
+  //   //   // tty->print_cr("untouched oop during heap scan | ac %lu | gc_epoch %lu | size %d | name %s",
+  //   //   //               obj->access_counter(),
+  //   //   //               obj->gc_epoch(),
+  //   //   //               obj->size(),
+  //   //   //               obj->klass()->external_name());
+  //   // }
+  //   // do nothing
+  // } else {
+  //   // increase_oop_stats_evac(true, false, obj_size*HeapWordSize);
+  //   // increase_oop_stats_evac(true, true, 1);
+  //   if (ac == 0){
+  //     _histogram[0] += 1;
+  //     _size_histogram[0] += obj_size;
+  //     return;
+  //   }
+  //   int idx = static_cast<int>(log2(ac)) + 1;
+  //   int arr_size = sizeof(_histogram)/sizeof(_histogram[0]);
+  //   // printf("arr_size %d | ac %lu | idx %d\n", arr_size, ac, idx);
+  //   if (idx >= arr_size) {
+  //     // Atomic::add(1, &_histogram[arr_size-1]);
+  //     _histogram[arr_size-1] += 1;
+  //     _size_histogram[arr_size-1] += obj_size;
+  //   }
+  //   else {
+  //     // Atomic::add(1, &_histogram[idx]);
+  //     _histogram[idx] += 1;
+  //     _size_histogram[idx] += obj_size;
+  //   }
+  // }
+  obj->is_dummy()
 }
 
 void ShenandoahHeap::reset_histogram() {
