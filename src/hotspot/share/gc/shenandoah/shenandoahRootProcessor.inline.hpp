@@ -158,10 +158,10 @@ void ShenandoahRootScanner<ITR>::roots_do(uint worker_id, OopClosure* oops, OopC
   ResourceMark rm;
 
   // Process serial-claiming roots first
-  _serial_roots.oops_do(oops, worker_id, sel_oops);
+  _serial_roots.oops_do(oops, worker_id, NULL);
   // _serial_roots.oops_do(sel_oops, worker_id);
 
-  _jni_roots.oops_do(oops, worker_id);
+  _jni_roots.oops_do(sel_oops, worker_id);
   // _jni_roots.oops_do(sel_oops, worker_id);
 
   // Process light-weight/limited parallel roots then
@@ -186,9 +186,9 @@ void ShenandoahRootScanner<ITR>::strong_roots_do(uint worker_id, OopClosure* oop
 
   // Process serial-claiming roots first
   // _serial_roots.oops_do(oops, worker_id);
-  _serial_roots.oops_do(oops, worker_id, sel_oops);
+  _serial_roots.oops_do(oops, worker_id, NULL);
 
-  _jni_roots.oops_do(oops, worker_id);
+  _jni_roots.oops_do(sel_oops, worker_id);
   // _jni_roots.oops_do(sel_oops, worker_id);
 
   // Process light-weight/limited parallel roots then
