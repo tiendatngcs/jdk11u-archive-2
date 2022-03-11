@@ -2763,7 +2763,7 @@ void ShenandoahHeap::op_stats_logging() {
                 heap->oop_stats_mark(true, true),
                 heap->oop_stats_mark(true, false),
                 heap->oop_stats_mark(false, true),
-                heap->oop_stats_mark(false, false),
+                heap->oop_stats_mark(false, false)),
 
   log_info(gc)("Valid/invalid oop stats evac\n"
                 "valid_count_below_tams: %lu bytes\n"
