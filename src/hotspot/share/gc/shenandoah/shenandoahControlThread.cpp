@@ -484,13 +484,13 @@ void ShenandoahControlThread::service_concurrent_normal_cycle(GCCause::Cause cau
   //               "invalid_count: %lu bytes\n"
   //               "invalid_size: %lu bytes\n"
   //               "total_count: %lu bytes\n"
-  //               "total_size: %lu bytes\n", heap->oop_stats(true, true), heap->oop_stats(true, false), heap->oop_stats(false, true), heap->oop_stats(false, false), heap->oop_stats(true, true)+heap->oop_stats(false, true), heap->oop_stats(true, false)+heap->oop_stats(false, false));
+  //               "total_size: %lu bytes\n", heap->oop_stats_evac(true, true), heap->oop_stats_evac(true, false), heap->oop_stats_evac(false, true), heap->oop_stats_evac(false, false), heap->oop_stats_evac(true, true)+heap->oop_stats_evac(false, true), heap->oop_stats_evac(true, false)+heap->oop_stats_evac(false, false));
 
 
 
 
   // heap->reset_histogram();
-  // heap->reset_oop_stats();
+  // heap->reset_oop_stats_evac();
   // heap->reset_bytes_allocated_since_objects_scan();
   // heap->reset_used_by_regions();
   // heap->reset_total_marked_objects();

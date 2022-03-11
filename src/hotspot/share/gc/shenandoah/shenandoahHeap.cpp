@@ -465,6 +465,10 @@ ShenandoahHeap::ShenandoahHeap(ShenandoahCollectorPolicy* policy) :
   _valid_size_above_tams(0),
   _invalid_count_above_tams(0),
   _invalid_size_above_tams(0),
+  _valid_count(0),
+  _valid_size(0),
+  _invalid_count(0),
+  _invalid_size(0),
   _histogram(),
   _size_histogram(),
   _max_workers(MAX2(ConcGCThreads, ParallelGCThreads)),
@@ -645,7 +649,7 @@ size_t ShenandoahHeap::committed() const {
   return _committed;
 }
 
-size_t ShenandoahHeap::oop_stats(bool is_valid, bool is_count, bool is_below_tams) const {
+size_t ShenandoahHeap::oop_stats_evac(bool is_valid, bool is_count, bool is_below_tams) const {
   if (is_below_tams) {
     if (is_valid) {
       if (is_count) {
@@ -669,6 +673,19 @@ size_t ShenandoahHeap::oop_stats(bool is_valid, bool is_count, bool is_below_tam
     }
     return _invalid_size_above_tams;
   }
+}
+
+size_t ShenandoahHeap::oop_stats_evac(bool is_valid, bool is_count) const {
+  if (is_valid) {
+    if (is_count) {
+      return _valid_count;
+    }
+    return _valid_size;
+  }
+  if (is_count) {
+    return _invalid_count;
+  }
+  return _invalid_size;
 }
 
 const size_t* ShenandoahHeap::histogram()   const {
@@ -729,7 +746,7 @@ void ShenandoahHeap::increase_total_object_size(size_t bytes) {
 
 
 ///// stats keeping mechanics
-void ShenandoahHeap::increase_oop_stats(oop obj) {
+void ShenandoahHeap::increase_oop_stats_evac(oop obj) {
   assert(heap_region_containing(obj)->is_cset(), "Obj must be in collecting region");
   bool is_below_tams = !complete_marking_context()->allocated_after_mark_start(obj);
   if (is_below_tams){
@@ -773,6 +790,16 @@ void ShenandoahHeap::increase_oop_stats(oop obj) {
   }
 }
 
+void ShenandoahHeap::increase_oop_stats_mark(oop obj) {
+  if (obj->is_valid()) {
+    _valid_count += 1;
+    _valid_size += obj->size();
+  } else {
+    _invalid_count += 1;
+    _invalid_size += obj->size();
+  }
+}
+
 void ShenandoahHeap::update_histogram(oop obj) {
   // for full heap object scan, include all objects, even dummy.
   if (obj == NULL) return;
@@ -798,8 +825,8 @@ void ShenandoahHeap::update_histogram(oop obj) {
     }
     // do nothing
   } else {
-    // increase_oop_stats(true, false, obj_size*HeapWordSize);
-    // increase_oop_stats(true, true, 1);
+    // increase_oop_stats_evac(true, false, obj_size*HeapWordSize);
+    // increase_oop_stats_evac(true, true, 1);
     if (ac == 0){
       _histogram[0] += 1;
       _size_histogram[0] += obj_size;
@@ -827,7 +854,7 @@ void ShenandoahHeap::reset_histogram() {
   memset(_size_histogram, 0, sizeof(_size_histogram));
 }
 
-void ShenandoahHeap::reset_oop_stats() {
+void ShenandoahHeap::reset_oop_stats_evac() {
   OrderAccess::acquire();
   _valid_count_below_tams = 0;
   _valid_size_below_tams = 0;
@@ -840,6 +867,15 @@ void ShenandoahHeap::reset_oop_stats() {
 
   _invalid_count_above_tams = 0;
   _invalid_size_above_tams = 0;
+}
+
+void ShenandoahHeap::reset_oop_stats_mark() {
+  OrderAccess::acquire();
+  _valid_count = 0;
+  _valid_size = 0;
+
+  _invalid_count = 0;
+  _invalid_size = 0;
 }
 
 void ShenandoahHeap::notify_mutator_alloc_words(size_t words, bool waste) {
@@ -1798,7 +1834,7 @@ void ShenandoahHeap::op_final_mark() {
       rp->verify_no_references_recorded();
     }
   }
-  // tty->print_cr("Mark finished, total marked %lu bytes", oop_stats(true, false)+oop_stats(false, false));
+  // tty->print_cr("Mark finished, total marked %lu bytes", oop_stats_evac(true, false)+oop_stats_evac(false, false));
 }
 
 void ShenandoahHeap::op_conc_evac() {
@@ -2719,7 +2755,17 @@ void ShenandoahHeap::op_stats_logging() {
     log_info(gc)("\t%d: %lu", i, heap->size_histogram()[i]);
   }
 
-  log_info(gc)("Valid/invalid oop stats\n"
+  log_info(gc)("Valid/invalid oop stats mark\n"
+                "valid_count: %lu bytes\n"
+                "valid_size: %lu bytes\n"
+                "invalid_count: %lu bytes\n"
+                "invalid_size: %lu bytes\n\n"
+                heap->oop_stats_mark(true, true),
+                heap->oop_stats_mark(true, false),
+                heap->oop_stats_mark(false, true),
+                heap->oop_stats_mark(false, false),
+
+  log_info(gc)("Valid/invalid oop stats evac\n"
                 "valid_count_below_tams: %lu bytes\n"
                 "valid_size_below_tams: %lu bytes\n"
                 "invalid_count_below_tams: %lu bytes\n"
@@ -2728,18 +2774,19 @@ void ShenandoahHeap::op_stats_logging() {
                 "valid_size_above_tams: %lu bytes\n"
                 "invalid_count_above_tams: %lu bytes\n"
                 "invalid_size_above_tams: %lu bytes\n",
-                heap->oop_stats(true, true, true),
-                heap->oop_stats(true, false, true),
-                heap->oop_stats(false, true, true),
-                heap->oop_stats(false, false, true),
-                heap->oop_stats(true, true, false),
-                heap->oop_stats(true, false, false),
-                heap->oop_stats(false, true, false),
-                heap->oop_stats(false, false, false));
+                heap->oop_stats_evac(true, true, true),
+                heap->oop_stats_evac(true, false, true),
+                heap->oop_stats_evac(false, true, true),
+                heap->oop_stats_evac(false, false, true),
+                heap->oop_stats_evac(true, true, false),
+                heap->oop_stats_evac(true, false, false),
+                heap->oop_stats_evac(false, true, false),
+                heap->oop_stats_evac(false, false, false));
 
 
   heap->reset_histogram();
-  heap->reset_oop_stats();
+  heap->reset_oop_stats_evac();
+  heap->reset_oop_stats_mark();
   heap->reset_bytes_allocated_since_objects_scan();
   heap->reset_used_by_regions();
   heap->reset_total_marked_objects();

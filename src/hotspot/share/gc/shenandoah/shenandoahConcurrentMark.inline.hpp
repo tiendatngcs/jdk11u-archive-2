@@ -43,8 +43,12 @@ void ShenandoahConcurrentMark::do_task(ShenandoahObjToScanQueue* q, T* cl, Shena
   shenandoah_assert_marked(NULL, obj);
   shenandoah_assert_not_in_cset_except(NULL, obj, _heap->cancelled_gc());
 
-  if (print_oop) {
-    if (!obj->is_dummy() && !obj->is_valid()) {
+  increase_oop_stats_mark(obj);
+  if (obj->is_valid()) {
+    _heap->update_histogram(obj);
+  }
+  else if (!obj->is_dummy()) {
+    if (print_oop) {
       ResourceMark rm;
       if (obj->klass()->is_array_klass()){
         tty->print_cr("untouched non-dummy oop during mark | ac %lu | gc_epoch %lu | size %d | header_size %d | name %s",
@@ -279,7 +283,7 @@ inline void ShenandoahConcurrentMark::mark_through_ref(T *p, ShenandoahHeap* hea
 
       if (mark_context->mark(obj)) {
         // heap->update_histogram(obj);
-        // tty->print_cr("Marked oop size %d bytes, region %lu, is humongous %s, total marked %lu", obj->size()*HeapWordSize, heap->heap_region_index_containing(obj), heap->heap_region_containing(obj)->is_humongous() ? "true" : "false", (heap->oop_stats(true, false)+heap->oop_stats(false, false)));
+        // tty->print_cr("Marked oop size %d bytes, region %lu, is humongous %s, total marked %lu", obj->size()*HeapWordSize, heap->heap_region_index_containing(obj), heap->heap_region_containing(obj)->is_humongous() ? "true" : "false", (heap->oop_stats_evac(true, false)+heap->oop_stats_evac(false, false)));
         if (heap->heap_region_containing(obj)->is_humongous()){
           tty->print_cr("Humongous oop detected size %d bytes, region %lu", obj->size()*HeapWordSize, heap->heap_region_index_containing(obj));
         }
@@ -331,7 +335,7 @@ inline void ShenandoahConcurrentMark::mark_through_ref(T *p, ShenandoahHeap* hea
 
 //       if (mark_context->mark(obj)) {
 //         // heap->update_histogram(obj);
-//         // tty->print_cr("Marked oop size %d bytes, region %lu, is humongous %s, total marked %lu", obj->size()*HeapWordSize, heap->heap_region_index_containing(obj), heap->heap_region_containing(obj)->is_humongous() ? "true" : "false", (heap->oop_stats(true, false)+heap->oop_stats(false, false)));
+//         // tty->print_cr("Marked oop size %d bytes, region %lu, is humongous %s, total marked %lu", obj->size()*HeapWordSize, heap->heap_region_index_containing(obj), heap->heap_region_containing(obj)->is_humongous() ? "true" : "false", (heap->oop_stats_evac(true, false)+heap->oop_stats_evac(false, false)));
 //         if (heap->heap_region_containing(obj)->is_humongous()){
 //           tty->print_cr("Humongous oop detected size %d bytes, region %lu", obj->size()*HeapWordSize, heap->heap_region_index_containing(obj));
 //         }
