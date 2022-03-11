@@ -804,7 +804,6 @@ void ShenandoahHeap::update_histogram(oop obj) {
   // for full heap object scan, include all objects, even dummy.
   if (obj == NULL) return;
   assert(is_oop(obj), "must be oop");
-  assert(obj->klass()!=NULL, "must have valid klass");
   // if (obj->is_dummy()) return;
 
   // oop_check_to_reset_access_counter(obj);
@@ -812,7 +811,7 @@ void ShenandoahHeap::update_histogram(oop obj) {
   intptr_t gc_epoch = obj->gc_epoch();
   int obj_size = obj->size();
   // tty->print_cr("examinating oop %p | ac %lu | gc_epoch %lu", (oopDesc*)obj, ac, gc_epoch);
-  increase_total_object_size(obj->size() * HeapWordSize);
+  // increase_total_object_size(obj->size() * HeapWordSize);
 
   if (!obj->is_valid()) {
     // if (complete_marking_context()->mark_bit_map()->isMarked(obj)) {
