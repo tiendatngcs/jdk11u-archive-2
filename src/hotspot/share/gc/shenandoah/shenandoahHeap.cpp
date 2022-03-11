@@ -845,7 +845,7 @@ void ShenandoahHeap::update_histogram(oop obj) {
   //     _size_histogram[idx] += obj_size;
   //   }
   // }
-  obj->is_dummy()
+  obj->is_dummy();
 }
 
 void ShenandoahHeap::reset_histogram() {
