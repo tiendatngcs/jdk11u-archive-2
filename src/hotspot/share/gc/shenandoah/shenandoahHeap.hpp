@@ -240,7 +240,7 @@ public:
   void reset_oop_stats_mark();
 
   size_t oop_stats_evac(bool is_valid, bool is_count, bool is_below_tams) const;
-  size_t oop_stats_mark(bool is_valid, bool is_count, bool is_below_tams) const;
+  size_t oop_stats_mark(bool is_valid, bool is_count) const;
 
   const size_t* histogram()   const;
   const size_t* size_histogram() const;
