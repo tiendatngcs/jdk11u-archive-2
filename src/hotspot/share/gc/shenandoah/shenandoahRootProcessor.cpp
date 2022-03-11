@@ -66,8 +66,8 @@ void ShenandoahSerialRoots::oops_do(OopClosure* cl, uint worker_id, OopClosure* 
   _universe_root.oops_do(cl, worker_id);
   _object_synchronizer_root.oops_do(cl, worker_id);
   _management_root.oops_do(cl, worker_id);
-  _system_dictionary_root.oops_do(sel_cl, worker_id);
-  _jvmti_root.oops_do(cl, worker_id);
+  _system_dictionary_root.oops_do(cl, worker_id);
+  _jvmti_root.oops_do(sel_cl, worker_id);
 }
 
 ShenandoahJNIHandleRoots::ShenandoahJNIHandleRoots(ShenandoahPhaseTimings::Phase phase) :
