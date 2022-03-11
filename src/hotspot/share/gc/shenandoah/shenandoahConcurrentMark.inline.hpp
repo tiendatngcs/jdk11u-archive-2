@@ -43,11 +43,12 @@ void ShenandoahConcurrentMark::do_task(ShenandoahObjToScanQueue* q, T* cl, Shena
   shenandoah_assert_marked(NULL, obj);
   shenandoah_assert_not_in_cset_except(NULL, obj, _heap->cancelled_gc());
 
-  _heap->increase_oop_stats_mark(obj);
   if (obj->is_valid()) {
+    _heap->increase_oop_stats_mark(obj);
     _heap->update_histogram(obj);
   }
   else if (!obj->is_dummy()) {
+    _heap->increase_oop_stats_mark(obj);
     if (print_oop) {
       ResourceMark rm;
       if (obj->klass()->is_array_klass()){
