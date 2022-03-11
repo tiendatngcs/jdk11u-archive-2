@@ -2759,7 +2759,7 @@ void ShenandoahHeap::op_stats_logging() {
                 "valid_count: %lu bytes\n"
                 "valid_size: %lu bytes\n"
                 "invalid_count: %lu bytes\n"
-                "invalid_size: %lu bytes\n\n"
+                "invalid_size: %lu bytes\n",
                 heap->oop_stats_mark(true, true),
                 heap->oop_stats_mark(true, false),
                 heap->oop_stats_mark(false, true),
