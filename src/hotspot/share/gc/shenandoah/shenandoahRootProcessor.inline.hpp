@@ -161,14 +161,14 @@ void ShenandoahRootScanner<ITR>::roots_do(uint worker_id, OopClosure* oops, OopC
   _serial_roots.oops_do(oops, worker_id, NULL);
   // _serial_roots.oops_do(sel_oops, worker_id);
 
-  _jni_roots.oops_do(sel_oops, worker_id);
+  _jni_roots.oops_do(oops, worker_id);
   // _jni_roots.oops_do(sel_oops, worker_id);
 
   // Process light-weight/limited parallel roots then
   _dedup_roots.oops_do(&always_true, oops, worker_id);
   // _dedup_roots.oops_do(&always_true, sel_oops, worker_id);
   
-  _cld_roots.cld_do(clds, worker_id);
+  _cld_roots.cld_do(sel_clds, worker_id);
   // _cld_roots.cld_do(sel_clds, worker_id);
 
   // Process heavy-weight/fully parallel roots the last
@@ -188,11 +188,11 @@ void ShenandoahRootScanner<ITR>::strong_roots_do(uint worker_id, OopClosure* oop
   // _serial_roots.oops_do(oops, worker_id);
   _serial_roots.oops_do(oops, worker_id, NULL);
 
-  _jni_roots.oops_do(sel_oops, worker_id);
+  _jni_roots.oops_do(oops, worker_id);
   // _jni_roots.oops_do(sel_oops, worker_id);
 
   // Process light-weight/limited parallel roots then
-  _cld_roots.always_strong_cld_do(clds, worker_id);
+  _cld_roots.always_strong_cld_do(sel_clds, worker_id);
   // _cld_roots.always_strong_cld_do(sel_clds, worker_id);
 
   // Process heavy-weight/fully parallel roots the last
