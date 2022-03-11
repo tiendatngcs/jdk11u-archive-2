@@ -675,7 +675,7 @@ size_t ShenandoahHeap::oop_stats_evac(bool is_valid, bool is_count, bool is_belo
   }
 }
 
-size_t ShenandoahHeap::oop_stats_evac(bool is_valid, bool is_count) const {
+size_t ShenandoahHeap::oop_stats_mark(bool is_valid, bool is_count) const {
   if (is_valid) {
     if (is_count) {
       return _valid_count;
