@@ -810,19 +810,19 @@ void ShenandoahHeap::update_histogram(oop obj) {
   // oop_check_to_reset_access_counter(obj);
   intptr_t ac = obj->access_counter();
   intptr_t gc_epoch = obj->gc_epoch();
-  int obj_size = obj->klass()->oop_size(obj);
+  int obj_size = obj->size();
   // tty->print_cr("examinating oop %p | ac %lu | gc_epoch %lu", (oopDesc*)obj, ac, gc_epoch);
   increase_total_object_size(obj->size() * HeapWordSize);
 
   if (!obj->is_valid()) {
-    if (complete_marking_context()->mark_bit_map()->isMarked(obj)) {
-      // ResourceMark rm;
-      // tty->print_cr("untouched oop during heap scan | ac %lu | gc_epoch %lu | size %d | name %s",
-      //               obj->access_counter(),
-      //               obj->gc_epoch(),
-      //               obj->size(),
-      //               obj->klass()->external_name());
-    }
+    // if (complete_marking_context()->mark_bit_map()->isMarked(obj)) {
+    //   // ResourceMark rm;
+    //   // tty->print_cr("untouched oop during heap scan | ac %lu | gc_epoch %lu | size %d | name %s",
+    //   //               obj->access_counter(),
+    //   //               obj->gc_epoch(),
+    //   //               obj->size(),
+    //   //               obj->klass()->external_name());
+    // }
     // do nothing
   } else {
     // increase_oop_stats_evac(true, false, obj_size*HeapWordSize);
