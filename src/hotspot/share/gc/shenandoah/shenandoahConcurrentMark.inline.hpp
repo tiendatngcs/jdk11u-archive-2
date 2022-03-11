@@ -45,7 +45,7 @@ void ShenandoahConcurrentMark::do_task(ShenandoahObjToScanQueue* q, T* cl, Shena
 
   _heap->increase_oop_stats_mark(obj);
   if (obj->is_valid()) {
-    // _heap->update_histogram(obj);
+    _heap->update_histogram(obj);
   }
   else if (!obj->is_dummy()) {
     if (print_oop) {

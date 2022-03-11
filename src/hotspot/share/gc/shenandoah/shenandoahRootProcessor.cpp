@@ -63,8 +63,8 @@ ShenandoahSerialRoots::ShenandoahSerialRoots(ShenandoahPhaseTimings::Phase phase
 
 void ShenandoahSerialRoots::oops_do(OopClosure* cl, uint worker_id, OopClosure* sel_cl) {
   if (sel_cl == NULL) sel_cl = cl;
-  _universe_root.oops_do(sel_cl, worker_id);
-  _object_synchronizer_root.oops_do(cl, worker_id);
+  _universe_root.oops_do(cl, worker_id);
+  _object_synchronizer_root.oops_do(sel_cl, worker_id);
   _management_root.oops_do(cl, worker_id);
   _system_dictionary_root.oops_do(cl, worker_id);
   _jvmti_root.oops_do(cl, worker_id);
