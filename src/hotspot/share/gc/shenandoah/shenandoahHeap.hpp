@@ -189,6 +189,9 @@ private:
 
   size_t _invalid_count;
   size_t _invalid_size;
+  
+  size_t _dummy_count;
+  size_t _dummy_size;
 
   size_t _histogram[30];
   size_t _size_histogram[30];
@@ -241,6 +244,7 @@ public:
 
   size_t oop_stats_evac(bool is_valid, bool is_count, bool is_below_tams) const;
   size_t oop_stats_mark(bool is_valid, bool is_count) const;
+  size_t dummy_oop_stats_mark(bool is_count) const;
 
   const size_t* histogram()   const;
   const size_t* size_histogram() const;

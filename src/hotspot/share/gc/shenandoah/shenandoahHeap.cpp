@@ -469,6 +469,8 @@ ShenandoahHeap::ShenandoahHeap(ShenandoahCollectorPolicy* policy) :
   _valid_size(0),
   _invalid_count(0),
   _invalid_size(0),
+  _dummy_count(0),
+  _dummy_size(0),
   _histogram(),
   _size_histogram(),
   _max_workers(MAX2(ConcGCThreads, ParallelGCThreads)),
@@ -688,6 +690,13 @@ size_t ShenandoahHeap::oop_stats_mark(bool is_valid, bool is_count) const {
   return _invalid_size;
 }
 
+size_t ShenandoahHeap::dummy_oop_stats_mark(bool is_count) const {
+  if (is_count) {
+    return _dummy_count;
+  }
+  return _dummy_size;
+}
+
 const size_t* ShenandoahHeap::histogram()   const {
   // OrderAccess::acquire();
   return _histogram;
@@ -792,11 +801,16 @@ void ShenandoahHeap::increase_oop_stats_evac(oop obj) {
 
 void ShenandoahHeap::increase_oop_stats_mark(oop obj) {
   if (obj->is_valid()) {
+    assert(!obj->is_dummy(), "Valid oop cannot be dummy");
     _valid_count += 1;
     _valid_size += obj->size();
   } else {
     _invalid_count += 1;
     _invalid_size += obj->size();
+    if (obj->is_dummy()) {
+      _dummy_count += 1;
+      _dummy_size += obj->size();
+    }
   }
 }
 
@@ -875,6 +889,9 @@ void ShenandoahHeap::reset_oop_stats_mark() {
 
   _invalid_count = 0;
   _invalid_size = 0;
+
+  _dummy_count = 0;
+  _dummy_size = 0;
 }
 
 void ShenandoahHeap::notify_mutator_alloc_words(size_t words, bool waste) {
@@ -2758,29 +2775,33 @@ void ShenandoahHeap::op_stats_logging() {
                 "valid_count: %lu bytes\n"
                 "valid_size: %lu bytes\n"
                 "invalid_count: %lu bytes\n"
-                "invalid_size: %lu bytes\n",
+                "invalid_size: %lu bytes\n"
+                "dummy_count: %lu bytes\n"
+                "dummy_size: %lu bytes\n",
                 heap->oop_stats_mark(true, true),
                 heap->oop_stats_mark(true, false),
                 heap->oop_stats_mark(false, true),
-                heap->oop_stats_mark(false, false));
+                heap->oop_stats_mark(false, false),
+                heap->dummy_oop_stats_mark(true),
+                heap->dummy_oop_stats_mark(false));
 
-  log_info(gc)("Valid/invalid oop stats evac\n"
-                "valid_count_below_tams: %lu bytes\n"
-                "valid_size_below_tams: %lu bytes\n"
-                "invalid_count_below_tams: %lu bytes\n"
-                "invalid_size_below_tams: %lu bytes\n\n"
-                "valid_count_above_tams: %lu bytes\n"
-                "valid_size_above_tams: %lu bytes\n"
-                "invalid_count_above_tams: %lu bytes\n"
-                "invalid_size_above_tams: %lu bytes\n",
-                heap->oop_stats_evac(true, true, true),
-                heap->oop_stats_evac(true, false, true),
-                heap->oop_stats_evac(false, true, true),
-                heap->oop_stats_evac(false, false, true),
-                heap->oop_stats_evac(true, true, false),
-                heap->oop_stats_evac(true, false, false),
-                heap->oop_stats_evac(false, true, false),
-                heap->oop_stats_evac(false, false, false));
+  // log_info(gc)("Valid/invalid oop stats evac\n"
+  //               "valid_count_below_tams: %lu bytes\n"
+  //               "valid_size_below_tams: %lu bytes\n"
+  //               "invalid_count_below_tams: %lu bytes\n"
+  //               "invalid_size_below_tams: %lu bytes\n\n"
+  //               "valid_count_above_tams: %lu bytes\n"
+  //               "valid_size_above_tams: %lu bytes\n"
+  //               "invalid_count_above_tams: %lu bytes\n"
+  //               "invalid_size_above_tams: %lu bytes\n",
+  //               heap->oop_stats_evac(true, true, true),
+  //               heap->oop_stats_evac(true, false, true),
+  //               heap->oop_stats_evac(false, true, true),
+  //               heap->oop_stats_evac(false, false, true),
+  //               heap->oop_stats_evac(true, true, false),
+  //               heap->oop_stats_evac(true, false, false),
+  //               heap->oop_stats_evac(false, true, false),
+  //               heap->oop_stats_evac(false, false, false));
 
 
   heap->reset_histogram();
