@@ -152,9 +152,17 @@ void C1_MacroAssembler::initialize_header(Register obj, Register klass, Register
     assert_different_registers(obj, klass, len, t1, t2);
     movptr(t1, Address(klass, Klass::prototype_header_offset()));
     movptr(Address(obj, oopDesc::mark_offset_in_bytes()), t1);
+
+    // zero ac and gc_epoch
+    movptr(Address(obj, oopDesc::access_counter_offset_in_bytes ()), (intptr_t)0);
+    movptr(Address(obj, oopDesc::gc_epoch_offset_in_bytes ()), (intptr_t)0);
   } else {
     // This assumes that all prototype bits fit in an int32_t
     movptr(Address(obj, oopDesc::mark_offset_in_bytes ()), (int32_t)(intptr_t)markOopDesc::prototype());
+
+    // zero ac and gc_epoch
+    movptr(Address(obj, oopDesc::access_counter_offset_in_bytes ()), (intptr_t)0);
+    movptr(Address(obj, oopDesc::gc_epoch_offset_in_bytes ()), (intptr_t)0);
   }
 #ifdef _LP64
   if (UseCompressedClassPointers) { // Take care not to kill klass
