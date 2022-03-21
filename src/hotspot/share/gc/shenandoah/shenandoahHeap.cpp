@@ -852,6 +852,7 @@ void ShenandoahHeap::update_histogram(oop obj) {
   } else {
     // increase_oop_stats_evac(true, false, obj_size*HeapWordSize);
     // increase_oop_stats_evac(true, true, 1);
+
     if (ac == 0){
       _histogram[0] += 1;
       _size_histogram[0] += obj_size;
@@ -869,6 +870,15 @@ void ShenandoahHeap::update_histogram(oop obj) {
       // Atomic::add(1, &_histogram[idx]);
       _histogram[idx] += 1;
       _size_histogram[idx] += obj_size;
+    }
+
+    if (idx > 27) {
+      ResourceMark rm;
+      tty->print_cr("Unintialized oop ? | ac %lu | gc_epoch %lu | size %d | name %s",
+                    obj->access_counter(),
+                    obj->gc_epoch(),
+                    obj->size(),
+                    obj->klass()->external_name());
     }
   }
 }
