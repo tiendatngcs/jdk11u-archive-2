@@ -802,16 +802,18 @@ void ShenandoahHeap::increase_oop_stats_evac(oop obj) {
 void ShenandoahHeap::increase_oop_stats_mark(oop obj) {
   if (obj->is_valid()) {
     // assert(!obj->is_dummy(), "Valid oop cannot be dummy");
-    if (obj->is_dummy()) {
-      ResourceMark rm;
-      tty->print_cr("Valid oop cannot be dummy  | ac %lu | gc_epoch %lu | size %d | header_size %d | name %s | is_array_class %d",
-                    obj->access_counter(),
-                    obj->gc_epoch(),
-                    obj->size(),
-                    obj->header_size(),
-                    obj->klass()->external_name(),
-                    obj->klass()->is_array_klass());
-    }
+    // if (obj->is_dummy()) {
+    //   ResourceMark rm;
+    //   tty->print_cr("Valid oop cannot be dummy  | ac %lu | gc_epoch %lu | size %d | header_size %d | name %s | is_array_class %d",
+    //                 obj->access_counter(),
+    //                 obj->gc_epoch(),
+    //                 obj->size(),
+    //                 obj->header_size(),
+    //                 obj->klass()->external_name(),
+    //                 obj->klass()->is_array_klass());
+    // }
+
+    // When object is valid, we do not care if it is dummy or not yet
     _valid_count += 1;
     _valid_size += obj->size();
   } else {

@@ -47,7 +47,7 @@ void ShenandoahConcurrentMark::do_task(ShenandoahObjToScanQueue* q, T* cl, Shena
   if (!is_selected){
     _heap->increase_oop_stats_mark(obj);
     if (obj->is_valid()) {
-      assert(!obj->is_dummy(), "Valid object must not be dummy");
+      // assert(!obj->is_dummy(), "Valid object must not be dummy");
       // Histograms only count valid oops
       _heap->update_histogram(obj);
     }
@@ -69,7 +69,7 @@ void ShenandoahConcurrentMark::do_task(ShenandoahObjToScanQueue* q, T* cl, Shena
       //                 obj->header_size(),
       //                 obj->klass()->external_name());
       // }
-      
+
     }
 
   }
