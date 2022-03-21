@@ -321,9 +321,9 @@ bool oopDesc::is_array()     const { return klass()->is_array_klass();     }
 bool oopDesc::is_objArray()  const { return klass()->is_objArray_klass();  }
 bool oopDesc::is_typeArray() const { return klass()->is_typeArray_klass(); }
 bool oopDesc::is_dummy()           {
-  if (klass()->is_array_klass()) {
-    return size() * HeapWordSize == arrayOopDesc::header_size_in_bytes();
-  }
+  // if (klass()->is_array_klass()) {
+  //   return size() * HeapWordSize == arrayOopDesc::header_size_in_bytes();
+  // }
   return size() == header_size();
 }
 bool oopDesc::is_valid()           { return access_counter() != 0 || gc_epoch() != 0; }
