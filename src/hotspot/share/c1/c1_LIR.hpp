@@ -877,6 +877,7 @@ class    LIR_OpTypeCheck;
 class    LIR_OpCompareAndSwap;
 class    LIR_OpProfileCall;
 class    LIR_OpProfileType;
+class    LIR_OpIncrAC;
 #ifdef ASSERT
 class    LIR_OpAssert;
 #endif
@@ -998,6 +999,9 @@ enum LIR_Code {
     , lir_profile_call
     , lir_profile_type
   , end_opMDOProfile
+  , begin_opIncrAC
+    , lir_incrac
+  , end_opIncrAC
   , begin_opAssert
     , lir_assert
   , end_opAssert
@@ -1135,6 +1139,7 @@ class LIR_Op: public CompilationResourceObj {
   virtual LIR_Op2* as_Op2() { return NULL; }
   virtual LIR_Op3* as_Op3() { return NULL; }
   virtual LIR_OpArrayCopy* as_OpArrayCopy() { return NULL; }
+  virtual LIR_OpArrayCopy* as_OpIncrAC() { return NULL; }
   virtual LIR_OpUpdateCRC32* as_OpUpdateCRC32() { return NULL; }
   virtual LIR_OpTypeCheck* as_OpTypeCheck() { return NULL; }
   virtual LIR_OpCompareAndSwap* as_OpCompareAndSwap() { return NULL; }
@@ -1753,7 +1758,7 @@ private:
 
 public:
   LIR_OpIncrAC(LIR_Opr base_oop, LIR_Opr tmp1)
-    : LIR_Op()
+    : LIR_Op(lir_incrac, LIR_OprFact::illegalOpr, NULL)
     , _base_oop(base_oop)
     , _tmp1(tmp1) {}
 
@@ -1761,7 +1766,7 @@ public:
   LIR_Opr tmp1()        const                     { return _tmp1;         }
 
   virtual void emit_code(LIR_Assembler* masm);
-  virtual LIR_OpIncrAC * as_LIR_OpIncrAC () { return this; }
+  virtual LIR_OpIncrAC * as_OpIncrAC () { return this; }
   virtual void print_instr(outputStream* out) const PRODUCT_RETURN;
 };
 // Dat mod ends
