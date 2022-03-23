@@ -652,6 +652,8 @@ void ContiguousSpace::allocate_temporary_filler(int factor) {
     typeArrayOop t = (typeArrayOop) allocate(size);
     assert(t != NULL, "allocation should succeed");
     t->set_mark_raw(markOopDesc::prototype());
+    // t->set_access_counter(0);
+    // t->set_gc_epoch(0);
     t->set_klass(Universe::intArrayKlassObj());
     t->set_length((int)length);
   } else {
@@ -659,6 +661,8 @@ void ContiguousSpace::allocate_temporary_filler(int factor) {
            "size for smallest fake object doesn't match");
     instanceOop obj = (instanceOop) allocate(size);
     obj->set_mark_raw(markOopDesc::prototype());
+    // t->set_access_counter(0);
+    // t->set_gc_epoch(0);
     obj->set_klass_gap(0);
     obj->set_klass(SystemDictionary::Object_klass());
   }

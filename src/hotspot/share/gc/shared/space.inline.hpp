@@ -119,6 +119,8 @@ public:
       CollectedHeap::fill_with_object(dead_start, dead_length);
       oop obj = oop(dead_start);
       obj->set_mark_raw(obj->mark_raw()->set_marked());
+      // obj->set_access_counter(0);
+      // obj->set_gc_epoch(0);
 
       assert(dead_length == (size_t)obj->size(), "bad filler object size");
       log_develop_trace(gc, compaction)("Inserting object to dead space: " PTR_FORMAT ", " PTR_FORMAT ", " SIZE_FORMAT "b",

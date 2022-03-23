@@ -1033,6 +1033,10 @@ void LIR_OpAllocArray::emit_code(LIR_Assembler* masm) {
   masm->append_code_stub(stub());
 }
 
+void LIR_OpIncrAC::emit_code(LIR_Assembler* masm) {
+  masm->emit_increase_access_counter(this);
+}
+
 void LIR_OpTypeCheck::emit_code(LIR_Assembler* masm) {
   masm->emit_opTypeCheck(this);
   if (stub()) {
@@ -1317,6 +1321,10 @@ void LIR_List::allocate_array(LIR_Opr dst, LIR_Opr len, LIR_Opr t1,LIR_Opr t2, L
                            t4,
                            type,
                            stub));
+}
+
+void LIR_List::increase_access_counter(LIR_Opr base_oop, LIR_Opr tmp1) {
+  append(new LIR_OpIncrAC(base_oop, tmp1));
 }
 
 void LIR_List::shift_left(LIR_Opr value, LIR_Opr count, LIR_Opr dst, LIR_Opr tmp) {
@@ -1950,6 +1958,10 @@ void LIR_OpAllocArray::print_instr(outputStream* out) const {
   tmp4()->print(out);                    out->print(" ");
   out->print("[type:0x%x]", type());     out->print(" ");
   out->print("[label:" INTPTR_FORMAT "]", p2i(stub()->entry()));
+}
+
+void LIR_OpIncrAC::print_instr(outputStream* out) const {
+  base_oop()->print(out);                 out->print(" ");
 }
 
 

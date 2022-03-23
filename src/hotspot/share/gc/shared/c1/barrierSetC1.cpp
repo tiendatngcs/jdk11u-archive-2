@@ -144,6 +144,11 @@ void BarrierSetC1::store_at_resolved(LIRAccess& access, LIR_Opr value) {
   bool mask_boolean = (decorators & C1_MASK_BOOLEAN) != 0;
   LIRGenerator* gen = access.gen();
 
+  // Dat mod
+  LIR_Opr tmp1 = FrameMap::r9_opr;
+  __ increase_access_counter(access.base().opr(), tmp1);
+  // Dat mod ends
+
   if (mask_boolean) {
     value = gen->mask_boolean(access.base().opr(), value, access.access_emit_info());
   }
@@ -171,6 +176,11 @@ void BarrierSetC1::load_at_resolved(LIRAccess& access, LIR_Opr result) {
   bool needs_patching = (decorators & C1_NEEDS_PATCHING) != 0;
   bool mask_boolean = (decorators & C1_MASK_BOOLEAN) != 0;
   bool in_native = (decorators & IN_NATIVE) != 0;
+
+  // Dat mod
+  LIR_Opr tmp1 = FrameMap::r9_opr;
+  __ increase_access_counter(access.base().opr(), tmp1);
+  // Dat mod ends
 
   if (support_IRIW_for_not_multiple_copy_atomic_cpu && is_volatile) {
     __ membar();

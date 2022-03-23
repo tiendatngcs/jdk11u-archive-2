@@ -1545,6 +1545,11 @@ void LIRGenerator::do_StoreField(StoreField* x) {
     decorators |= C1_NEEDS_PATCHING;
   }
 
+  // BasicTypeList signature;
+  // LIR_OprList* args = new LIR_OprList();
+  // call_runtime(&signature, args, CAST_FROM_FN_PTR(address, SharedRuntime::print_something), voidType, NULL);
+  // __ increase_access_counter()
+
   access_store_at(decorators, field_type, object, LIR_OprFact::intConst(x->offset()),
                   value.result(), info != NULL ? new CodeEmitInfo(info) : NULL, info);
 }
@@ -1642,6 +1647,8 @@ void LIRGenerator::access_store_at(DecoratorSet decorators, BasicType type,
                                    CodeEmitInfo* patch_info, CodeEmitInfo* store_emit_info) {
   decorators |= C1_WRITE_ACCESS;
   LIRAccess access(this, decorators, base, offset, type, patch_info, store_emit_info);
+  LIR_Opr tmp1 = FrameMap::r9_opr;
+  increase_access_counter(access.base().opr(), tmp1);
   if (access.is_raw()) {
     _barrier_set->BarrierSetC1::store_at(access, value);
   } else {

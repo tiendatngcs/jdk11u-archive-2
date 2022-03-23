@@ -520,6 +520,10 @@ JRT_LEAF(address, SharedRuntime::exception_handler_for_return_address(JavaThread
   return raw_exception_handler_for_return_address(thread, return_address);
 JRT_END
 
+JRT_LEAF(void, SharedRUntime::print_something())
+  tty->print_cr("Something is printed");
+JRT_END
+
 
 address SharedRuntime::get_poll_stub(address pc) {
   address stub;
