@@ -921,7 +921,7 @@ void LIR_OpVisitState::visit(LIR_Op* op) {
       LIR_OpIncrAC* opIncrAC = (LIR_OpIncrAC*)op;
       
       if (opIncrAC->_base_oop->is_valid())       do_input(opIncrAC->_base_oop);
-      if (opIncrAC->_tmp1->is_valid())           do_input(opIncrAC->_tmp1);
+      if (opIncrAC->_tmp1->is_valid())           do_temp(opIncrAC->_tmp1);
       break;
     }
   default:
