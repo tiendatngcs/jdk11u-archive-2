@@ -918,7 +918,7 @@ void LIR_OpVisitState::visit(LIR_Op* op) {
     }
     case lir_incrac: {
       assert(op->as_OpIncrAC() != NULL, "must be");
-      LIR_OpIncrAC* opIncrAC = (LIR_OpIncrAC)*op;
+      LIR_OpIncrAC* opIncrAC = (LIR_OpIncrAC*)op;
       
       if (opIncrAC->_base_oop->is_valid())       do_input(opIncrAC->_base_oop);
       if (opIncrAC->_tmp1->is_valid())           do_input(opIncrAC->_tmp1);
