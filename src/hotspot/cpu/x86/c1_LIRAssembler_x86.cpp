@@ -1605,7 +1605,7 @@ void LIR_Assembler::emit_alloc_array(LIR_OpAllocArray* op) {
   __ bind(*op->stub()->continuation());
 }
 
-void LIR_Assembler::emit_increase_access_counter(LIR_OpAllocArray* op) {
+void LIR_Assembler::emit_increase_access_counter(LIR_OpIncrAC* op) {
   Register base_oop = op->base_oop()->as_register();
   Register tmp1 = op->tmp1()->as_register();
 
