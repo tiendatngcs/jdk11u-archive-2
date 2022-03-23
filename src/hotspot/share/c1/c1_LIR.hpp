@@ -1139,7 +1139,7 @@ class LIR_Op: public CompilationResourceObj {
   virtual LIR_Op2* as_Op2() { return NULL; }
   virtual LIR_Op3* as_Op3() { return NULL; }
   virtual LIR_OpArrayCopy* as_OpArrayCopy() { return NULL; }
-  virtual LIR_OpArrayCopy* as_OpIncrAC() { return NULL; }
+  virtual LIR_OpIncrAC* as_OpIncrAC() { return NULL; }
   virtual LIR_OpUpdateCRC32* as_OpUpdateCRC32() { return NULL; }
   virtual LIR_OpTypeCheck* as_OpTypeCheck() { return NULL; }
   virtual LIR_OpCompareAndSwap* as_OpCompareAndSwap() { return NULL; }
