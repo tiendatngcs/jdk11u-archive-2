@@ -150,6 +150,7 @@ void BarrierSetC1::store_at_resolved(LIRAccess& access, LIR_Opr value) {
     // LIR_Opr tmp1 = gen->new_pointer_register();
     // __ move((LIR_Address*)NULL, tmp1); // define virtual register
     
+    // __ increase_access_counter(access.base().opr(), gen->load_immediate(0, T_LONG));
     __ increase_access_counter(access.base().opr(), gen->new_register(objectType));
   }
   // Dat mod ends
@@ -188,7 +189,7 @@ void BarrierSetC1::load_at_resolved(LIRAccess& access, LIR_Opr result) {
     // LIR_Opr tmp1 = gen->new_pointer_register();
     // __ move((LIR_Address*)NULL, tmp1); // define virtual register
     
-    __ increase_access_counter(access.base().opr(), gen->new_register(T_LONG));
+    __ increase_access_counter(access.base().opr(), gen->new_register(objectType));
   }
   // Dat mod ends
 
@@ -337,7 +338,7 @@ void BarrierSetC1::generate_referent_check(LIRAccess& access, LabelObj* cont) {
         referent_off = LIR_OprFact::intConst(java_lang_ref_Reference::referent_offset);
       } else {
         assert(offset->type() == T_LONG, "what else?");
-        referent_off = gen->new_register(objectType);
+        referent_off = gen->new_register(T_LONG);
         __ move(LIR_OprFact::longConst(java_lang_ref_Reference::referent_offset), referent_off);
       }
       __ cmp(lir_cond_notEqual, offset, referent_off);
