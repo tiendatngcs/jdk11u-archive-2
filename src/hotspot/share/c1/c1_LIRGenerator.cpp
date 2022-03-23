@@ -1647,8 +1647,8 @@ void LIRGenerator::access_store_at(DecoratorSet decorators, BasicType type,
                                    CodeEmitInfo* patch_info, CodeEmitInfo* store_emit_info) {
   decorators |= C1_WRITE_ACCESS;
   LIRAccess access(this, decorators, base, offset, type, patch_info, store_emit_info);
-  LIR_Opr tmp1 = FrameMap::r9_opr;
-  increase_access_counter(access.base().opr(), tmp1);
+  // LIR_Opr tmp1 = FrameMap::r9_opr;
+  // increase_access_counter(access.base().opr(), tmp1);
   if (access.is_raw()) {
     _barrier_set->BarrierSetC1::store_at(access, value);
   } else {
