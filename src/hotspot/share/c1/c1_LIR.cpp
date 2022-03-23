@@ -920,8 +920,8 @@ void LIR_OpVisitState::visit(LIR_Op* op) {
       assert(op->as_OpIncrAC() != NULL, "must be");
       LIR_OpIncrAC* opIncrAC = (LIR_OpIncrAC*)op;
       
-      assert(opIncrAC->_base_oop->is_valid());       do_input(opIncrAC->_base_oop);
-      assert(opIncrAC->_tmp1->is_valid());           do_temp(opIncrAC->_tmp1);
+      assert(opIncrAC->_base_oop->is_valid(), "used");       do_input(opIncrAC->_base_oop);
+      assert(opIncrAC->_tmp1->is_valid(), "used");           do_temp(opIncrAC->_tmp1);
       break;
     }
   default:
