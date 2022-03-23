@@ -1763,7 +1763,7 @@ public:
   virtual void emit_code(LIR_Assembler* masm);
   virtual LIR_OpIncrAC * as_LIR_OpIncrAC () { return this; }
   virtual void print_instr(outputStream* out) const PRODUCT_RETURN;
-}
+};
 // Dat mod ends
 
 
