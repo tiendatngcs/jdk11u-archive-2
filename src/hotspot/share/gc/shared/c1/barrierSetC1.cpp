@@ -147,7 +147,7 @@ void BarrierSetC1::store_at_resolved(LIRAccess& access, LIR_Opr value) {
   // Dat mod
   // LIR_Opr tmp1 = FrameMap::rcx_oop_opr;
   LIR_Opr tmp1 = gen->new_pointer_register();
-  __ move(NULL, tmp1); // define virtual register
+  __ move((LIR_Address*)NULL, tmp1); // define virtual register
   
   __ increase_access_counter(access.base().opr(), tmp1);
   // Dat mod ends
@@ -183,8 +183,8 @@ void BarrierSetC1::load_at_resolved(LIRAccess& access, LIR_Opr result) {
   // Dat mod
   // LIR_Opr tmp1 = FrameMap::rcx_oop_opr;
   LIR_Opr tmp1 = gen->new_pointer_register();
-  __ move(NULL, tmp1); // define virtual register
-  
+  __ move((LIR_Address*)NULL, tmp1); // define virtual register
+
   __ increase_access_counter(access.base().opr(), tmp1);
   // Dat mod ends
 
