@@ -1607,60 +1607,60 @@ void LIR_Assembler::emit_alloc_array(LIR_OpAllocArray* op) {
 
 void LIR_Assembler::emit_increase_access_counter(LIR_OpIncrAC* op) {
   Register base_oop = op->base_oop()->as_register();
-  Register tmp1 = op->tmp1()->as_register();
+  // Register tmp1 = op->tmp1()->as_register();
 
-  Label oop_is_null, no_reset_values;
-  __ cmpptr(base_oop, 0);
-  __ jcc(Assembler::equal, oop_is_null);
+  // Label oop_is_null, no_reset_values;
+  // __ cmpptr(base_oop, 0);
+  // __ jcc(Assembler::equal, oop_is_null);
 
 
 
-  if (UseCompressedOops) {
-    __ decode_heap_oop(base_oop);
-  }
-  // __ pusha();
-  // __ call_VM_leaf(CAST_FROM_FN_PTR(address, InterpreterRuntime::print_oop), base_oop);
-  // __ popa();
+  // if (UseCompressedOops) {
+  //   __ decode_heap_oop(base_oop);
+  // }
+  // // __ pusha();
+  // // __ call_VM_leaf(CAST_FROM_FN_PTR(address, InterpreterRuntime::print_oop), base_oop);
+  // // __ popa();
 
-  // load base_oop gc_epoch to tmp1
+  // // load base_oop gc_epoch to tmp1
 
-  // cmp tmp1 to static_gc_epoch if equal jmp to no_reset_values, 
-  __ movptr(tmp1, InternalAddress((address)(&oopDesc::static_gc_epoch)));
-  // __ pusha();
-  // __ call_VM_leaf(CAST_FROM_FN_PTR(address, ShenandoahRuntime::print_address), tmp1);
-  // __ popa();
+  // // cmp tmp1 to static_gc_epoch if equal jmp to no_reset_values, 
+  // __ movptr(tmp1, InternalAddress((address)(&oopDesc::static_gc_epoch)));
+  // // __ pusha();
+  // // __ call_VM_leaf(CAST_FROM_FN_PTR(address, ShenandoahRuntime::print_address), tmp1);
+  // // __ popa();
   
-  __ cmpptr(tmp1, Address(base_oop, oopDesc::gc_epoch_offset_in_bytes()));
-  __ jcc(Assembler::equal, no_reset_values);
-  // Reset ac to 0 and gc_epoch to current gc_epoch
-  __ movptr(Address(base_oop, oopDesc::gc_epoch_offset_in_bytes()), tmp1);
+  // __ cmpptr(tmp1, Address(base_oop, oopDesc::gc_epoch_offset_in_bytes()));
+  // __ jcc(Assembler::equal, no_reset_values);
+  // // Reset ac to 0 and gc_epoch to current gc_epoch
+  // __ movptr(Address(base_oop, oopDesc::gc_epoch_offset_in_bytes()), tmp1);
 
-  // __ pusha();
-  // __ call_VM_leaf(CAST_FROM_FN_PTR(address, ShenandoahRuntime::print_address), tmp1);
-  // __ popa();
+  // // __ pusha();
+  // // __ call_VM_leaf(CAST_FROM_FN_PTR(address, ShenandoahRuntime::print_address), tmp1);
+  // // __ popa();
 
-  __ movptr(Address(base_oop, oopDesc::access_counter_offset_in_bytes()), (intptr_t)0); // illegal use but works for this situation
-
-
-  __ bind(no_reset_values);
-  // increment ac by 1
-  __ movptr(tmp1, Address(base_oop, oopDesc::access_counter_offset_in_bytes()));
-  __ increment(tmp1);
-  __ movptr(Address(base_oop, oopDesc::access_counter_offset_in_bytes()), tmp1);
+  // __ movptr(Address(base_oop, oopDesc::access_counter_offset_in_bytes()), (intptr_t)0); // illegal use but works for this situation
 
 
-  // __ pusha();
-  // __ call_VM_leaf(CAST_FROM_FN_PTR(address, InterpreterRuntime::print_oop), base_oop);
-  // __ popa();
+  // __ bind(no_reset_values);
+  // // increment ac by 1
+  // __ movptr(tmp1, Address(base_oop, oopDesc::access_counter_offset_in_bytes()));
+  // __ increment(tmp1);
+  // __ movptr(Address(base_oop, oopDesc::access_counter_offset_in_bytes()), tmp1);
 
-  // __ pusha();
-  // __ call_VM_leaf(CAST_FROM_FN_PTR(address, InterpreterRuntime::print_newline));
-  // __ popa();
-  if (UseCompressedOops) {
-    __ encode_heap_oop(base_oop);
-  }
+
+  // // __ pusha();
+  // // __ call_VM_leaf(CAST_FROM_FN_PTR(address, InterpreterRuntime::print_oop), base_oop);
+  // // __ popa();
+
+  // // __ pusha();
+  // // __ call_VM_leaf(CAST_FROM_FN_PTR(address, InterpreterRuntime::print_newline));
+  // // __ popa();
+  // if (UseCompressedOops) {
+  //   __ encode_heap_oop(base_oop);
+  // }
   
-  __ bind(oop_is_null);
+  // __ bind(oop_is_null);
 }
 
 void LIR_Assembler::type_profile_helper(Register mdo,
