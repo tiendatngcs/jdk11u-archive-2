@@ -152,7 +152,7 @@ void BarrierSetC1::store_at_resolved(LIRAccess& access, LIR_Opr value) {
     
     // __ increase_access_counter(access.base().opr(), gen->load_immediate(0, T_LONG));
     LIR_Opr tmp = gen->new_pointer_register();
-    __ move(LIR_OprFact::doubleConst(-0.0), tmp);
+    __ move(LIR_OprFact::longConst(0), tmp);
     __ increase_access_counter(access.base().opr(), tmp);
   }
   // Dat mod ends
@@ -192,7 +192,7 @@ void BarrierSetC1::load_at_resolved(LIRAccess& access, LIR_Opr result) {
     // __ move((LIR_Address*)NULL, tmp1); // define virtual register
     
     LIR_Opr tmp = gen->new_pointer_register();
-    __ move(LIR_OprFact::doubleConst(-0.0), tmp);
+    __ move(LIR_OprFact::longConst(0), tmp);
     __ increase_access_counter(access.base().opr(), tmp);
   }
   // Dat mod ends
