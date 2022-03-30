@@ -82,6 +82,27 @@ void BarrierSetC1::store_at(LIRAccess& access, LIR_Opr value) {
   LIR_Opr resolved = resolve_address(access, false);
   access.set_resolved_addr(resolved);
   store_at_resolved(access, value);
+
+  // // Dat mod
+  // // LIR_Opr tmp1 = FrameMap::rcx_oop_opr;
+  // // bool is_array = (decorators & IS_ARRAY) != 0;
+  // // bool on_anonymous = (decorators & ON_UNKNOWN_OOP_REF) != 0;
+  // // bool is_precise = is_array || on_anonymous;
+
+  // if (UseShenandoahGC){
+
+  //   // LIR_Opr tmp1 = gen->new_pointer_register();
+  //   // __ move((LIR_Address*)NULL, tmp1); // define virtual register
+    
+  //   // __ increase_access_counter(access.base().opr(), gen->load_immediate(0, T_LONG));
+  //   // LIR_Opr tmp = gen->new_pointer_register();
+  //   LIR_Opr tmp = access.gen()->new_register(T_LONG);
+
+  //   __ move(LIR_OprFact::longConst(0), tmp);
+  //   __ increase_access_counter(access.base().opr(), tmp);
+  // }
+  // // Dat mod ends
+
 }
 
 void BarrierSetC1::load_at(LIRAccess& access, LIR_Opr result) {
@@ -144,18 +165,22 @@ void BarrierSetC1::store_at_resolved(LIRAccess& access, LIR_Opr value) {
   bool mask_boolean = (decorators & C1_MASK_BOOLEAN) != 0;
   LIRGenerator* gen = access.gen();
 
-  // Dat mod
-  // LIR_Opr tmp1 = FrameMap::rcx_oop_opr;
-  if (UseShenandoahGC){
-    // LIR_Opr tmp1 = gen->new_pointer_register();
-    // __ move((LIR_Address*)NULL, tmp1); // define virtual register
+  // // Dat mod
+  // // LIR_Opr tmp1 = FrameMap::rcx_oop_opr;
+  // bool is_array = (decorators & IS_ARRAY) != 0;
+  // bool on_anonymous = (decorators & ON_UNKNOWN_OOP_REF) != 0;
+  // bool is_precise = is_array || on_anonymous;
+
+  // if (UseShenandoahGC){
+  //   // LIR_Opr tmp1 = gen->new_pointer_register();
+  //   // __ move((LIR_Address*)NULL, tmp1); // define virtual register
     
-    // __ increase_access_counter(access.base().opr(), gen->load_immediate(0, T_LONG));
-    LIR_Opr tmp = gen->new_pointer_register();
-    __ move(LIR_OprFact::longConst(0), tmp);
-    __ increase_access_counter(access.base().opr(), tmp);
-  }
-  // Dat mod ends
+  //   // __ increase_access_counter(access.base().opr(), gen->load_immediate(0, T_LONG));
+  //   LIR_Opr tmp = gen->new_pointer_register();
+  //   __ move(LIR_OprFact::longConst(0), tmp);
+  //   __ increase_access_counter(access.base().opr(), tmp);
+  // }
+  // // Dat mod ends
 
   if (mask_boolean) {
     value = gen->mask_boolean(access.base().opr(), value, access.access_emit_info());
@@ -185,17 +210,17 @@ void BarrierSetC1::load_at_resolved(LIRAccess& access, LIR_Opr result) {
   bool mask_boolean = (decorators & C1_MASK_BOOLEAN) != 0;
   bool in_native = (decorators & IN_NATIVE) != 0;
 
-  // Dat mod
-  // LIR_Opr tmp1 = FrameMap::rcx_oop_opr;
-  if (UseShenandoahGC){
-    // LIR_Opr tmp1 = gen->new_pointer_register();
-    // __ move((LIR_Address*)NULL, tmp1); // define virtual register
+  // // Dat mod
+  // // LIR_Opr tmp1 = FrameMap::rcx_oop_opr;
+  // if (UseShenandoahGC){
+  //   // LIR_Opr tmp1 = gen->new_pointer_register();
+  //   // __ move((LIR_Address*)NULL, tmp1); // define virtual register
     
-    LIR_Opr tmp = gen->new_pointer_register();
-    __ move(LIR_OprFact::longConst(0), tmp);
-    __ increase_access_counter(access.base().opr(), tmp);
-  }
-  // Dat mod ends
+  //   LIR_Opr tmp = gen->new_pointer_register();
+  //   __ move(LIR_OprFact::longConst(0), tmp);
+  //   __ increase_access_counter(access.base().opr(), tmp);
+  // }
+  // // Dat mod ends
 
   if (support_IRIW_for_not_multiple_copy_atomic_cpu && is_volatile) {
     __ membar();

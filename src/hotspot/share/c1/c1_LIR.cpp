@@ -1748,6 +1748,8 @@ const char * LIR_Op::name() const {
      case lir_profile_call:          s = "profile_call";  break;
      // LIR_OpProfileType
      case lir_profile_type:          s = "profile_type";  break;
+     // LIR_OpIncrAC
+     case lir_incrac:                s = "incrac";        break;
      // LIR_OpAssert
 #ifdef ASSERT
      case lir_assert:                s = "assert";        break;

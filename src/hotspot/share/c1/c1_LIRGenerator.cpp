@@ -1622,6 +1622,12 @@ void LIRGenerator::access_load_at(DecoratorSet decorators, BasicType type,
                                   LIRItem& base, LIR_Opr offset, LIR_Opr result,
                                   CodeEmitInfo* patch_info, CodeEmitInfo* load_emit_info) {
   decorators |= C1_READ_ACCESS;
+  // Dat mod
+  LIR_Opr tmp = new_register(T_LONG);
+  __ move(LIR_OprFact::longConst(0x01l), tmp);
+  __ increase_access_counter(base, tmp);
+
+  // Dat mod ends
   LIRAccess access(this, decorators, base, offset, type, patch_info, load_emit_info);
   if (access.is_raw()) {
     _barrier_set->BarrierSetC1::load_at(access, result);
@@ -1646,6 +1652,16 @@ void LIRGenerator::access_store_at(DecoratorSet decorators, BasicType type,
                                    LIRItem& base, LIR_Opr offset, LIR_Opr value,
                                    CodeEmitInfo* patch_info, CodeEmitInfo* store_emit_info) {
   decorators |= C1_WRITE_ACCESS;
+
+  // Dat mod
+  base.set_destroys_register();
+  base.load_item();
+  LIR_Opr tmp = new_register(T_LONG);
+  __ move(LIR_OprFact::longConst(-0.0), tmp);
+  __ increase_access_counter(base.result(), tmp);
+
+  // Dat mod ends
+
   LIRAccess access(this, decorators, base, offset, type, patch_info, store_emit_info);
   // LIR_Opr tmp1 = FrameMap::r9_opr;
   // increase_access_counter(access.base().opr(), tmp1);
