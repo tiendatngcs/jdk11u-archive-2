@@ -873,12 +873,12 @@ void ShenandoahHeap::update_histogram(oop obj) {
     }
 
     if (idx > 27) {
-      ResourceMark rm;
-      tty->print_cr("Unintialized oop ? | ac %lu | gc_epoch %lu | size %d | name %s",
-                    obj->access_counter(),
-                    obj->gc_epoch(),
-                    obj->size(),
-                    obj->klass()->external_name());
+      // ResourceMark rm;
+      // tty->print_cr("Unintialized oop ? | ac %lu | gc_epoch %lu | size %d | name %s",
+      //               obj->access_counter(),
+      //               obj->gc_epoch(),
+      //               obj->size(),
+      //               obj->klass()->external_name());
     }
   }
 }

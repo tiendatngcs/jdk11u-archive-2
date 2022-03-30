@@ -1640,9 +1640,9 @@ void LIR_Assembler::emit_increase_access_counter(LIR_OpIncrAC* op) {
   // temp comment the line below
   // __ movptr(Address(base_oop, oopDesc::gc_epoch_offset_in_bytes()), tmp1);
 
-  __ pusha();
-  __ call_VM_leaf(CAST_FROM_FN_PTR(address, SharedRuntime::print_int), tmp1);
-  __ popa();
+  // __ pusha();
+  // __ call_VM_leaf(CAST_FROM_FN_PTR(address, SharedRuntime::print_int), tmp1);
+  // __ popa();
 
   __ movptr(Address(base_oop, oopDesc::access_counter_offset_in_bytes()), (intptr_t)0); // illegal use but works for this situation
 
