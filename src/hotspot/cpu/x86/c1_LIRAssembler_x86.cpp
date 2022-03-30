@@ -1630,7 +1630,7 @@ void LIR_Assembler::emit_increase_access_counter(LIR_OpIncrAC* op) {
   // __ call_VM_leaf(CAST_FROM_FN_PTR(address, ShenandoahRuntime::print_address), tmp1);
   // __ popa();
   
-  __ cmpptr(tmp1, Address(base_oop, oopDesc::gc_epoch_offset_in_bytes()));
+  // __ cmpptr(tmp1, Address(base_oop, oopDesc::gc_epoch_offset_in_bytes()));
   // __ jcc(Assembler::equal, no_reset_values);
   // // Reset ac to 0 and gc_epoch to current gc_epoch
   // __ movptr(Address(base_oop, oopDesc::gc_epoch_offset_in_bytes()), tmp1);
