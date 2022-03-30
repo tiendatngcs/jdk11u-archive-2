@@ -1637,8 +1637,7 @@ void LIR_Assembler::emit_increase_access_counter(LIR_OpIncrAC* op) {
   __ cmpptr(tmp1, Address(base_oop, oopDesc::gc_epoch_offset_in_bytes()));
   __ jcc(Assembler::equal, no_reset_values);
   // Reset ac to 0 and gc_epoch to current gc_epoch
-  // temp comment the line below
-  // __ movptr(Address(base_oop, oopDesc::gc_epoch_offset_in_bytes()), tmp1);
+  __ movptr(Address(base_oop, oopDesc::gc_epoch_offset_in_bytes()), tmp1);
 
   // __ pusha();
   // __ call_VM_leaf(CAST_FROM_FN_PTR(address, SharedRuntime::print_int), tmp1);
