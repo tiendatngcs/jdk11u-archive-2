@@ -520,8 +520,12 @@ JRT_LEAF(address, SharedRuntime::exception_handler_for_return_address(JavaThread
   return raw_exception_handler_for_return_address(thread, return_address);
 JRT_END
 
-JRT_LEAF(void, SharedRuntime::print_something())
-  tty->print_cr("Something is printed");
+JRT_LEAF(void, SharedRuntime::print_address(void* addr))
+  tty->print_cr("Address %p", addr);
+JRT_END
+
+JRT_LEAF(void, SharedRuntime::print_int(intptr_t num))
+  tty->print_cr("Int %lu", num);
 JRT_END
 
 

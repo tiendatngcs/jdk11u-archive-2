@@ -1630,9 +1630,9 @@ void LIR_Assembler::emit_increase_access_counter(LIR_OpIncrAC* op) {
   // try out --------------------------
   __ movptr(tmp1, oopDesc::static_gc_epoch);
   // --------------------------
-  // __ pusha();
-  // __ call_VM_leaf(CAST_FROM_FN_PTR(address, ShenandoahRuntime::print_address), tmp1);
-  // __ popa();
+  __ pusha();
+  __ call_VM_leaf(CAST_FROM_FN_PTR(address, SharedRuntime::print_int), tmp1);
+  __ popa();
   
   // __ cmpptr(tmp1, Address(base_oop, oopDesc::gc_epoch_offset_in_bytes()));
   // __ jcc(Assembler::equal, no_reset_values);
