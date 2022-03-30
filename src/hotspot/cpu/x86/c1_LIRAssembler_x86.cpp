@@ -1625,7 +1625,11 @@ void LIR_Assembler::emit_increase_access_counter(LIR_OpIncrAC* op) {
   // load base_oop gc_epoch to tmp1
 
   // cmp tmp1 to static_gc_epoch if equal jmp to no_reset_values, 
-  __ movptr(tmp1, InternalAddress((address)(&oopDesc::static_gc_epoch)));
+  // __ movptr(tmp1, InternalAddress((address)(&oopDesc::static_gc_epoch)));
+
+  // try out --------------------------
+  __ movptr(tmp1, oopDesc::static_gc_epoch);
+  // --------------------------
   // __ pusha();
   // __ call_VM_leaf(CAST_FROM_FN_PTR(address, ShenandoahRuntime::print_address), tmp1);
   // __ popa();
