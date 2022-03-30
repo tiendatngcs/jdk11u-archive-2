@@ -1625,8 +1625,11 @@ void LIRGenerator::access_load_at(DecoratorSet decorators, BasicType type,
   // Dat mod
   base.set_destroys_register();
   base.load_item();
-  LIR_Opr tmp = new_register(T_LONG);
-  __ move(LIR_OprFact::longConst(-0.0), tmp);
+  // LIR_Opr tmp = new_register(T_LONG);
+  // __ move(LIR_OprFact::longConst(-0.0), tmp);
+
+  LIR_Opr tmp = new_register(T_OBJECT);
+  __ move(LIR_OprFact::oopConst(NULL), tmp);
   __ increase_access_counter(base.result(), tmp);
 
   // Dat mod ends
@@ -1658,8 +1661,11 @@ void LIRGenerator::access_store_at(DecoratorSet decorators, BasicType type,
   // Dat mod
   base.set_destroys_register();
   base.load_item();
-  LIR_Opr tmp = new_register(T_LONG);
-  __ move(LIR_OprFact::longConst(-0.0), tmp);
+  // LIR_Opr tmp = new_register(T_LONG);
+  // __ move(LIR_OprFact::longConst(-0.0), tmp);
+
+  LIR_Opr tmp = new_register(T_OBJECT);
+  __ move(LIR_OprFact::oopConst(NULL), tmp);
   __ increase_access_counter(base.result(), tmp);
 
   // Dat mod ends
