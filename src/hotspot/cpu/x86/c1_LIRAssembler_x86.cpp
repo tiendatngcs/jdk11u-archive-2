@@ -1607,7 +1607,7 @@ void LIR_Assembler::emit_alloc_array(LIR_OpAllocArray* op) {
 
 void LIR_Assembler::emit_increase_access_counter(LIR_OpIncrAC* op) {
   Register base_oop = op->base_oop()->as_register();
-  // Register tmp1 = op->tmp1()->as_register();
+  Register tmp1 = op->tmp1()->as_register();
 
   // Label oop_is_null, no_reset_values;
   // __ cmpptr(base_oop, 0);
