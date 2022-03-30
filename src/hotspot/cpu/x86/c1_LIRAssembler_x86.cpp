@@ -1618,9 +1618,9 @@ void LIR_Assembler::emit_increase_access_counter(LIR_OpIncrAC* op) {
   if (UseCompressedOops) {
     __ decode_heap_oop(base_oop);
   }
-  __ pusha();
-  __ call_VM_leaf(CAST_FROM_FN_PTR(address, SharedRuntime::print_oop), base_oop);
-  __ popa();
+  // __ pusha();
+  // __ call_VM_leaf(CAST_FROM_FN_PTR(address, SharedRuntime::print_oop), base_oop);
+  // __ popa();
 
   // load base_oop gc_epoch to tmp1
 
@@ -1630,9 +1630,9 @@ void LIR_Assembler::emit_increase_access_counter(LIR_OpIncrAC* op) {
   // try out --------------------------
   __ movptr(tmp1, oopDesc::static_gc_epoch);
   // --------------------------
-  __ pusha();
-  __ call_VM_leaf(CAST_FROM_FN_PTR(address, SharedRuntime::print_int), tmp1);
-  __ popa();
+  // __ pusha();
+  // __ call_VM_leaf(CAST_FROM_FN_PTR(address, SharedRuntime::print_int), tmp1);
+  // __ popa();
   
   __ cmpptr(tmp1, Address(base_oop, oopDesc::gc_epoch_offset_in_bytes()));
   __ jcc(Assembler::equal, no_reset_values);
@@ -1654,13 +1654,13 @@ void LIR_Assembler::emit_increase_access_counter(LIR_OpIncrAC* op) {
   __ movptr(Address(base_oop, oopDesc::access_counter_offset_in_bytes()), tmp1);
 
 
-  __ pusha();
-  __ call_VM_leaf(CAST_FROM_FN_PTR(address, SharedRuntime::print_oop), base_oop);
-  __ popa();
+  // __ pusha();
+  // __ call_VM_leaf(CAST_FROM_FN_PTR(address, SharedRuntime::print_oop), base_oop);
+  // __ popa();
 
-  __ pusha();
-  __ call_VM_leaf(CAST_FROM_FN_PTR(address, SharedRuntime::print_newline));
-  __ popa();
+  // __ pusha();
+  // __ call_VM_leaf(CAST_FROM_FN_PTR(address, SharedRuntime::print_newline));
+  // __ popa();
   if (UseCompressedOops) {
     __ encode_heap_oop(base_oop);
   }
