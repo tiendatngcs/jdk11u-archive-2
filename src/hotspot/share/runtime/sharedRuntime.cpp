@@ -520,12 +520,20 @@ JRT_LEAF(address, SharedRuntime::exception_handler_for_return_address(JavaThread
   return raw_exception_handler_for_return_address(thread, return_address);
 JRT_END
 
+JRT_LEAF(void, SharedRuntime::print_oop(oopDesc* obj))
+  tty->print_cr("oop @ %p | ac = %lu | gc_epoch = %lu", obj, obj->access_counter(), obj->gc_epoch());
+JRT_END
+
 JRT_LEAF(void, SharedRuntime::print_address(void* addr))
   tty->print_cr("Address %p", addr);
 JRT_END
 
 JRT_LEAF(void, SharedRuntime::print_int(intptr_t num))
   tty->print_cr("Int %lu", num);
+JRT_END
+
+JRT_LEAF(void, SharedRuntime::print_newline())
+  tty->print_cr("");
 JRT_END
 
 
