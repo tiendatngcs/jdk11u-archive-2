@@ -1623,9 +1623,11 @@ void LIRGenerator::access_load_at(DecoratorSet decorators, BasicType type,
                                   CodeEmitInfo* patch_info, CodeEmitInfo* load_emit_info) {
   decorators |= C1_READ_ACCESS;
   // Dat mod
+  base.set_destroys_register();
+  base.load_item();
   LIR_Opr tmp = new_register(T_LONG);
-  __ move(LIR_OprFact::longConst(0x01l), tmp);
-  __ increase_access_counter(base, tmp);
+  __ move(LIR_OprFact::longConst(-0.0), tmp);
+  __ increase_access_counter(base.result(), tmp);
 
   // Dat mod ends
   LIRAccess access(this, decorators, base, offset, type, patch_info, load_emit_info);
