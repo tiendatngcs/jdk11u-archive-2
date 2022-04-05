@@ -1600,9 +1600,12 @@ Node* GraphKit::access_store_at(Node* ctl,
 
   assert(val != NULL, "not dead path");
 
+  increase_access_counter(obj);
+  
   C2AccessValuePtr addr(adr, adr_type);
   C2AccessValue value(val, val_type);
   C2Access access(this, decorators | C2_WRITE_ACCESS, bt, obj, addr);
+
   if (access.is_raw()) {
     return _barrier_set->BarrierSetC2::store_at(access, value);
   } else {
@@ -1619,6 +1622,8 @@ Node* GraphKit::access_load_at(Node* obj,   // containing obj
   if (stopped()) {
     return top(); // Dead path ?
   }
+
+  increase_access_counter(obj);
 
   C2AccessValuePtr addr(adr, adr_type);
   C2Access access(this, decorators | C2_READ_ACCESS, bt, obj, addr);
@@ -1762,6 +1767,19 @@ Node* GraphKit::load_array_element(Node* ctl, Node* ary, Node* idx, const TypeAr
   }
   Node* ld = make_load(ctl, adr, elemtype, elembt, arytype, MemNode::unordered);
   return ld;
+}
+
+//-------------------------increase_access_counter-------------------------
+void GraphKit::increase_access_counter(Node* base_oop) {
+  Node* ac_adr = basic_plus_adr(base_oop, oopDesc::access_counter_offset_in_bytes());
+  const TypePtr* adr_type = ac_adr->bottom_type()->is_ptr();
+  // Load access counter 
+  Node* access_counter = make_load(control(), ac_adr, adr_type, adr_type->basic_type(), Compile::AliasIdxRaw, MemNode::unordered);
+  // Increase access counter by 1
+  Node* one = longcon(1);
+  Node* increased_ac = new AddLNode(access_counter, one);
+  // Store access counter back to base_oop, Return new base_oop
+  store_to_memory(control(), ac_adr, increased_ac, adr_type->basic_type(), Compile::AliasIdxRaw, MemNode::unordered);
 }
 
 //-------------------------set_arguments_for_java_call-------------------------
