@@ -1600,7 +1600,9 @@ Node* GraphKit::access_store_at(Node* ctl,
 
   assert(val != NULL, "not dead path");
 
-  increase_access_counter(ctl, obj);
+  // increase_access_counter(ctl, obj);
+  Node* ac_adr = basic_plus_adr(obj, obj, oopDesc::access_counter_offset_in_bytes());
+  increment_counter(ac_adr);
 
   C2AccessValuePtr addr(adr, adr_type);
   C2AccessValue value(val, val_type);
