@@ -1601,7 +1601,7 @@ Node* GraphKit::access_store_at(Node* ctl,
   assert(val != NULL, "not dead path");
 
   increase_access_counter(obj);
-  
+
   C2AccessValuePtr addr(adr, adr_type);
   C2AccessValue value(val, val_type);
   C2Access access(this, decorators | C2_WRITE_ACCESS, bt, obj, addr);
@@ -1772,12 +1772,13 @@ Node* GraphKit::load_array_element(Node* ctl, Node* ary, Node* idx, const TypeAr
 //-------------------------increase_access_counter-------------------------
 void GraphKit::increase_access_counter(Node* base_oop) {
   Node* ac_adr = basic_plus_adr(base_oop, oopDesc::access_counter_offset_in_bytes());
-  const TypePtr* adr_type = ac_adr->bottom_type()->is_ptr();
+  // const TypePtr* adr_type = ac_adr->bottom_type()->is_ptr();
   // Load access counter 
-  Node* access_counter = make_load(control(), ac_adr, adr_type, adr_type->basic_type(), Compile::AliasIdxRaw, MemNode::unordered);
+  // make_load(ctrl, counter_addr, TypeLong::LONG, T_LONG, adr_type, MemNode::unordered);
+  Node* access_counter = make_load(control(), ac_adr, TypeLong::LONG, T_LONG, Compile::AliasIdxRaw, MemNode::unordered);
   // Increase access counter by 1
   Node* one = longcon(1);
-  Node* increased_ac = new AddLNode(access_counter, one);
+  Node* increased_ac = _gvn.transform(new AddLNode(access_counter, one));
   // Store access counter back to base_oop, Return new base_oop
   store_to_memory(control(), ac_adr, increased_ac, adr_type->basic_type(), Compile::AliasIdxRaw, MemNode::unordered);
 }
