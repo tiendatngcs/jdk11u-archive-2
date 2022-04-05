@@ -655,7 +655,7 @@ class GraphKit : public Phase {
   // Return a load of array element at idx.
   Node* load_array_element(Node* ctl, Node* ary, Node* idx, const TypeAryPtr* arytype);
 
-  void increase_access_counter(Node* base_oop);
+  void increase_access_counter(Node* ctrl, Node* base_oop);
 
   //---------------- Dtrace support --------------------
   void make_dtrace_method_entry_exit(ciMethod* method, bool is_entry);
