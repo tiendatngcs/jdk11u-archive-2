@@ -1775,7 +1775,7 @@ void GraphKit::increase_access_counter(Node* ctrl, Node* base_oop) {
   // // const TypePtr* adr_type = ac_adr->bottom_type()->is_ptr();
   // // Load access counter 
   // make_load(ctrl, counter_addr, TypeLong::LONG, T_LONG, adr_type, MemNode::unordered);
-  // Node* access_counter = make_load(ctrl, ac_adr, TypeLong::LONG, T_LONG, Compile::AliasIdxRaw, MemNode::unordered);
+  Node* access_counter = make_load(ctrl, ac_adr, TypeLong::LONG, T_LONG, Compile::AliasIdxRaw, MemNode::unordered);
   // // Increase access counter by 1
   // Node* one = longcon(1);
   // Node* increased_ac = _gvn.transform(new AddLNode(access_counter, one));
