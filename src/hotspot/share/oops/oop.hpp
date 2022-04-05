@@ -52,12 +52,14 @@ class CMSIsAliveClosure;
 class PSPromotionManager;
 class ParCompactionManager;
 
+#define GC_EPOCH_MASK		(~(0L)>>1)  // 0111111...
+
 class oopDesc {
   friend class VMStructs;
   friend class JVMCIVMStructs;
  private:
   intptr_t _access_counter;
-  intptr_t _gc_epoch;
+  intptr_t _gc_epoch; // Contain initialize bit as first bit, the rest is gc_epoch
   volatile markOop _mark;
   union _metadata {
     Klass*      _klass;
@@ -87,6 +89,15 @@ class oopDesc {
   
   inline void set_gc_epoch(intptr_t new_value);
   static inline void set_gc_epoch(HeapWord* mem, intptr_t new_value);
+
+  // inline void set_initialize_bit();
+  // static inline void set_initialize_bit(HeapWord* mem);
+
+  // inline void unset_initialize_bit();
+  // static inline void unset_initialize_bit(HeapWord* mem);
+
+  // inline bool initialize_bit_is_set();
+  // static inline bool initialize_bit_is_set(HeapWord* mem);
 
   // Used only to re-initialize the mark word (e.g., of promoted
   // objects during a GC) -- requires a valid klass pointer

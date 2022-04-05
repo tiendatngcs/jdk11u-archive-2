@@ -407,6 +407,12 @@ oop MemAllocator::finish(HeapWord* mem) const {
   oopDesc::set_access_counter(mem, 0);
   oopDesc::set_gc_epoch(mem, 0);
 
+  // // Dat mod temp
+  // assert(!oopDesc::initialize_bit_is_set(mem), "Must not be set");
+  // oopDesc::set_initialize_bit(mem);
+  // assert(oopDesc::initialize_bit_is_set(mem), "Should be set");
+  // // Dat mod ends
+
   // Need a release store to ensure array/class length, mark word, and
   // object zeroing are visible before setting the klass non-NULL, for
   // concurrent collectors.

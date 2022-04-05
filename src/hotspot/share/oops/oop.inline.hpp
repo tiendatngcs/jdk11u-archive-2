@@ -56,7 +56,7 @@ markOop* oopDesc::mark_addr_raw() const {
 }
 
 intptr_t oopDesc::true_access_counter() {
-  if (_gc_epoch != static_gc_epoch) {
+  if (gc_epoch() != static_gc_epoch) {
     set_access_counter(0);
     set_gc_epoch(static_gc_epoch);
   }
@@ -68,6 +68,7 @@ intptr_t oopDesc::access_counter() {
 }
 
 intptr_t oopDesc::gc_epoch() {
+  // return _gc_epoch & GC_EPOCH_MASK; // Clear first bit
   return _gc_epoch;
 }
 
@@ -91,12 +92,38 @@ void oopDesc::increase_access_counter() {
 }
 
 void oopDesc::set_gc_epoch(intptr_t new_value) {
+  // _gc_epoch = (_gc_epoch & ~GC_EPOCH_MASK) | (new_value & GC_EPOCH_MASK);
   _gc_epoch = new_value;
 }
 
 void oopDesc::set_gc_epoch(HeapWord* mem, intptr_t new_value){ 
+  // *(intptr_t*)(((char*)mem) + gc_epoch_offset_in_bytes()) = (*(intptr_t*)(((char*)mem) + gc_epoch_offset_in_bytes()) & ~GC_EPOCH_MASK) | (new_value & GC_EPOCH_MASK);
   *(intptr_t*)(((char*)mem) + gc_epoch_offset_in_bytes()) = new_value;
 }
+
+// void oopDesc::set_initialize_bit() {
+//   _gc_epoch |= ~GC_EPOCH_MASK;
+// }
+
+// void oopDesc::set_initialize_bit(HeapWord* mem) {
+//   *(intptr_t*)(((char*)mem) + gc_epoch_offset_in_bytes()) |= ~GC_EPOCH_MASK;
+// }
+
+// void oopDesc::unset_initialize_bit() {
+//   _gc_epoch = _gc_epoch << 1 >> 1;
+// }
+
+// void oopDesc::unset_initialize_bit(HeapWord* mem) {
+//   *(intptr_t*)(((char*)mem) + gc_epoch_offset_in_bytes()) = *(intptr_t*)(((char*)mem) + gc_epoch_offset_in_bytes()) << 1 >> 1;
+// }
+
+// bool oopDesc::initialize_bit_is_set() {
+//   return _gc_epoch & ~GC_EPOCH_MASK;
+// }
+
+// bool oopDesc::initialize_bit_is_set(HeapWord* mem) {
+//   return *(intptr_t*)(((char*)mem) + gc_epoch_offset_in_bytes()) & ~GC_EPOCH_MASK;
+// }
 
 void oopDesc::set_mark(volatile markOop m) {
   HeapAccess<MO_VOLATILE>::store_at(as_oop(), mark_offset_in_bytes(), m);
