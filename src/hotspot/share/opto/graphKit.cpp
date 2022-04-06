@@ -1644,8 +1644,8 @@ Node* GraphKit::access_store_at(Node* ctl,
   } else {
     st = _barrier_set->store_at(access, value);
   }
-  Node* ac_adr = basic_plus_adr(access.base(), oopDesc::access_counter_offset_in_bytes());
-  st = StoreNode::make(_gvn, ctl, st, ac_adr, NULL, longcon(1), T_LONG, MemNode::unordered);
+  // Node* ac_adr = basic_plus_adr(access.base(), oopDesc::access_counter_offset_in_bytes());
+  // st = StoreNode::make(_gvn, ctl, st, ac_adr, NULL, longcon(1), T_LONG, MemNode::unordered);
   return st;
 }
 
@@ -1670,8 +1670,9 @@ Node* GraphKit::access_load_at(Node* obj,   // containing obj
   } else {
     ld = _barrier_set->load_at(access, val_type);
   }
-  Node* ac_adr = basic_plus_adr(access.base(), oopDesc::access_counter_offset_in_bytes());
+  // Node* ac_adr = basic_plus_adr(access.base(), oopDesc::access_counter_offset_in_bytes());
   // Node* st = StoreNode::make(_gvn, control(), ld, ac_adr, NULL, longcon(1), T_LONG, MemNode::unordered);
+  // ld = make_load(control(), adr, )
 
   return ld;
 }
