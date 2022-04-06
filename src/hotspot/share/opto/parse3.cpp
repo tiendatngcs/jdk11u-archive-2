@@ -200,6 +200,24 @@ void Parse::do_get_xxx(Node* obj, ciField* field, bool is_field) {
     type = Type::get_const_basic_type(bt);
   }
 
+  // Dat mod increase ac here?
+  // DecoratorSet ac_decorators = IN_HEAP | MO_UNORDERED;
+  // Node* ac_adr = basic_plus_adr(obj, obj, oopDesc::access_counter_offset_in_bytes());
+
+  // Node* incr_ac = increase_access_counter(obj, ac_adr, TypePtr::BOTTOM, T_LONG, ac_decorators);
+  // // Adjust Java stack
+  // if (type2size[bt] == 1)
+  //   push(incr_ac);
+  // else
+  //   push_pair(incr_ac);
+
+  // increase_ac
+  Node* ac_adr = basic_plus_adr(obj, obj, oopDesc::access_counter_offset_in_bytes());
+  increment_counter(ac_adr);
+  // end
+  
+
+  // Dat mod ends
   Node* ld = access_load_at(obj, adr, adr_type, type, bt, decorators);
 
   // Adjust Java stack
@@ -273,6 +291,12 @@ void Parse::do_put_xxx(Node* obj, ciField* field, bool is_field) {
       field_type = Type::BOTTOM;
     }
   }
+
+
+  // increase_ac
+  Node* ac_adr = basic_plus_adr(obj, obj, oopDesc::access_counter_offset_in_bytes());
+  increment_counter(ac_adr);
+  // end
   access_store_at(control(), obj, adr, adr_type, val, field_type, bt, decorators);
 
   if (is_field) {
@@ -360,6 +384,12 @@ Node* Parse::expand_multianewarray(ciArrayKlass* array_klass, Node* *lengths, in
       Node*    elem   = expand_multianewarray(array_klass_1, &lengths[1], ndimensions-1, nargs);
       intptr_t offset = header + ((intptr_t)i << LogBytesPerHeapOop);
       Node*    eaddr  = basic_plus_adr(array, offset);
+
+
+      // increase_ac
+      Node* ac_adr = basic_plus_adr(array, array, oopDesc::access_counter_offset_in_bytes());
+      increment_counter(ac_adr);
+      // end
       access_store_at(control(), array, eaddr, adr_type, elem, elemtype, T_OBJECT, IN_HEAP | IS_ARRAY);
     }
   }

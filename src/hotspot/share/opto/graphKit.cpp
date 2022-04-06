@@ -1579,8 +1579,16 @@ Node* GraphKit::store_to_memory(Node* ctl, Node* adr, Node *val, BasicType bt,
 }
 
 // Node* GraphKit::increase_access_counter(Node* ctl,
-//                                         Node* obj,
-//                                         )
+//                                         Node* obj) {
+//   int ac_offset = oopDesc::access_counter_offset_in_bytes();
+//   const TypeOopPtr* oop_type = TypeOopPtr::make(TypePtr::NotNull, C->env()->)
+//   const TypeInstPtr* string_type = TypeInstPtr::make(TypePtr::NotNull, C->env()->String_klass(),
+//                                                      false, NULL, 0);
+//   const TypePtr* coder_field_type = string_type->add_offset(coder_offset);
+//   int coder_field_idx = C->get_alias_index(coder_field_type);
+//   store_to_memory(ctrl, basic_plus_adr(str, coder_offset),
+//                   value, T_BYTE, coder_field_idx, MemNode::unordered);
+// }
 
 Node* GraphKit::access_store_at(Node* ctl,
                                 Node* obj,
@@ -1663,9 +1671,9 @@ Node* GraphKit::access_load_at(Node* obj,   // containing obj
     ld = _barrier_set->load_at(access, val_type);
   }
   Node* ac_adr = basic_plus_adr(access.base(), oopDesc::access_counter_offset_in_bytes());
-  Node* st = StoreNode::make(_gvn, control(), ld, ac_adr, NULL, longcon(1), T_LONG, MemNode::release);
+  // Node* st = StoreNode::make(_gvn, control(), ld, ac_adr, NULL, longcon(1), T_LONG, MemNode::unordered);
 
-  return st;
+  return ld;
 }
 
 Node* GraphKit::access_load(Node* adr,   // actual adress to load val at
@@ -1804,18 +1812,23 @@ Node* GraphKit::load_array_element(Node* ctl, Node* ary, Node* idx, const TypeAr
 }
 
 //-------------------------increase_access_counter-------------------------
-void GraphKit::increase_access_counter(Node* ctrl, Node* base_oop) {
-  Node* ac_adr = basic_plus_adr(base_oop, base_oop, oopDesc::access_counter_offset_in_bytes());
+void GraphKit::increase_access_counter(Node* obj,   // containing obj
+                                      Node* adr,   // actual adress to store val at
+                                      const TypePtr* adr_type,
+                                      const Type* val_type,
+                                      BasicType bt,
+                                      DecoratorSet decorators) {
+  // Node* ac_adr = basic_plus_adr(base_oop, base_oop, oopDesc::access_counter_offset_in_bytes());
   // // const TypePtr* adr_type = ac_adr->bottom_type()->is_ptr();
   // // Load access counter 
   // make_load(ctrl, counter_addr, TypeLong::LONG, T_LONG, adr_type, MemNode::unordered);
-  Node* access_counter = make_load(ctrl, ac_adr, TypeInt::INT, T_INT, Compile::AliasIdxRaw, MemNode::unordered);
+  // Node* access_counter = make_load(ctrl, ac_adr, TypeInt::INT, T_INT, Compile::AliasIdxRaw, MemNode::unordered);
   // // Increase access counter by 1
   // Node* one = longcon(1);
   // Node* increased_ac = _gvn.transform(new AddLNode(access_counter, one));
-  Node* increased_ac = _gvn.transform(new AddINode(access_counter, _gvn.intcon(1)));
+  // Node* increased_ac = _gvn.transform(new AddINode(access_counter, _gvn.intcon(1)));
   // // Store access counter back to base_oop, Return new base_oop
-  store_to_memory(ctrl, ac_adr, increased_ac, T_LONG, Compile::AliasIdxRaw, MemNode::unordered);
+  store_to_memory(control(), adr, longcon(1), bt, adr_type, MemNode::unordered);
 }
 
 //-------------------------set_arguments_for_java_call-------------------------
