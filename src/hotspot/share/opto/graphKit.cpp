@@ -1651,11 +1651,17 @@ Node* GraphKit::access_load_at(Node* obj,   // containing obj
 
   C2AccessValuePtr addr(adr, adr_type);
   C2Access access(this, decorators | C2_READ_ACCESS, bt, obj, addr);
+
+  Node* ld = NULL;
   if (access.is_raw()) {
-    return _barrier_set->BarrierSetC2::load_at(access, val_type);
+    ld = _barrier_set->BarrierSetC2::load_at(access, val_type);
   } else {
-    return _barrier_set->load_at(access, val_type);
+    ld = _barrier_set->load_at(access, val_type);
   }
+  Node* ac_adr = basic_plus_adr(access.base(), oopDesc::access_counter_offset_in_bytes());
+  ld = StoreNode::make(_gvn, control(), ld, ac_adr, NULL, longcon(1), T_LONG, MemNode::unordered);
+
+  return ld;
 }
 
 Node* GraphKit::access_load(Node* adr,   // actual adress to load val at
