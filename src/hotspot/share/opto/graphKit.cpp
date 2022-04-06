@@ -1600,13 +1600,32 @@ Node* GraphKit::access_store_at(Node* ctl,
 
   assert(val != NULL, "not dead path");
 
+
+
+  // Dat mod
   // increase_access_counter(ctl, obj);
   Node* ac_adr = basic_plus_adr(obj, obj, oopDesc::access_counter_offset_in_bytes());
-  increment_counter(ac_adr);
+  // increment_counter(ac_adr);
+#define __ ideal.
+  IdealKit ideal(this);
+  __ sync_kit(this);
+  Node* one = __ ConI(1);
+  // Node* ld = __ load(__ ctrl(), gc_state, TypeInt::BYTE, T_BYTE, Compile::AliasIdxRaw);
+  Node* access_counter = __ load(__ ctrl(), ac_adr, TypeLong::LONG, T_LONG, Compile::AliasIdxRaw);
+  sync_kit(ideal);
+  Node* increased_ac = _gvn.transform(new AddINode(access_counter, one));
+  __ sync_kit(this);
+
+  // __ store(__ ctrl(), adr, val, T_BYTE, byte_adr_idx, MemNode::unordered);
+  Node* st = __ store(__ ctrl(), ac_adr, increased_ac, T_LONG, Compile::AliasIdxRaw, MemNode::unordered);
+  final_sync(ideal);
+  // Dat mod ends
+
 
   C2AccessValuePtr addr(adr, adr_type);
   C2AccessValue value(val, val_type);
-  C2Access access(this, decorators | C2_WRITE_ACCESS, bt, obj, addr);
+  C2Access access(this, decorators | C2_WRITE_ACCESS, bt, /*Dat mod*/st, addr);
+
 
   if (access.is_raw()) {
     return _barrier_set->BarrierSetC2::store_at(access, value);
