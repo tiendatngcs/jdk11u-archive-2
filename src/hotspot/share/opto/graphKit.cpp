@@ -1578,6 +1578,10 @@ Node* GraphKit::store_to_memory(Node* ctl, Node* adr, Node *val, BasicType bt,
   return st;
 }
 
+// Node* GraphKit::increase_access_counter(Node* ctl,
+//                                         Node* obj,
+//                                         )
+
 Node* GraphKit::access_store_at(Node* ctl,
                                 Node* obj,
                                 Node* adr,
@@ -1659,9 +1663,9 @@ Node* GraphKit::access_load_at(Node* obj,   // containing obj
     ld = _barrier_set->load_at(access, val_type);
   }
   Node* ac_adr = basic_plus_adr(access.base(), oopDesc::access_counter_offset_in_bytes());
-  ld = StoreNode::make(_gvn, control(), ld, ac_adr, NULL, longcon(1), T_LONG, MemNode::unordered);
+  Node* st = StoreNode::make(_gvn, control(), ld, ac_adr, NULL, longcon(1), T_LONG, MemNode::release);
 
-  return ld;
+  return st;
 }
 
 Node* GraphKit::access_load(Node* adr,   // actual adress to load val at
