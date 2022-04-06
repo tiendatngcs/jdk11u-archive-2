@@ -238,7 +238,7 @@ void Parse::do_put_xxx(Node* obj, ciField* field, bool is_field) {
 
   // Dat Mod
   int ac_offset = oopDesc::access_counter_offset_in_bytes();
-  const TypePtr* ac_adr_type = TypeX_X;
+  // const TypePtr* ac_adr_type = TypeX_X;
   Node* ac_adr = basic_plus_adr(obj, obj, ac_offset);
   BasicType ac_bt = TypeX_X->basic_type();
   Node* one = longcon(1);
