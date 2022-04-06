@@ -1624,7 +1624,7 @@ Node* GraphKit::access_store_at(Node* ctl,
 
   C2AccessValuePtr addr(adr, adr_type);
   C2AccessValue value(val, val_type);
-  C2Access access(this, decorators | C2_WRITE_ACCESS, bt, /*Dat mod*/st, addr);
+  C2Access access(this, decorators | C2_WRITE_ACCESS, bt, obj, addr);
 
 
   if (access.is_raw()) {
