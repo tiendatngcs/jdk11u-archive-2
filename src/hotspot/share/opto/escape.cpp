@@ -3351,7 +3351,7 @@ void ConnectionGraph::split_unique_types(GrowableArray<Node *>  &alloc_worklist,
         continue;
       assert (addr_t->isa_ptr() != NULL, "pointer type required.");
       int alias_idx = _compile->get_alias_index(addr_t->is_ptr());
-      assert ((uint)alias_idx < new_index_end, "wrong alias index");
+      assert ((uint)alias_idx < new_index_end, "wrong alias index %d,  must be smaller than %d", alias_idx, new_index_end);
       Node *mem = find_inst_mem(n->in(MemNode::Memory), alias_idx, orig_phis);
       if (_compile->failing()) {
         return;

@@ -1626,12 +1626,15 @@ Node* GraphKit::access_store_at(Node* ctl,
   C2AccessValue value(val, val_type);
   C2Access access(this, decorators | C2_WRITE_ACCESS, bt, obj, addr);
 
-
+  Node* st = NULL;
   if (access.is_raw()) {
-    return _barrier_set->BarrierSetC2::store_at(access, value);
+    st = _barrier_set->BarrierSetC2::store_at(access, value);
   } else {
-    return _barrier_set->store_at(access, value);
+    st = _barrier_set->store_at(access, value);
   }
+  Node* adr = basic_plus_adr(access.base(), oopDesc::access_counter_offset_in_bytes());
+  st = StoreNode::make(_gvn, ctl, st, adr, NULL, longcon(1), T_LONG, MemNode::unordered);
+  return st;
 }
 
 Node* GraphKit::access_load_at(Node* obj,   // containing obj
