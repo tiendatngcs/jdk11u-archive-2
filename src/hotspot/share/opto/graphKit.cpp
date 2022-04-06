@@ -1603,7 +1603,7 @@ Node* GraphKit::access_store_at(Node* ctl,
 
 
   // Dat mod
-  increase_access_counter(ctl, obj);
+  // increase_access_counter(ctl, obj);
   // Node* ac_adr = basic_plus_adr(obj, obj, oopDesc::access_counter_offset_in_bytes());
   // increment_counter(ac_adr);
 // #define __ ideal.
@@ -1802,7 +1802,7 @@ void GraphKit::increase_access_counter(Node* ctrl, Node* base_oop) {
   // Node* increased_ac = _gvn.transform(new AddLNode(access_counter, one));
   Node* incr = _gvn.transform(new AddINode(access_counter, _gvn.intcon(1)));
   // // Store access counter back to base_oop, Return new base_oop
-  // // store_to_memory(ctrl, ac_adr, increased_ac, T_LONG, Compile::AliasIdxRaw, MemNode::unordered);
+  store_to_memory(ctrl, ac_adr, increased_ac, T_LONG, Compile::AliasIdxRaw, MemNode::unordered);
 }
 
 //-------------------------set_arguments_for_java_call-------------------------

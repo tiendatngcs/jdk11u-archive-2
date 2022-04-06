@@ -236,6 +236,19 @@ void Parse::do_get_xxx(Node* obj, ciField* field, bool is_field) {
 void Parse::do_put_xxx(Node* obj, ciField* field, bool is_field) {
   bool is_vol = field->is_volatile();
 
+  // Dat Mod
+  int ac_offset = oopDesc::access_counter_offset_in_bytes();
+  const TypePtr* ac_adr_type = TypeX_X;
+  Node* ac_adr = basic_plus_adr(obj, obj, ac_offset);
+  BasicType ac_bt = TypeX_X->basic_type();
+  Node* one = longcon(1);
+  store_to_memory(control(), ac_adr, one, ac_bt, ac_adr_type, MemNode::unordered);
+  // store_to_memory(kit->control(), )
+
+  // __ store(__ ctrl(), access.base(), next_index, index_bt, Compile::AliasIdxRaw, MemNode::unordered);
+
+  // Dat mod ends
+
   // Compute address and memory type.
   int offset = field->offset_in_bytes();
   const TypePtr* adr_type = C->alias_type(field)->adr_type();
