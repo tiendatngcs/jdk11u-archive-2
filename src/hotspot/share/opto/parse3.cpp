@@ -242,7 +242,7 @@ void Parse::do_put_xxx(Node* obj, ciField* field, bool is_field) {
   Node* ac_adr = basic_plus_adr(obj, obj, ac_offset);
   BasicType ac_bt = TypeX_X->basic_type();
   Node* one = longcon(1);
-  store_to_memory(control(), ac_adr, one, ac_bt, Compile::AliasIdxTop, MemNode::unordered);
+  store_to_memory(control(), ac_adr, one, ac_bt, TypePtr::BOTTOM, MemNode::unordered);
   // store_to_memory(kit->control(), )
 
   // __ store(__ ctrl(), access.base(), next_index, index_bt, Compile::AliasIdxRaw, MemNode::unordered);
