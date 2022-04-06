@@ -1613,7 +1613,7 @@ Node* GraphKit::access_store_at(Node* ctl,
   // Node* ld = __ load(__ ctrl(), gc_state, TypeInt::BYTE, T_BYTE, Compile::AliasIdxRaw);
   Node* access_counter = __ load(__ ctrl(), ac_adr, TypeLong::LONG, T_LONG, Compile::AliasIdxRaw);
   sync_kit(ideal);
-  Node* increased_ac = _gvn.transform(new AddINode(access_counter, one));
+  Node* increased_ac = _gvn.transform(new AddLNode(access_counter, one));
   __ sync_kit(this);
 
   // __ store(__ ctrl(), adr, val, T_BYTE, byte_adr_idx, MemNode::unordered);
