@@ -88,7 +88,7 @@ Node* BarrierSetC2::store_at_resolved(C2Access& access, C2AccessValue& val) cons
   // increase_access_counter
   Node* base_oop = access.base();
   Node* ac_adr = kit->basic_plus_adr(base_oop, base_oop, oopDesc::access_counter_offset_in_bytes());
-  Node* st = StoreNode::make(kit->gvn(), kit->control(), ac_adr, ac_adr, NULL, longcon(1),  T_LONG, MemNode::unordered);
+  Node* st = StoreNode::make(kit->gvn(), kit->control(), ac_adr, ac_adr, NULL, kit->longcon(1),  T_LONG, MemNode::unordered);
   // base_oop = LoadNode::make(kit->gvn(), kit->control(), st, base_oop, )
   // StoreNode::make(_gvn, ctl, st, ac_adr, NULL, longcon(1), T_LONG, MemNode::unordered);
 
