@@ -119,7 +119,7 @@ Node* BarrierSetC2::load_at_resolved(C2Access& access, const Type* val_type) con
   // increase_access_counter
   Node* base_oop = access.base();
   Node* ac_adr = kit->basic_plus_adr(base_oop, base_oop, oopDesc::access_counter_offset_in_bytes());
-  Node* st = StoreNode::make(kit->gvn(), NULL, ac_adr, ac_adr, NULL, kit->longcon(1),  T_LONG, MemNode::unordered);
+  Node* st = StoreNode::make(kit->gvn(), kit->control(), ac_adr, ac_adr, TypeRawPtr::BOTTOM, kit->longcon(1),  T_LONG, MemNode::unordered);
 
   MemNode::MemOrd mo = access.mem_node_mo();
   LoadNode::ControlDependency dep = pinned ? LoadNode::Pinned : LoadNode::DependsOnlyOnTest;
