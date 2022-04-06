@@ -1800,7 +1800,7 @@ void GraphKit::increase_access_counter(Node* ctrl, Node* base_oop) {
   // // Increase access counter by 1
   // Node* one = longcon(1);
   // Node* increased_ac = _gvn.transform(new AddLNode(access_counter, one));
-  Node* incr = _gvn.transform(new AddINode(access_counter, _gvn.intcon(1)));
+  Node* increased_ac = _gvn.transform(new AddINode(access_counter, _gvn.intcon(1)));
   // // Store access counter back to base_oop, Return new base_oop
   store_to_memory(ctrl, ac_adr, increased_ac, T_LONG, Compile::AliasIdxRaw, MemNode::unordered);
 }
