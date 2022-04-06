@@ -1603,22 +1603,22 @@ Node* GraphKit::access_store_at(Node* ctl,
 
 
   // Dat mod
-  // increase_access_counter(ctl, obj);
-  Node* ac_adr = basic_plus_adr(obj, obj, oopDesc::access_counter_offset_in_bytes());
+  increase_access_counter(ctl, obj);
+  // Node* ac_adr = basic_plus_adr(obj, obj, oopDesc::access_counter_offset_in_bytes());
   // increment_counter(ac_adr);
-#define __ ideal.
-  IdealKit ideal(this);
-  __ sync_kit(this);
-  Node* one = __ ConI(1);
-  // Node* ld = __ load(__ ctrl(), gc_state, TypeInt::BYTE, T_BYTE, Compile::AliasIdxRaw);
-  Node* access_counter = __ load(__ ctrl(), ac_adr, TypeInt::INT, T_INT, Compile::AliasIdxRaw);
-  sync_kit(ideal);
-  Node* increased_ac = _gvn.transform(new AddINode(access_counter, one));
-  __ sync_kit(this);
+// #define __ ideal.
+//   IdealKit ideal(this);
+//   __ sync_kit(this);
+//   Node* one = __ ConI(1);
+//   // Node* ld = __ load(__ ctrl(), gc_state, TypeInt::BYTE, T_BYTE, Compile::AliasIdxRaw);
+//   Node* access_counter = __ load(__ ctrl(), ac_adr, TypeInt::INT, T_INT, Compile::AliasIdxRaw);
+//   sync_kit(ideal);
+//   Node* increased_ac = _gvn.transform(new AddINode(access_counter, one));
+//   __ sync_kit(this);
 
-  // __ store(__ ctrl(), adr, val, T_BYTE, byte_adr_idx, MemNode::unordered);
-  Node* st = __ store(__ ctrl(), ac_adr, increased_ac, T_INT, Compile::AliasIdxRaw, MemNode::unordered);
-  final_sync(ideal);
+//   // __ store(__ ctrl(), adr, val, T_BYTE, byte_adr_idx, MemNode::unordered);
+//   Node* st = __ store(__ ctrl(), ac_adr, increased_ac, T_INT, Compile::AliasIdxRaw, MemNode::unordered);
+//   final_sync(ideal);
   // Dat mod ends
 
 
@@ -1796,11 +1796,11 @@ void GraphKit::increase_access_counter(Node* ctrl, Node* base_oop) {
   // // const TypePtr* adr_type = ac_adr->bottom_type()->is_ptr();
   // // Load access counter 
   // make_load(ctrl, counter_addr, TypeLong::LONG, T_LONG, adr_type, MemNode::unordered);
-  Node* access_counter = make_load(ctrl, ac_adr, TypeLong::LONG, T_LONG, Compile::AliasIdxRaw, MemNode::unordered);
+  Node* access_counter = make_load(ctrl, ac_adr, TypeInt::INT, T_INT, Compile::AliasIdxRaw, MemNode::unordered);
   // // Increase access counter by 1
   // Node* one = longcon(1);
   // Node* increased_ac = _gvn.transform(new AddLNode(access_counter, one));
-  Node* incr = _gvn.transform(new AddLNode(access_counter, _gvn.longcon(1)));
+  Node* incr = _gvn.transform(new AddINode(access_counter, _gvn.intcon(1)));
   // // Store access counter back to base_oop, Return new base_oop
   // // store_to_memory(ctrl, ac_adr, increased_ac, T_LONG, Compile::AliasIdxRaw, MemNode::unordered);
 }
