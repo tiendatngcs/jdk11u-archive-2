@@ -67,8 +67,9 @@ void Parse::array_load(BasicType bt) {
 
 
   // increase_ac
-  // Node* ac_adr = basic_plus_adr(array, array, oopDesc::access_counter_offset_in_bytes());
-  // increment_counter(ac_adr);
+  Node* ac_adr = basic_plus_adr(array, array, oopDesc::access_counter_offset_in_bytes());
+  increment_counter(ac_adr);
+  insert_mem_bar(Op_MemBarCPUOrder);
   // end
 
   Node* ld = access_load_at(array, adr, adr_type, elemtype, bt,
@@ -110,8 +111,9 @@ void Parse::array_store(BasicType bt) {
 
 
   // increase_ac
-  // Node* ac_adr = basic_plus_adr(array, array, oopDesc::access_counter_offset_in_bytes());
-  // increment_counter(ac_adr);
+  Node* ac_adr = basic_plus_adr(array, array, oopDesc::access_counter_offset_in_bytes());
+  increment_counter(ac_adr);
+  insert_mem_bar(Op_MemBarCPUOrder);
   // end
   access_store_at(control(), array, adr, adr_type, val, elemtype, bt, MO_UNORDERED | IN_HEAP | IS_ARRAY);
 }

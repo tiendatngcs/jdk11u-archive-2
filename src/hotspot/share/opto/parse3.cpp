@@ -212,8 +212,9 @@ void Parse::do_get_xxx(Node* obj, ciField* field, bool is_field) {
   //   push_pair(incr_ac);
 
   // increase_ac
-  // Node* ac_adr = basic_plus_adr(obj, obj, oopDesc::access_counter_offset_in_bytes());
-  // increment_counter(ac_adr);
+  Node* ac_adr = basic_plus_adr(obj, obj, oopDesc::access_counter_offset_in_bytes());
+  increment_counter(ac_adr);
+  insert_mem_bar(Op_MemBarCPUOrder);
   // end
   
 
@@ -294,8 +295,9 @@ void Parse::do_put_xxx(Node* obj, ciField* field, bool is_field) {
 
 
   // increase_ac
-  // Node* ac_adr = basic_plus_adr(obj, obj, oopDesc::access_counter_offset_in_bytes());
-  // increment_counter(ac_adr);
+  Node* ac_adr = basic_plus_adr(obj, obj, oopDesc::access_counter_offset_in_bytes());
+  increment_counter(ac_adr);
+  insert_mem_bar(Op_MemBarCPUOrder);
   // end
   access_store_at(control(), obj, adr, adr_type, val, field_type, bt, decorators);
 
@@ -387,8 +389,9 @@ Node* Parse::expand_multianewarray(ciArrayKlass* array_klass, Node* *lengths, in
 
 
       // increase_ac
-      // Node* ac_adr = basic_plus_adr(array, array, oopDesc::access_counter_offset_in_bytes());
-      // increment_counter(ac_adr);
+      Node* ac_adr = basic_plus_adr(array, array, oopDesc::access_counter_offset_in_bytes());
+      increment_counter(ac_adr);
+      insert_mem_bar(Op_MemBarCPUOrder);
       // end
       access_store_at(control(), array, eaddr, adr_type, elem, elemtype, T_OBJECT, IN_HEAP | IS_ARRAY);
     }
