@@ -202,7 +202,7 @@ void Parse::do_get_xxx(Node* obj, ciField* field, bool is_field) {
 
   // Dat mod increase ac here?
   // DecoratorSet ac_decorators = IN_HEAP | MO_UNORDERED;
-  // Node* ac_adr = basic_plus_adr(obj, obj, oopDesc::access_counter_offset_in_bytes());
+  Node* ac_adr = basic_plus_adr(obj, obj, oopDesc::access_counter_offset_in_bytes());
 
   // Node* incr_ac = increase_access_counter(obj, ac_adr, TypePtr::BOTTOM, T_LONG, ac_decorators);
   // // Adjust Java stack
@@ -218,6 +218,7 @@ void Parse::do_get_xxx(Node* obj, ciField* field, bool is_field) {
   // end
   
 
+  store_to_memory(control(), ac_adr, longcon(1), T_LONG, TypeAryPtr::LONGS, MemNode::unordered);
   // Dat mod ends
   Node* ld = access_load_at(obj, adr, adr_type, type, bt, decorators);
 
