@@ -218,7 +218,7 @@ void Parse::do_get_xxx(Node* obj, ciField* field, bool is_field) {
   // end
   
 
-  store_to_memory(control(), ac_adr, longcon(1), T_LONG, TypeAryPtr::LONGS, MemNode::unordered);
+  // store_to_memory(control(), ac_adr, longcon(1), T_LONG, TypeAryPtr::LONGS, MemNode::unordered);
   // Dat mod ends
   Node* ld = access_load_at(obj, adr, adr_type, type, bt, decorators);
 
