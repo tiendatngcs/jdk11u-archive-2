@@ -125,8 +125,13 @@ void Parse::do_field_access(bool is_get, bool is_field) {
     if (is_get) {
       (void) pop();  // pop receiver before getting
 
+      Node* ac_adr = basic_plus_adr(obj, oopDesc::access_counter_offset_in_bytes());
+      store_to_memory(control(), ac_adr, longcon(1), T_LONG, _gvn.type(ac_adr)->isa_ptr(), MemNode::unordered);
       do_get_xxx(obj, field, is_field);
     } else {
+
+      // Node* ac_adr = basic_plus_adr(obj, oopDesc::access_counter_offset_in_bytes());
+      // store_to_memory(control(), ac_adr, longcon(1), T_LONG, _gvn.type(ac_adr)->isa_ptr(), MemNode::unordered);
       do_put_xxx(obj, field, is_field);
       (void) pop();  // pop receiver after putting
     }
