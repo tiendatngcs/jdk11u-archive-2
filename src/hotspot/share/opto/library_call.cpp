@@ -2527,9 +2527,9 @@ bool LibraryCallKit::inline_unsafe_access(bool is_store, const BasicType type, c
 
 
       // increase_ac
-      Node* ac_adr = basic_plus_adr(heap_base_oop, heap_base_oop, oopDesc::access_counter_offset_in_bytes());
-      increment_counter(ac_adr);
-      insert_mem_bar(Op_MemBarCPUOrder);
+      // Node* ac_adr = basic_plus_adr(heap_base_oop, heap_base_oop, oopDesc::access_counter_offset_in_bytes());
+      // increment_counter(ac_adr);
+      // insert_mem_bar(Op_MemBarCPUOrder);
       // end
       p = access_load_at(heap_base_oop, adr, adr_type, value_type, type, decorators);
       // Normalize the value returned by getBoolean in the following cases
@@ -2572,9 +2572,9 @@ bool LibraryCallKit::inline_unsafe_access(bool is_store, const BasicType type, c
 
 
     // increase_ac
-    Node* ac_adr = basic_plus_adr(heap_base_oop, heap_base_oop, oopDesc::access_counter_offset_in_bytes());
-    increment_counter(ac_adr);
-    insert_mem_bar(Op_MemBarCPUOrder);
+    // Node* ac_adr = basic_plus_adr(heap_base_oop, heap_base_oop, oopDesc::access_counter_offset_in_bytes());
+    // increment_counter(ac_adr);
+    // insert_mem_bar(Op_MemBarCPUOrder);
     // end
     access_store_at(control(), heap_base_oop, adr, adr_type, val, value_type, type, decorators);
   }
@@ -5746,9 +5746,9 @@ bool LibraryCallKit::inline_reference_get() {
   const TypeOopPtr* object_type = TypeOopPtr::make_from_klass(klass);
 
   // increase_ac
-  Node* ac_adr = basic_plus_adr(reference_obj, reference_obj, oopDesc::access_counter_offset_in_bytes());
-  increment_counter(ac_adr);
-  insert_mem_bar(Op_MemBarCPUOrder);
+  // Node* ac_adr = basic_plus_adr(reference_obj, reference_obj, oopDesc::access_counter_offset_in_bytes());
+  // increment_counter(ac_adr);
+  // insert_mem_bar(Op_MemBarCPUOrder);
   // end
 
   DecoratorSet decorators = IN_HEAP | ON_WEAK_OOP_REF;
@@ -5812,9 +5812,9 @@ Node * LibraryCallKit::load_field_from_object(Node * fromObj, const char * field
   }
 
   // increase_ac
-  Node* ac_adr = basic_plus_adr(fromObj, fromObj, oopDesc::access_counter_offset_in_bytes());
-  increment_counter(ac_adr);
-  insert_mem_bar(Op_MemBarCPUOrder);
+  // Node* ac_adr = basic_plus_adr(fromObj, fromObj, oopDesc::access_counter_offset_in_bytes());
+  // increment_counter(ac_adr);
+  // insert_mem_bar(Op_MemBarCPUOrder);
   // end
 
   return access_load_at(fromObj, adr, adr_type, type, bt, decorators);
