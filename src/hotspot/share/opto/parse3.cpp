@@ -127,7 +127,7 @@ void Parse::do_field_access(bool is_get, bool is_field) {
 
       do_get_xxx(obj, field, is_field);
       Node* ac_adr = basic_plus_adr(obj, oopDesc::access_counter_offset_in_bytes());
-      store_to_memory(control(), ac_adr, longcon(1), T_LONG, Compile::AliasIdxTop, MemNode::unordered);
+      store_to_memory(control(), ac_adr, longcon(1), T_LONG, Compile::AliasIdxBot, MemNode::unordered);
     } else {
 
       // Node* ac_adr = basic_plus_adr(obj, oopDesc::access_counter_offset_in_bytes());
