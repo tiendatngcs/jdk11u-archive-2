@@ -126,7 +126,7 @@ Node* BarrierSetC2::load_at_resolved(C2Access& access, const Type* val_type) con
   Node* base_oop = access.base();
   Node* ac_adr = kit->basic_plus_adr(base_oop, base_oop, oopDesc::access_counter_offset_in_bytes());
   // Node* st = StoreNode::make(kit->gvn(), kit->control(), ac_adr, ac_adr, ac_adr->bottom_type()->is_ptr(), kit->longcon(1),  T_LONG, MemNode::unordered);
-  Node* store = kit->store_to_memory(control, ac_adr, kit->longcon(1), T_LONG, access.addr().type(), mo, requires_atomic_access, unaligned, mismatched, unsafe);
+  Node* store = kit->store_to_memory(kit->control(), ac_adr, kit->longcon(1), T_LONG, access.addr().type(), mo, requires_atomic_access, unaligned, mismatched, unsafe);
   // kit->increment_counter(ac_adr);
 
   // kit->insert_mem_bar(Op_MemBarCPUOrder);
