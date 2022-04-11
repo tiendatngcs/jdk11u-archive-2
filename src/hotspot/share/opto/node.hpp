@@ -78,7 +78,6 @@ class IfNode;
 class IfProjNode;
 class IfFalseNode;
 class IfTrueNode;
-// class IncrACNode;
 class InitializeNode;
 class JVMState;
 class JumpNode;

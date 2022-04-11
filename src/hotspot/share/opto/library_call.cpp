@@ -2524,13 +2524,6 @@ bool LibraryCallKit::inline_unsafe_access(bool is_store, const BasicType type, c
     }
 
     if (p == NULL) { // Could not constant fold the load
-
-
-      // increase_ac
-      // Node* ac_adr = basic_plus_adr(heap_base_oop, heap_base_oop, oopDesc::access_counter_offset_in_bytes());
-      // increment_counter(ac_adr);
-      // insert_mem_bar(Op_MemBarCPUOrder);
-      // end
       p = access_load_at(heap_base_oop, adr, adr_type, value_type, type, decorators);
       // Normalize the value returned by getBoolean in the following cases
       if (type == T_BOOLEAN &&
@@ -2569,13 +2562,6 @@ bool LibraryCallKit::inline_unsafe_access(bool is_store, const BasicType type, c
       val = ConvL2X(val);
       val = gvn().transform(new CastX2PNode(val));
     }
-
-
-    // increase_ac
-    // Node* ac_adr = basic_plus_adr(heap_base_oop, heap_base_oop, oopDesc::access_counter_offset_in_bytes());
-    // increment_counter(ac_adr);
-    // insert_mem_bar(Op_MemBarCPUOrder);
-    // end
     access_store_at(control(), heap_base_oop, adr, adr_type, val, value_type, type, decorators);
   }
 
@@ -5745,12 +5731,6 @@ bool LibraryCallKit::inline_reference_get() {
   ciInstanceKlass* klass = env()->Object_klass();
   const TypeOopPtr* object_type = TypeOopPtr::make_from_klass(klass);
 
-  // increase_ac
-  // Node* ac_adr = basic_plus_adr(reference_obj, reference_obj, oopDesc::access_counter_offset_in_bytes());
-  // increment_counter(ac_adr);
-  // insert_mem_bar(Op_MemBarCPUOrder);
-  // end
-
   DecoratorSet decorators = IN_HEAP | ON_WEAK_OOP_REF;
   Node* result = access_load_at(reference_obj, adr, adr_type, object_type, T_OBJECT, decorators);
   // Add memory barrier to prevent commoning reads from this field
@@ -5810,12 +5790,6 @@ Node * LibraryCallKit::load_field_from_object(Node * fromObj, const char * field
   if (is_vol) {
     decorators |= MO_SEQ_CST;
   }
-
-  // increase_ac
-  // Node* ac_adr = basic_plus_adr(fromObj, fromObj, oopDesc::access_counter_offset_in_bytes());
-  // increment_counter(ac_adr);
-  // insert_mem_bar(Op_MemBarCPUOrder);
-  // end
 
   return access_load_at(fromObj, adr, adr_type, type, bt, decorators);
 }

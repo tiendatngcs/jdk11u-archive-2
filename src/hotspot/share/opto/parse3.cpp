@@ -200,26 +200,6 @@ void Parse::do_get_xxx(Node* obj, ciField* field, bool is_field) {
     type = Type::get_const_basic_type(bt);
   }
 
-  // Dat mod increase ac here?
-  // DecoratorSet ac_decorators = IN_HEAP | MO_UNORDERED;
-  Node* ac_adr = basic_plus_adr(obj, obj, oopDesc::access_counter_offset_in_bytes());
-
-  // Node* incr_ac = increase_access_counter(obj, ac_adr, TypePtr::BOTTOM, T_LONG, ac_decorators);
-  // // Adjust Java stack
-  // if (type2size[bt] == 1)
-  //   push(incr_ac);
-  // else
-  //   push_pair(incr_ac);
-
-  // increase_ac
-  // Node* ac_adr = basic_plus_adr(obj, obj, oopDesc::access_counter_offset_in_bytes());
-  // increment_counter(ac_adr);
-  // insert_mem_bar(Op_MemBarCPUOrder);
-  // end
-  
-
-  // store_to_memory(control(), ac_adr, longcon(1), T_LONG, TypeAryPtr::LONGS, MemNode::unordered);
-  // Dat mod ends
   Node* ld = access_load_at(obj, adr, adr_type, type, bt, decorators);
 
   // Adjust Java stack
@@ -256,19 +236,6 @@ void Parse::do_get_xxx(Node* obj, ciField* field, bool is_field) {
 void Parse::do_put_xxx(Node* obj, ciField* field, bool is_field) {
   bool is_vol = field->is_volatile();
 
-  // // Dat Mod
-  // int ac_offset = oopDesc::access_counter_offset_in_bytes();
-  // // const TypePtr* ac_adr_type = TypeX_X;
-  // Node* ac_adr = basic_plus_adr(obj, obj, ac_offset);
-  // BasicType ac_bt = TypeX_X->basic_type();
-  // Node* one = longcon(1);
-  // store_to_memory(control(), ac_adr, one, T_LONG, _gvn.type(ac_adr)->isa_ptr(), MemNode::unordered);
-  // // store_to_memory(kit->control(), )
-
-  // // __ store(__ ctrl(), access.base(), next_index, index_bt, Compile::AliasIdxRaw, MemNode::unordered);
-
-  // // Dat mod ends
-
   // Compute address and memory type.
   int offset = field->offset_in_bytes();
   const TypePtr* adr_type = C->alias_type(field)->adr_type();
@@ -293,13 +260,6 @@ void Parse::do_put_xxx(Node* obj, ciField* field, bool is_field) {
       field_type = Type::BOTTOM;
     }
   }
-
-
-  // increase_ac
-  // Node* ac_adr = basic_plus_adr(obj, obj, oopDesc::access_counter_offset_in_bytes());
-  // increment_counter(ac_adr);
-  // insert_mem_bar(Op_MemBarCPUOrder);
-  // end
   access_store_at(control(), obj, adr, adr_type, val, field_type, bt, decorators);
 
   if (is_field) {
@@ -387,13 +347,6 @@ Node* Parse::expand_multianewarray(ciArrayKlass* array_klass, Node* *lengths, in
       Node*    elem   = expand_multianewarray(array_klass_1, &lengths[1], ndimensions-1, nargs);
       intptr_t offset = header + ((intptr_t)i << LogBytesPerHeapOop);
       Node*    eaddr  = basic_plus_adr(array, offset);
-
-
-      // increase_ac
-      // Node* ac_adr = basic_plus_adr(array, array, oopDesc::access_counter_offset_in_bytes());
-      // increment_counter(ac_adr);
-      // insert_mem_bar(Op_MemBarCPUOrder);
-      // end
       access_store_at(control(), array, eaddr, adr_type, elem, elemtype, T_OBJECT, IN_HEAP | IS_ARRAY);
     }
   }

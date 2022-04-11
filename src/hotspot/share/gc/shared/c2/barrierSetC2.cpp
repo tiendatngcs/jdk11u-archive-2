@@ -85,13 +85,6 @@ Node* BarrierSetC2::store_at_resolved(C2Access& access, C2AccessValue& val) cons
     val.set_node(new_val);
   }
 
-  // increase_access_counter
-  Node* base_oop = access.base();
-  Node* ac_adr = kit->basic_plus_adr(base_oop, base_oop, oopDesc::access_counter_offset_in_bytes());
-  // Node* st = StoreNode::make(kit->gvn(), kit->control(), ac_adr, ac_adr, NULL, kit->longcon(1),  T_LONG, MemNode::unordered);
-  // base_oop = LoadNode::make(kit->gvn(), kit->control(), st, base_oop, )
-  // StoreNode::make(_gvn, ctl, st, ac_adr, NULL, longcon(1), T_LONG, MemNode::unordered);
-
   MemNode::MemOrd mo = access.mem_node_mo();
 
   Node* store = kit->store_to_memory(kit->control(), access.addr().node(), val.node(), access.type(),
@@ -116,24 +109,9 @@ Node* BarrierSetC2::load_at_resolved(C2Access& access, const Type* val_type) con
 
   bool in_native = (decorators & IN_NATIVE) != 0;
 
-
   MemNode::MemOrd mo = access.mem_node_mo();
   LoadNode::ControlDependency dep = pinned ? LoadNode::Pinned : LoadNode::DependsOnlyOnTest;
   Node* control = control_dependent ? kit->control() : NULL;
-
-
-  // increase_access_counter
-  Node* base_oop = access.base();
-  Node* ac_adr = kit->basic_plus_adr(base_oop, base_oop, oopDesc::access_counter_offset_in_bytes());
-  // Node* st = StoreNode::make(kit->gvn(), kit->control(), ac_adr, ac_adr, ac_adr->bottom_type()->is_ptr(), kit->longcon(1),  T_LONG, MemNode::unordered);
-  // if (in_native){
-  //   Node* store = kit->store_to_memory(kit->control(), ac_adr, kit->longcon(1), T_LONG, Compile::AliasIdxRaw, mo, requires_atomic_access, unaligned, mismatched, unsafe);
-  // }
-  // kit->increment_counter(ac_adr);
-
-  // kit->insert_mem_bar(Op_MemBarCPUOrder);
-
-  // mod ends
 
   Node* load;
   if (in_native) {
