@@ -124,7 +124,7 @@ void Parse::do_field_access(bool is_get, bool is_field) {
 
     Node* ac_adr = basic_plus_adr(obj, oopDesc::access_counter_offset_in_bytes());
 
-    store_to_memory(control(), ac_adr, longcon(1), T_LONG, TypePtr::NOTNULL, MemNode::unordered);
+    store_to_memory(control(), ac_adr, longcon(1), T_LONG, TypePtr::NULL_PTR, MemNode::unordered);
 
     if (is_get) {
       (void) pop();  // pop receiver before getting
