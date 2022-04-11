@@ -134,7 +134,7 @@ void Parse::do_field_access(bool is_get, bool is_field) {
     const TypeInstPtr* tip = TypeInstPtr::make(field_holder->java_mirror());
     obj = _gvn.makecon(tip);
     Node* ac_adr = basic_plus_adr(obj, oopDesc::access_counter_offset_in_bytes());
-    store_to_memory(control(), ac_adr, longcon(1), T_INT, _gvn.type(ac_adr)->isa_ptr(), MemNode::unordered);
+    store_to_memory(control(), ac_adr, longcon(1), T_LONG, _gvn.type(ac_adr)->isa_ptr(), MemNode::unordered);
     if (is_get) {
       do_get_xxx(obj, field, is_field);
     } else {
