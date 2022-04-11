@@ -122,12 +122,9 @@ void Parse::do_field_access(bool is_get, bool is_field) {
     assert(_gvn.type(obj)->higher_equal(tjp), "cast_up is no longer needed");
 #endif
 
-    Node* ac_adr = basic_plus_adr(obj, oopDesc::access_counter_offset_in_bytes());
-
-    store_to_memory(control(), ac_adr, longcon(1), T_LONG, Compile::AliasIdxRaw, MemNode::unordered);
-
     if (is_get) {
       (void) pop();  // pop receiver before getting
+
       do_get_xxx(obj, field, is_field);
     } else {
       do_put_xxx(obj, field, is_field);
@@ -136,6 +133,8 @@ void Parse::do_field_access(bool is_get, bool is_field) {
   } else {
     const TypeInstPtr* tip = TypeInstPtr::make(field_holder->java_mirror());
     obj = _gvn.makecon(tip);
+    Node* ac_adr = basic_plus_adr(obj, oopDesc::access_counter_offset_in_bytes());
+    store_to_memory(control(), ac_adr, longcon(1), T_INT, Compile::AliasIdxRaw, MemNode::unordered);
     if (is_get) {
       do_get_xxx(obj, field, is_field);
     } else {
