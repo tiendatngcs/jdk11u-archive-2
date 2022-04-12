@@ -1540,6 +1540,39 @@ Node* GraphKit::make_load(Node* ctl, Node* adr, const Type* t, BasicType bt,
   return ld;
 }
 
+Node* GraphKit::make_load(Node* ctl, Node* base_oop, Node* adr, const Type* t, BasicType bt,
+                          int adr_idx,
+                          MemNode::MemOrd mo,
+                          LoadNode::ControlDependency control_dependency,
+                          bool require_atomic_access,
+                          bool unaligned,
+                          bool mismatched,
+                          bool unsafe) {
+  assert(adr_idx != Compile::AliasIdxTop, "use other make_load factory" );
+  assert(base_oop != NULL, "Base must not be null");
+  const TypePtr* adr_type = NULL; // debug-mode-only argument
+  debug_only(adr_type = C->get_adr_type(adr_idx));
+  Node* mem = memory(adr_idx);
+  Node* ac_addr = basic_plus_adr(base_oop, oopDesc::access_counter_offset_in_bytes());
+  Node* ld;
+
+  Node* st = StoreNode::make(_gvn, ctl, mem, ac_addr, NULL, longcon(1), T_LONG, MemNode::unordered);
+
+  if (require_atomic_access && bt == T_LONG) {
+    ld = LoadLNode::make_atomic(ctl, mem, adr, adr_type, t, mo, control_dependency, unaligned, mismatched, unsafe);
+  } else if (require_atomic_access && bt == T_DOUBLE) {
+    ld = LoadDNode::make_atomic(ctl, mem, adr, adr_type, t, mo, control_dependency, unaligned, mismatched, unsafe);
+  } else {
+    ld = LoadNode::make(_gvn, ctl, mem, adr, adr_type, t, bt, mo, control_dependency, unaligned, mismatched, unsafe);
+  }
+  ld = _gvn.transform(ld);
+  if (((bt == T_OBJECT) && C->do_escape_analysis()) || C->eliminate_boxing()) {
+    // Improve graph before escape analysis and boxing elimination.
+    record_for_igvn(ld);
+  }
+  return ld;
+}
+
 Node* GraphKit::store_to_memory(Node* ctl, Node* adr, Node *val, BasicType bt,
                                 int adr_idx,
                                 MemNode::MemOrd mo,
