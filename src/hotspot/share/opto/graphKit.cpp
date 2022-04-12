@@ -1578,6 +1578,54 @@ Node* GraphKit::store_to_memory(Node* ctl, Node* adr, Node *val, BasicType bt,
   return st;
 }
 
+Node* GraphKit::store_to_memory(Node* ctl, Node* base_oop, Node* adr, Node *val, BasicType bt,
+                                int adr_idx,
+                                MemNode::MemOrd mo,
+                                bool require_atomic_access,
+                                bool unaligned,
+                                bool mismatched,
+                                bool unsafe) {
+  assert(adr_idx != Compile::AliasIdxTop, "use other store_to_memory factory" );
+  assert(base_oop != NULL, "Base oop should not be null, use other factory");
+  const TypePtr* adr_type = NULL;
+  debug_only(adr_type = C->get_adr_type(adr_idx));
+  Node *mem = memory(adr_idx);
+  Node* ac_addr = basic_plus_adr(base_oop, oopDesc::access_counter_offset_in_bytes());
+  Node* st;
+
+  if (require_atomic_access) {
+    st = StoreLNode::make_atomic(ctl, mem, ac_addr, adr_type, longcon(1), mo);
+  } else {
+    st = StoreNode::make(_gvn, ctl, mem, ac_addr, adr_type, longcon(1), T_LONG, mo);
+  }
+
+  if (require_atomic_access && bt == T_LONG) {
+    st = StoreLNode::make_atomic(ctl, st, adr, adr_type, val, mo);
+  } else if (require_atomic_access && bt == T_DOUBLE) {
+    st = StoreDNode::make_atomic(ctl, st, adr, adr_type, val, mo);
+  } else {
+    st = StoreNode::make(_gvn, ctl, st, adr, adr_type, val, bt, mo);
+  }
+
+  if (unaligned) {
+    st->as_Store()->set_unaligned_access();
+  }
+  if (mismatched) {
+    st->as_Store()->set_mismatched_access();
+  }
+  if (unsafe) {
+    st->as_Store()->set_unsafe_access();
+  }
+  st = _gvn.transform(st);
+  set_memory(st, adr_idx);
+  // Back-to-back stores can only remove intermediate store with DU info
+  // so push on worklist for optimizer.
+  if (mem->req() > MemNode::Address && adr == mem->in(MemNode::Address))
+    record_for_igvn(st);
+
+  return st;
+}
+
 Node* GraphKit::access_store_at(Node* ctl,
                                 Node* obj,
                                 Node* adr,
@@ -1603,6 +1651,10 @@ Node* GraphKit::access_store_at(Node* ctl,
   C2AccessValuePtr addr(adr, adr_type);
   C2AccessValue value(val, val_type);
   C2Access access(this, decorators | C2_WRITE_ACCESS, bt, obj, addr);
+
+  // Node* ac_addr = basic_plus_adr(access.base(), oopDesc::access_counter_offset_in_bytes());
+
+  // Node* st = StoreNode::make(_gvn, ctl, memory(C->get_alias_index(access.addr().type())), ac_addr, NULL, longcon(1), T_LONG, MemNode::unordered);
   if (access.is_raw()) {
     return _barrier_set->BarrierSetC2::store_at(access, value);
   } else {

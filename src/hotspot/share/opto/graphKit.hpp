@@ -578,6 +578,33 @@ class GraphKit : public Phase {
                         bool mismatched = false,
                         bool unsafe = false);
 
+
+  // Dat mod: helper for oop ac increment
+  Node* store_to_memory(Node* ctl, Node* base_oop, Node* adr, Node* val, BasicType bt,
+                        const TypePtr* adr_type,
+                        MemNode::MemOrd mo,
+                        bool require_atomic_access = false,
+                        bool unaligned = false,
+                        bool mismatched = false,
+                        bool unsafe = false) {
+    // This version computes alias_index from an address type
+    assert(adr_type != NULL, "use other store_to_memory factory");
+    return store_to_memory(ctl, base_oop, adr, val, bt,
+                           C->get_alias_index(adr_type),
+                           mo, require_atomic_access,
+                           unaligned, mismatched, unsafe);
+  }
+  // This is the base version which is given alias index
+  // Return the new StoreXNode
+  Node* store_to_memory(Node* ctl, Node* base_oop, Node* adr, Node* val, BasicType bt,
+                        int adr_idx,
+                        MemNode::MemOrd,
+                        bool require_atomic_access = false,
+                        bool unaligned = false,
+                        bool mismatched = false,
+                        bool unsafe = false);
+
+
   // Perform decorated accesses
 
   Node* access_store_at(Node* ctl,
