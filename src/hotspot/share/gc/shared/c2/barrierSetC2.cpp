@@ -115,7 +115,7 @@ Node* BarrierSetC2::load_at_resolved(C2Access& access, const Type* val_type) con
 
   Node* load;
   if (in_native) {
-    load = kit->make_load(control, adr, val_type, access.type(), mo);
+    load = kit->make_load(control, access.base(), adr, val_type, access.type(), mo);
   } else {
     load = kit->make_load(control, access.base(), adr, val_type, access.type(), adr_type, mo,
                           dep, requires_atomic_access, unaligned, mismatched, unsafe);
