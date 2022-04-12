@@ -1593,18 +1593,20 @@ Node* GraphKit::store_to_memory(Node* ctl, Node* base_oop, Node* adr, Node *val,
   Node* ac_addr = basic_plus_adr(base_oop, oopDesc::access_counter_offset_in_bytes());
   Node* st;
 
-  if (require_atomic_access) {
-    st = StoreLNode::make_atomic(ctl, mem, ac_addr, adr_type, longcon(1), mo);
-  } else {
-    st = StoreNode::make(_gvn, ctl, mem, ac_addr, adr_type, longcon(1), T_LONG, mo);
-  }
+  // if (require_atomic_access) {
+  //   st = StoreLNode::make_atomic(ctl, mem, ac_addr, adr_type, longcon(1), mo);
+  // } else {
+  //   st = StoreNode::make(_gvn, ctl, mem, ac_addr, adr_type, longcon(1), T_LONG, mo);
+  // }
+
+  st = StoreNode::make(_gvn, ctl, mem, ac_addr, NULL, longcon(1), T_LONG, MemNode::unordered);
 
   if (require_atomic_access && bt == T_LONG) {
-    st = StoreLNode::make_atomic(ctl, st, adr, adr_type, val, mo);
+    st = StoreLNode::make_atomic(ctl, mem, adr, adr_type, val, mo);
   } else if (require_atomic_access && bt == T_DOUBLE) {
-    st = StoreDNode::make_atomic(ctl, st, adr, adr_type, val, mo);
+    st = StoreDNode::make_atomic(ctl, mem, adr, adr_type, val, mo);
   } else {
-    st = StoreNode::make(_gvn, ctl, st, adr, adr_type, val, bt, mo);
+    st = StoreNode::make(_gvn, ctl, mem, adr, adr_type, val, bt, mo);
   }
 
   if (unaligned) {
