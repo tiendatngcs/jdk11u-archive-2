@@ -766,11 +766,11 @@ bool ArrayCopyNode::modifies(intptr_t offset_lo, intptr_t offset_hi, PhaseTransf
 Node* ArrayCopyNode::increase_access_counter (PhaseGVN *phase, Node* ctl, Node* src, Node* dst) {
   Node* st;
   Node* ac_adr;
-  ac_adr = phase.transform( new AddPNode(src, src, oopDesc::access_counter_offset_in_bytes()) );
+  ac_adr = phase.transform( new AddPNode(src, src, phase->longcon(oopDesc::access_counter_offset_in_bytes())) );
   st = StoreNode::make(phase, NULL, immutable_memory(), ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), T_LONG, MemNode::unordered);
   st = phase.transform(st);
 
-  ac_adr = phase.transform( new AddPNode(dst, dst, oopDesc::access_counter_offset_in_bytes()) );
+  ac_adr = phase.transform( new AddPNode(dst, dst, phase->longcon(oopDesc::access_counter_offset_in_bytes())) );
   st = StoreNode::make(phase, NULL, immutable_memory(), ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), T_LONG, MemNode::unordered);
   st = phase.transform(st);
   return st;
