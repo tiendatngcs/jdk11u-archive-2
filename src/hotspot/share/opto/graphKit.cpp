@@ -1560,11 +1560,11 @@ Node* GraphKit::make_load(Node* ctl, Node* base_oop, Node* adr, const Type* t, B
   // increment_counter(ac_addr);
 
   if (require_atomic_access && bt == T_LONG) {
-    ld = LoadLNode::make_atomic(ctl, mem, adr, adr_type, t, mo, control_dependency, unaligned, mismatched, unsafe);
+    ld = LoadLNode::make_atomic(ctl, st, adr, adr_type, t, mo, control_dependency, unaligned, mismatched, unsafe);
   } else if (require_atomic_access && bt == T_DOUBLE) {
-    ld = LoadDNode::make_atomic(ctl, mem, adr, adr_type, t, mo, control_dependency, unaligned, mismatched, unsafe);
+    ld = LoadDNode::make_atomic(ctl, st, adr, adr_type, t, mo, control_dependency, unaligned, mismatched, unsafe);
   } else {
-    ld = LoadNode::make(_gvn, ctl, mem, adr, adr_type, t, bt, mo, control_dependency, unaligned, mismatched, unsafe);
+    ld = LoadNode::make(_gvn, ctl, st, adr, adr_type, t, bt, mo, control_dependency, unaligned, mismatched, unsafe);
   }
   ld = _gvn.transform(ld);
   if (((bt == T_OBJECT) && C->do_escape_analysis()) || C->eliminate_boxing()) {
