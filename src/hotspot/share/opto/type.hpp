@@ -1135,6 +1135,8 @@ class TypeInstPtr : public TypeOopPtr {
   static const TypeInstPtr *MIRROR;
   static const TypeInstPtr *MARK;
   static const TypeInstPtr *KLASS;
+  static const TypeInstPtr *ACCESS_COUNTER;
+  static const TypeInstPtr *GC_EPOCH;
 #ifndef PRODUCT
   virtual void dump2( Dict &d, uint depth, outputStream *st ) const; // Specialized per-Type dumping
 #endif
