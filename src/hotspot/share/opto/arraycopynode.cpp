@@ -609,7 +609,7 @@ Node *ArrayCopyNode::Ideal(PhaseGVN *phase, bool can_reshape) {
   array_copy_test_overlap(phase, can_reshape, disjoint_bases, count, forward_ctl, backward_ctl);
 
   // Dat mod
-  increase_access_counter(phase, NULL, src, dest);
+  // increase_access_counter(phase, NULL, src, dest);
 
   Node* forward_mem = array_copy_forward(phase, can_reshape, forward_ctl,
                                          start_mem_src, start_mem_dest,
@@ -763,15 +763,15 @@ bool ArrayCopyNode::modifies(intptr_t offset_lo, intptr_t offset_hi, PhaseTransf
   return false;
 }
 
-Node* ArrayCopyNode::increase_access_counter (PhaseGVN *phase, Node* ctl, Node* src, Node* dst) {
-  Node* st;
-  Node* ac_adr;
-  ac_adr = phase.transform( new AddPNode(src, src, phase->longcon(oopDesc::access_counter_offset_in_bytes())) );
-  st = StoreNode::make(phase, NULL, immutable_memory(), ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), T_LONG, MemNode::unordered);
-  st = phase.transform(st);
+// Node* ArrayCopyNode::increase_access_counter (PhaseGVN *phase, Node* ctl, Node* src, Node* dst) {
+//   Node* st;
+//   Node* ac_adr;
+//   ac_adr = phase.transform( new AddPNode(src, src, phase->longcon(oopDesc::access_counter_offset_in_bytes())) );
+//   st = StoreNode::make(phase, NULL, immutable_memory(), ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), T_LONG, MemNode::unordered);
+//   st = phase.transform(st);
 
-  ac_adr = phase.transform( new AddPNode(dst, dst, phase->longcon(oopDesc::access_counter_offset_in_bytes())) );
-  st = StoreNode::make(phase, NULL, immutable_memory(), ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), T_LONG, MemNode::unordered);
-  st = phase.transform(st);
-  return st;
-}
+//   ac_adr = phase.transform( new AddPNode(dst, dst, phase->longcon(oopDesc::access_counter_offset_in_bytes())) );
+//   st = StoreNode::make(phase, NULL, phase->immutable_memory(), ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), T_LONG, MemNode::unordered);
+//   st = phase.transform(st);
+//   return st;
+// }
