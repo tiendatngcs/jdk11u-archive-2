@@ -96,6 +96,9 @@ private:
   void array_copy_test_overlap(PhaseGVN *phase, bool can_reshape,
                                bool disjoint_bases, int count,
                                Node*& forward_ctl, Node*& backward_ctl);
+  
+  Node* increase_access_counter(PhaseGVN *phase, Node* ctl, Node* src, Node* dst);
+
   Node* array_copy_forward(PhaseGVN *phase, bool can_reshape, Node* ctl,
                            Node* start_mem_src, Node* start_mem_dest,
                            const TypePtr* atp_src, const TypePtr* atp_dest,
