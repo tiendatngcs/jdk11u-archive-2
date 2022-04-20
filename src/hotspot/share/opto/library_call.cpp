@@ -3788,11 +3788,11 @@ bool LibraryCallKit::inline_array_copyOf(bool is_copyOfRange) {
 
         Node* st;
         Node* ac_adr;
-        ac_adr = phase.transform( new AddPNode(original, original, phase->longcon(oopDesc::access_counter_offset_in_bytes())) );
+        ac_adr = _gvn.transform( new AddPNode(original, original, longcon(oopDesc::access_counter_offset_in_bytes())) );
         st = StoreNode::make(_gvn, NULL, immutable_memory(), ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), T_LONG, MemNode::unordered);
         st = _gvn.transform(st);
 
-        ac_adr = phase.transform( new AddPNode(newcopy, newcopy, phase->longcon(oopDesc::access_counter_offset_in_bytes())) );
+        ac_adr = _gvn.transform( new AddPNode(newcopy, newcopy, longcon(oopDesc::access_counter_offset_in_bytes())) );
         st = StoreNode::make(_gvn, NULL, immutable_memory(), ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), T_LONG, MemNode::unordered);
         st = _gvn.transform(st);
 
