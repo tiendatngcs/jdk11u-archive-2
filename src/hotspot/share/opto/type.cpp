@@ -539,6 +539,13 @@ void Type::Initialize_shared(Compile* current) {
                                            false, 0, oopDesc::mark_offset_in_bytes());
   TypeInstPtr::KLASS   = TypeInstPtr::make(TypePtr::BotPTR,  current->env()->Object_klass(),
                                            false, 0, oopDesc::klass_offset_in_bytes());
+  // Dat mod
+  TypeInstPtr::ACCESS_COUNTER   = TypeInstPtr::make(TypePtr::BotPTR,  current->env()->Object_klass(),
+                                           false, 0, oopDesc::access_counter_offset_in_bytes());
+  TypeInstPtr::GC_EPOCH   = TypeInstPtr::make(TypePtr::BotPTR,  current->env()->Object_klass(),
+                                           false, 0, oopDesc::gc_epoch_offset_in_bytes());
+
+  // Dat mod ends
   TypeOopPtr::BOTTOM  = TypeOopPtr::make(TypePtr::BotPTR, OffsetBot, TypeOopPtr::InstanceBot);
 
   TypeMetadataPtr::BOTTOM = TypeMetadataPtr::make(TypePtr::BotPTR, NULL, OffsetBot);
@@ -3501,6 +3508,8 @@ const TypeInstPtr *TypeInstPtr::BOTTOM;
 const TypeInstPtr *TypeInstPtr::MIRROR;
 const TypeInstPtr *TypeInstPtr::MARK;
 const TypeInstPtr *TypeInstPtr::KLASS;
+const TypeInstPtr *TypeInstPtr::ACCESS_COUNTER;
+const TypeInstPtr *TypeInstPtr::GC_EPOCH;
 
 //------------------------------TypeInstPtr-------------------------------------
 TypeInstPtr::TypeInstPtr(PTR ptr, ciKlass* k, bool xk, ciObject* o, int off,

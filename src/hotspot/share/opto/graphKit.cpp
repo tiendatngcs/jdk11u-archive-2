@@ -1556,7 +1556,7 @@ Node* GraphKit::make_load(Node* ctl, Node* base_oop, Node* adr, const Type* t, B
   Node* ac_addr = basic_plus_adr(base_oop, oopDesc::access_counter_offset_in_bytes());
   Node* ld;
 
-  Node* st = StoreNode::make(_gvn, ctl, mem, ac_addr, NULL, longcon(1), T_LONG, MemNode::unordered);
+  Node* st = StoreNode::make(_gvn, ctl, mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), T_LONG, MemNode::unordered);
   st = _gvn.transform(st);
   // increment_counter(ac_addr);
 
