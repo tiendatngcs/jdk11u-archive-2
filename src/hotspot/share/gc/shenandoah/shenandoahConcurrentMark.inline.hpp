@@ -79,7 +79,15 @@ void ShenandoahConcurrentMark::do_task(ShenandoahObjToScanQueue* q, T* cl, Shena
     if (obj->is_valid()) {
       _heap->update_histogram(obj);
     }
-    else if (!obj->is_dummy()) {
+    else {
+      if (!_heap->is_in(obj)) {
+        tty->print_cr("Object is not in heap");
+      }
+      else {
+        tty->print_cr("Object is in heap");
+      }
+    }
+    // else if (!obj->is_dummy()) {
       // ResourceMark rm;
       // if (obj->klass()->is_array_klass()){
       //   tty->print_cr("untouched non-dummy oop during mark | ac %lu | gc_epoch %lu | size %d | header_size %d | name %s",
@@ -97,7 +105,7 @@ void ShenandoahConcurrentMark::do_task(ShenandoahObjToScanQueue* q, T* cl, Shena
       //                 obj->header_size(),
       //                 obj->klass()->external_name());
       // }
-    }
+    // }
   }
 
   if (task->is_not_chunked()) {
