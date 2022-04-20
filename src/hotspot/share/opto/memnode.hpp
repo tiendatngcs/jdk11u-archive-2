@@ -673,6 +673,10 @@ public:
 #endif
 };
 
+//------------------------------StoreACNode-------------------------------------
+// Store access_counter node
+// class StoreACNode : public Store
+
 //------------------------------StoreFNode-------------------------------------
 // Store float to memory
 class StoreFNode : public StoreNode {

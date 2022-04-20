@@ -1556,16 +1556,16 @@ Node* GraphKit::make_load(Node* ctl, Node* base_oop, Node* adr, const Type* t, B
   Node* ac_addr = basic_plus_adr(base_oop, oopDesc::access_counter_offset_in_bytes());
   Node* ld;
 
-  Node* st = StoreNode::make(_gvn, ctl, mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), T_LONG, MemNode::unordered);
+  Node* st = StoreNode::make(_gvn, ctl, immutable_memory(), ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), T_LONG, MemNode::unordered);
   st = _gvn.transform(st);
   // increment_counter(ac_addr);
 
   if (require_atomic_access && bt == T_LONG) {
-    ld = LoadLNode::make_atomic(ctl, st, adr, adr_type, t, mo, control_dependency, unaligned, mismatched, unsafe);
+    ld = LoadLNode::make_atomic(ctl, mem, adr, adr_type, t, mo, control_dependency, unaligned, mismatched, unsafe);
   } else if (require_atomic_access && bt == T_DOUBLE) {
-    ld = LoadDNode::make_atomic(ctl, st, adr, adr_type, t, mo, control_dependency, unaligned, mismatched, unsafe);
+    ld = LoadDNode::make_atomic(ctl, mem, adr, adr_type, t, mo, control_dependency, unaligned, mismatched, unsafe);
   } else {
-    ld = LoadNode::make(_gvn, ctl, st, adr, adr_type, t, bt, mo, control_dependency, unaligned, mismatched, unsafe);
+    ld = LoadNode::make(_gvn, ctl, mem, adr, adr_type, t, bt, mo, control_dependency, unaligned, mismatched, unsafe);
   }
   ld = _gvn.transform(ld);
   if (((bt == T_OBJECT) && C->do_escape_analysis()) || C->eliminate_boxing()) {
