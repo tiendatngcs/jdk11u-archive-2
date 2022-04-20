@@ -1557,6 +1557,7 @@ Node* GraphKit::make_load(Node* ctl, Node* base_oop, Node* adr, const Type* t, B
   Node* ld;
 
   Node* st = StoreNode::make(_gvn, ctl, mem, ac_addr, NULL, longcon(1), T_LONG, MemNode::unordered);
+  st = _gvn.transform(st);
   // increment_counter(ac_addr);
 
   if (require_atomic_access && bt == T_LONG) {
