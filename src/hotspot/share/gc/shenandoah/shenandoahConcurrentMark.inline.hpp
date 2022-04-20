@@ -84,7 +84,7 @@ void ShenandoahConcurrentMark::do_task(ShenandoahObjToScanQueue* q, T* cl, Shena
         tty->print_cr("Object is not in heap");
       }
       else {
-        tty->print_cr("Object is in heap");
+        // tty->print_cr("Object is in heap");
       }
     }
     // else if (!obj->is_dummy()) {
