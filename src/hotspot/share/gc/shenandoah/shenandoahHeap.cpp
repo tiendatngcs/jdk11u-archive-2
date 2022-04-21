@@ -2707,10 +2707,12 @@ void ShenandoahHeap::op_stats_collection() {
     //   _heap->marked_object_iterate(r, )
 
     // }
-    ShenandoahStatsCountingObjectClosure cl(heap);
-    HeapWord* tams = ctx->top_at_mark_start(r);
-    marked_object_iterate(r, &cl, tams);
-    r = regions.next();
+    if (!r->is_humongous_continuation()) {
+      ShenandoahStatsCountingObjectClosure cl(heap);
+      HeapWord* tams = ctx->top_at_mark_start(r);
+      marked_object_iterate(r, &cl, tams);
+      r = regions.next();
+    }
   }
 }
 

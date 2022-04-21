@@ -531,6 +531,10 @@ template<class T>
 inline void ShenandoahHeap::marked_object_oop_iterate(ShenandoahHeapRegion* region, T* cl, HeapWord* top) {
   if (region->is_humongous()) {
     HeapWord* bottom = region->bottom();
+    if (region->is_humongous_continuation) {
+      //print par-top, print region->top and region->bottom
+      tty->print_cr("Par-top = %p | region->bottom = %p | region->top = %p", top, region->bottom(), region->top());
+    }
     if (top > bottom) {
       region = region->humongous_start_region();
       ShenandoahObjectToOopBoundedClosure<T> objs(cl, bottom, top);
