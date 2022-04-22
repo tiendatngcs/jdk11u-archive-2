@@ -1554,9 +1554,10 @@ Node* GraphKit::make_load(Node* ctl, Node* base_oop, Node* adr, const Type* t, B
   debug_only(adr_type = C->get_adr_type(adr_idx));
   Node* mem = memory(adr_idx);
   Node* ac_addr = basic_plus_adr(base_oop, oopDesc::access_counter_offset_in_bytes());
+  Node* ac_mem = memory(C->get_alias_index(TypeInstPtr::ACCESS_COUNTER));
   Node* ld;
 
-  Node* st = StoreNode::make(_gvn, NULL, immutable_memory(), ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), T_LONG, MemNode::unordered);
+  Node* st = StoreNode::make(_gvn, ctl, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), T_LONG, MemNode::unordered);
   st = _gvn.transform(st);
   // increment_counter(ac_addr);
 
@@ -1625,6 +1626,8 @@ Node* GraphKit::store_to_memory(Node* ctl, Node* base_oop, Node* adr, Node *val,
   const TypePtr* adr_type = NULL;
   debug_only(adr_type = C->get_adr_type(adr_idx));
   Node *mem = memory(adr_idx);
+
+  // Dat mod
   Node* ac_addr = basic_plus_adr(base_oop, oopDesc::access_counter_offset_in_bytes());
   Node* ac_mem = memory(C->get_alias_index(TypeInstPtr::ACCESS_COUNTER));
   Node* st;
@@ -1639,6 +1642,7 @@ Node* GraphKit::store_to_memory(Node* ctl, Node* base_oop, Node* adr, Node *val,
   
   st = _gvn.transform(st);
   // assert(false, "graphkit::store_to_memory");
+  // Dat mod ends
 
   if (require_atomic_access && bt == T_LONG) {
     st = StoreLNode::make_atomic(ctl, mem, adr, adr_type, val, mo);
