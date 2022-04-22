@@ -1562,6 +1562,9 @@ Node* GraphKit::make_load(Node* ctl, Node* base_oop, Node* adr, const Type* t, B
   st = _gvn.transform(st);
   // increment_counter(ac_addr);
 
+  st = _gvn.transform(LoadAccessCounterNode::make(_gvn, NULL, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER));
+  // st->dump(0);
+
   if (require_atomic_access && bt == T_LONG) {
     ld = LoadLNode::make_atomic(ctl, mem, adr, adr_type, t, mo, control_dependency, unaligned, mismatched, unsafe);
   } else if (require_atomic_access && bt == T_DOUBLE) {
@@ -1641,10 +1644,10 @@ Node* GraphKit::store_to_memory(Node* ctl, Node* base_oop, Node* adr, Node *val,
 
   st = StoreNode::make(_gvn, ctl, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), T_LONG, MemNode::unordered);
   st = _gvn.transform(st);
-  st->dump(0);
+  // st->dump(0);
 
   st = _gvn.transform(LoadAccessCounterNode::make(_gvn, NULL, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER));
-  st->dump(0);
+  // st->dump(0);
   // assert(false, "graphkit::store_to_memory");
   // Dat mod ends
 
