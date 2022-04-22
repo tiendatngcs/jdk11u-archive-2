@@ -2711,8 +2711,8 @@ void ShenandoahHeap::op_stats_collection() {
       ShenandoahStatsCountingObjectClosure cl(heap);
       HeapWord* tams = ctx->top_at_mark_start(r);
       marked_object_iterate(r, &cl, tams);
-      r = regions.next();
     }
+    r = regions.next();
   }
 }
 
