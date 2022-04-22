@@ -101,6 +101,9 @@
   notproduct(bool, PrintIdeal, false,                                       \
           "Print ideal graph before code generation")                       \
                                                                             \
+  notproduct(bool, PrintNodeDev, false,                                     \
+          "Print Node for bug fix during development")                      \
+                                                                            \
   notproduct(bool, PrintOpto, false,                                        \
           "Print compiler2 attempts")                                       \
                                                                             \

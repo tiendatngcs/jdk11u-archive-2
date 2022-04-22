@@ -762,6 +762,15 @@ public:
   virtual BasicType memory_type() const { return T_NARROWKLASS; }
 };
 
+//------------------------------StoreAccessCounterNode--------------------------------------
+// Store AccessCounter to memory
+class StoreAccessCounterNode : public StoreLNode {
+public:
+  StoreAccessCounterNode(Node *c, Node *mem, Node *adr, const TypePtr* at, Node *val, MemOrd mo)
+    : StoreLNode(c, mem, adr, at, val, mo) {}
+  virtual int Opcode() const;
+};
+
 //------------------------------StoreCMNode-----------------------------------
 // Store card-mark byte to memory for CM
 // The last StoreCM before a SafePoint must be preserved and occur after its "oop" store

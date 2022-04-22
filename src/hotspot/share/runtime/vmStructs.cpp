@@ -1704,6 +1704,7 @@ typedef PaddedEnd<ObjectMonitor>              PaddedObjectMonitor;
   declare_c2_type(LoadNNode, LoadNode)                                    \
   declare_c2_type(LoadKlassNode, LoadPNode)                               \
   declare_c2_type(LoadNKlassNode, LoadNNode)                              \
+  declare_c2_type(LoadAccessCounterNode, LoadLNode)                       \
   declare_c2_type(LoadSNode, LoadNode)                                    \
   declare_c2_type(StoreNode, MemNode)                                     \
   declare_c2_type(StoreBNode, StoreNode)                                  \
@@ -1715,6 +1716,7 @@ typedef PaddedEnd<ObjectMonitor>              PaddedObjectMonitor;
   declare_c2_type(StorePNode, StoreNode)                                  \
   declare_c2_type(StoreNNode, StoreNode)                                  \
   declare_c2_type(StoreNKlassNode, StoreNode)                             \
+  declare_c2_type(StoreAccessCounterNode, StoreLNode)                     \
   declare_c2_type(StoreCMNode, StoreNode)                                 \
   declare_c2_type(LoadPLockedNode, LoadPNode)                             \
   declare_c2_type(SCMemProjNode, ProjNode)                                \
