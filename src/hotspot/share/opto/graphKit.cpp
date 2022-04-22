@@ -1558,7 +1558,7 @@ Node* GraphKit::make_load(Node* ctl, Node* base_oop, Node* adr, const Type* t, B
   Node* ld;
 
   Node* st = StoreNode::make(_gvn, ctl, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), T_LONG, MemNode::unordered);
-  st->dump(99);
+  st->dump(0);
   st = _gvn.transform(st);
   // increment_counter(ac_addr);
 
@@ -1640,7 +1640,7 @@ Node* GraphKit::store_to_memory(Node* ctl, Node* base_oop, Node* adr, Node *val,
   // }
 
   st = StoreNode::make(_gvn, ctl, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), T_LONG, MemNode::unordered);
-  st->dump(99);
+  st->dump(0);
   st = _gvn.transform(st);
   // assert(false, "graphkit::store_to_memory");
   // Dat mod ends
