@@ -450,7 +450,8 @@ void ConnectionGraph::add_node_to_connection_graph(Node *n, Unique_Node_List *de
       break;
     }
     case Op_LoadKlass:
-    case Op_LoadNKlass: {
+    case Op_LoadNKlass:
+    case Op_LoadAccessCounter: {
       // Unknown class is loaded
       map_ideal_node(n, phantom_obj);
       break;

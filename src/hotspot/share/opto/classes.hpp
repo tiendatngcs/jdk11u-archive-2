@@ -182,6 +182,7 @@ macro(LoadF)
 macro(LoadI)
 macro(LoadKlass)
 macro(LoadNKlass)
+macro(LoadAccessCounter)    // Dat mod
 macro(LoadL)
 macro(LoadL_unaligned)
 macro(LoadPLocked)

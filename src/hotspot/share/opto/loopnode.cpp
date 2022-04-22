@@ -4292,6 +4292,7 @@ void PhaseIdealLoop::build_loop_late_post( Node *n ) {
     case Op_LoadI:
     case Op_LoadKlass:
     case Op_LoadNKlass:
+    case Op_LoadAccessCounter:
     case Op_LoadL:
     case Op_LoadS:
     case Op_LoadP:

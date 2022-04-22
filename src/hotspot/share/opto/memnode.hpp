@@ -523,6 +523,24 @@ public:
   virtual bool depends_only_on_test() const { return true; }
 };
 
+//------------------------------LoadAccessCounterNode----------------------------------
+// Load a AccessCounter from an object
+class LoadAccessCounterNode : public LoadLNode {
+protected:
+  // In most cases, LoadAccessCounterNode does not have the control input set. If the control
+  // input is set, it must not be removed (by LoadNode::Ideal()).
+  virtual bool can_remove_control() const;
+public:
+  LoadAccessCounterNode(Node *c, Node *mem, Node *adr, const TypePtr *at, const TypeLong *tr, MemOrd mo)
+    : LoadLNode(c, mem, adr, at, tr, mo) {}
+  virtual int Opcode() const;
+  virtual bool depends_only_on_test() const { return true; }
+
+  // Polymorphic factory method:
+  static Node* make(PhaseGVN& gvn, Node* ctl, Node* mem, Node* adr, const TypePtr* at,
+                    const TypeLong* tr = TypeLong::LONG);
+};
+
 
 //------------------------------StoreNode--------------------------------------
 // Store value; requires Store, Address and Value

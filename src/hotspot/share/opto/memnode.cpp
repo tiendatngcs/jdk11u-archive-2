@@ -2177,6 +2177,19 @@ bool LoadKlassNode::can_remove_control() const {
   return false;
 }
 
+//=============================================================================
+//----------------------------LoadAccessCounterNode::make------------------------------
+// Polymorphic factory method:
+Node* LoadAccessCounterNode::make(PhaseGVN& gvn, Node* ctl, Node* mem, Node* adr, const TypePtr* at, const TypeLong* tr) {
+  return new LoadAccessCounterNode(ctl, mem, adr, at, tr, MemNode::unordered);
+}
+
+// In most cases, LoadAccessCounterNode does not have the control input set. If the control
+// input is set, it must not be removed (by LoadNode::Ideal()).
+bool LoadAccessCounterNode::can_remove_control() const {
+  return false;
+}
+
 const Type* LoadNode::klass_value_common(PhaseGVN* phase) const {
   // Either input is TOP ==> the result is TOP
   const Type *t1 = phase->type( in(MemNode::Memory) );

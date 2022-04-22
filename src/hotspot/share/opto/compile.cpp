@@ -2999,6 +2999,7 @@ void Compile::final_graph_reshaping_impl( Node *n, Final_Reshape_Counts &frc) {
   case Op_LoadI:
   case Op_LoadKlass:
   case Op_LoadNKlass:
+  case Op_LoadAccessCounter:
   case Op_LoadL:
   case Op_LoadL_unaligned:
   case Op_LoadPLocked:

@@ -3343,6 +3343,7 @@ bool ShenandoahLoadReferenceBarrierNode::is_redundant() {
       case Op_LoadRange:
       case Op_LoadKlass:
       case Op_LoadNKlass:
+      case Op_LoadAccessCounter:
         // Do not require barriers
         break;
       case Op_AddP:
