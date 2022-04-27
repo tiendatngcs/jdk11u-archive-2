@@ -677,8 +677,8 @@ class StoreLNode : public StoreNode {
   const bool _require_atomic_access;  // is piecewise store forbidden?
 
 public:
-  StoreLNode(Node *c, Node *mem, Node *adr, const TypePtr* at, Node *val, MemOrd mo, bool require_atomic_access = false)
-    : StoreNode(c, mem, adr, at, val, mo), _require_atomic_access(require_atomic_access) {}
+  StoreLNode(Node *c, Node *mem, Node *adr, const TypePtr* at, Node *val, MemOrd mo, bool require_atomic_access = false, bool is_under_investigate = false)
+    : StoreNode(c, mem, adr, at, val, mo), _require_atomic_access(require_atomic_access), _is_under_investigate(is_under_investigate) {}
   virtual int Opcode() const;
   virtual BasicType memory_type() const { return T_LONG; }
   bool require_atomic_access() const { return _require_atomic_access; }
@@ -689,6 +689,14 @@ public:
     if (_require_atomic_access)  st->print(" Atomic!");
   }
 #endif
+
+  void dump() const {
+    if (_is_under_investigate) {
+      dump(" is_under_investigate \n");
+    } else {
+      dump("\n");
+    }
+  }
 };
 
 //------------------------------StoreACNode-------------------------------------
