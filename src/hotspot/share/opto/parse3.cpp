@@ -188,9 +188,17 @@ Node* Parse::do_increase_access_counter(Node* obj) {
   // Node* st = store_to_memory(ctl, ac_addr, incr, T_LONG, TypeInstPtr::ACCESS_COUNTER, MemNode::unordered);
 
   // ---------------------------------------------------
+  // Node* c = make_runtime_call(RC_LEAF, OptoRuntime::modf_Type(),
+  //                             CAST_FROM_FN_PTR(address, SharedRuntime::frem),
+  //                             "frem", NULL, //no memory effects
+  //                             f1, f2);
+  make_runtime_call(RC_LEAF, OptoRuntime::print_oop_Type(),
+                    CAST_FROM_FN_PTR(address, SharedRuntime::print_oop),
+                    "Print Oop", TypeRawPtr::BOTTOM, obj);
   Node* access_counter = _gvn.transform(new LoadLNode(ctl, ac_mem, ac_addr, TypeRawPtr::BOTTOM, TypeLong::LONG, MemNode::unordered));
   Node* incr = _gvn.transform(new AddLNode(access_counter, _gvn.transform(longcon(1))));
   Node* st = _gvn.transform(new StoreLNode(ctl, ac_mem, ac_addr, TypeRawPtr::BOTTOM, incr, MemNode::unordered));
+  
   st->set_is_under_investigation();
 
   if (PrintNodeDev) {
@@ -207,6 +215,10 @@ Node* Parse::do_increase_access_counter(Node* obj) {
   // } else {
   //   assert(false, "Should not reach here");
   // }
+
+  make_runtime_call(RC_LEAF, OptoRuntime::print_oop_Type(),
+                    CAST_FROM_FN_PTR(address, SharedRuntime::print_oop),
+                    "Print Oop", TypeRawPtr::BOTTOM, obj);
   return st;
 }
 

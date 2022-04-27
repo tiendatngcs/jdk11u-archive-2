@@ -319,6 +319,9 @@ private:
   static const TypeFunc* dtrace_method_entry_exit_Type();
   static const TypeFunc* dtrace_object_alloc_Type();
 
+  // Print
+  static const TypeFunc* print_oop_Type();
+
  private:
  static NamedCounter * volatile _named_counters;
 
