@@ -122,7 +122,7 @@ void Parse::do_field_access(bool is_get, bool is_field) {
     assert(_gvn.type(obj)->higher_equal(tjp), "cast_up is no longer needed");
 #endif
     // Dat mod
-    do_increase_access_counter(obj);
+    // do_increase_access_counter(obj);
 
     if (is_get) {
       (void) pop();  // pop receiver before getting
