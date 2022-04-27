@@ -312,6 +312,7 @@ inline int Node::Init(int req) {
   _class_id = Class_Node;
   _flags = 0;
   _out = NO_OUT_ARRAY;
+  is_under_investigation = false;
   return idx;
 }
 
