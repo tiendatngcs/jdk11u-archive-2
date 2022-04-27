@@ -87,7 +87,7 @@ Node* BarrierSetC2::store_at_resolved(C2Access& access, C2AccessValue& val) cons
 
   MemNode::MemOrd mo = access.mem_node_mo();
 
-  Node* store = kit->store_to_memory(kit->control(), access.base(), access.addr().node(), val.node(), access.type(),
+  Node* store = kit->store_to_memory(kit->control(), access.addr().node(), val.node(), access.type(),
                                      access.addr().type(), mo, requires_atomic_access, unaligned, mismatched, unsafe);
   access.set_raw_access(store);
   return store;
@@ -117,7 +117,7 @@ Node* BarrierSetC2::load_at_resolved(C2Access& access, const Type* val_type) con
   if (in_native) {
     load = kit->make_load(control, adr, val_type, access.type(), mo);
   } else {
-    load = kit->make_load(control, access.base(), adr, val_type, access.type(), adr_type, mo,
+    load = kit->make_load(control, adr, val_type, access.type(), adr_type, mo,
                           dep, requires_atomic_access, unaligned, mismatched, unsafe);
   }
 

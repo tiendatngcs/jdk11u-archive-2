@@ -528,6 +528,9 @@ class Parse : public GraphKit {
   void do_field_access(bool is_get, bool is_field);
   bool static_field_ok_in_clinit(ciField *field, ciMethod *method);
 
+  // Helper to increase access counter
+  Node* do_increase_access_counter(Node* obj);
+
   // common code for actually performing the load or store
   void do_get_xxx(Node* obj, ciField* field, bool is_field);
   void do_put_xxx(Node* obj, ciField* field, bool is_field);

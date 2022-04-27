@@ -121,17 +121,17 @@ void Parse::do_field_access(bool is_get, bool is_field) {
     const TypeInstPtr *tjp = TypeInstPtr::make(TypePtr::NotNull, iter().get_declared_field_holder());
     assert(_gvn.type(obj)->higher_equal(tjp), "cast_up is no longer needed");
 #endif
+    // Dat mod
+    do_increase_access_counter(obj);
 
     if (is_get) {
       (void) pop();  // pop receiver before getting
 
       do_get_xxx(obj, field, is_field);
-      Node* ac_adr = basic_plus_adr(obj, oopDesc::access_counter_offset_in_bytes());
+      // Node* ac_adr = basic_plus_adr(obj, oopDesc::access_counter_offset_in_bytes());
       // store_to_memory(control(), ac_adr, longcon(1), T_LONG, Compile::AliasIdxBot, MemNode::unordered);
     } else {
 
-      // Node* ac_adr = basic_plus_adr(obj, oopDesc::access_counter_offset_in_bytes());
-      // store_to_memory(control(), ac_adr, longcon(1), T_LONG, _gvn.type(ac_adr)->isa_ptr(), MemNode::unordered);
       do_put_xxx(obj, field, is_field);
       (void) pop();  // pop receiver after putting
     }
@@ -146,6 +146,35 @@ void Parse::do_field_access(bool is_get, bool is_field) {
       do_put_xxx(obj, field, is_field);
     }
   }
+}
+
+Node* Parse::do_increase_access_counter(Node* obj) {
+  // Dat mod
+  Node* ac_addr = basic_plus_adr(obj, oopDesc::access_counter_offset_in_bytes());
+  Node* ac_mem = memory(C->get_alias_index(TypeInstPtr::ACCESS_COUNTER));
+
+  Node* access_counter = LoadAccessCounterNode::make(_gvn, control(), ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER));
+  Node* incr = new AddLNode(access_counter, longcon(1));
+  // if (require_atomic_access) {
+  //   st = StoreLNode::make_atomic(ctl, mem, ac_addr, adr_type, longcon(1), mo);
+  // } else {
+  //   st = StoreNode::make(_gvn, ctl, mem, ac_addr, adr_type, longcon(1), T_LONG, mo);
+  // }
+
+  // st = StoreNode::make(_gvn, ctl, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), T_LONG, MemNode::unordered);
+  // st = _gvn.transform(st);
+  // st->dump(0);
+
+  // st = _gvn.transform(LoadAccessCounterNode::make(_gvn, NULL, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER));
+  // st->dump(0);
+  // assert(false, "graphkit::store_to_memory");
+  // Dat mod ends
+  
+  Node* st = _gvn.transform(new StoreAccessCounterNode(ctl, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, incr, MemNode::unordered));
+  if (PrintNodeDev) {
+    st->dump(0);
+  }
+  return st;
 }
 
 

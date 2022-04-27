@@ -1553,22 +1553,24 @@ Node* GraphKit::make_load(Node* ctl, Node* base_oop, Node* adr, const Type* t, B
   const TypePtr* adr_type = NULL; // debug-mode-only argument
   debug_only(adr_type = C->get_adr_type(adr_idx));
   Node* mem = memory(adr_idx);
-  Node* ac_addr = basic_plus_adr(base_oop, oopDesc::access_counter_offset_in_bytes());
-  Node* ac_mem = memory(C->get_alias_index(TypeInstPtr::ACCESS_COUNTER));
   Node* ld;
 
-  Node* st = StoreNode::make(_gvn, ctl, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), T_LONG, MemNode::unordered);
-  // st->dump(0);
-  st = _gvn.transform(st);
-  // increment_counter(ac_addr);
+  // Dat mod
+  // Node* ac_addr = basic_plus_adr(base_oop, oopDesc::access_counter_offset_in_bytes());
+  // Node* ac_mem = memory(C->get_alias_index(TypeInstPtr::ACCESS_COUNTER));
 
-  // st = _gvn.transform(LoadAccessCounterNode::make(_gvn, NULL, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER));
-  // st->dump(0);
+  // Node* st = StoreNode::make(_gvn, ctl, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), T_LONG, MemNode::unordered);
+  // // st->dump(0);
+  // st = _gvn.transform(st);
+  // // increment_counter(ac_addr);
+
+  // // st = _gvn.transform(LoadAccessCounterNode::make(_gvn, NULL, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER));
+  // // st->dump(0);
    
-  st = new StoreAccessCounterNode(ctl, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), MemNode::unordered);
-  if (PrintNodeDev) {
-    st->dump(0);
-  }
+  // st = new StoreAccessCounterNode(ctl, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), MemNode::unordered);
+  // if (PrintNodeDev) {
+  //   st->dump(0);
+  // }
 
   if (require_atomic_access && bt == T_LONG) {
     ld = LoadLNode::make_atomic(ctl, mem, adr, adr_type, t, mo, control_dependency, unaligned, mismatched, unsafe);
@@ -1635,31 +1637,7 @@ Node* GraphKit::store_to_memory(Node* ctl, Node* base_oop, Node* adr, Node *val,
   const TypePtr* adr_type = NULL;
   debug_only(adr_type = C->get_adr_type(adr_idx));
   Node *mem = memory(adr_idx);
-
-  // Dat mod
-  Node* ac_addr = basic_plus_adr(base_oop, oopDesc::access_counter_offset_in_bytes());
-  Node* ac_mem = memory(C->get_alias_index(TypeInstPtr::ACCESS_COUNTER));
   Node* st;
-
-  // if (require_atomic_access) {
-  //   st = StoreLNode::make_atomic(ctl, mem, ac_addr, adr_type, longcon(1), mo);
-  // } else {
-  //   st = StoreNode::make(_gvn, ctl, mem, ac_addr, adr_type, longcon(1), T_LONG, mo);
-  // }
-
-  st = StoreNode::make(_gvn, ctl, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), T_LONG, MemNode::unordered);
-  st = _gvn.transform(st);
-  // st->dump(0);
-
-  // st = _gvn.transform(LoadAccessCounterNode::make(_gvn, NULL, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER));
-  // st->dump(0);
-  // assert(false, "graphkit::store_to_memory");
-  // Dat mod ends
-
-  st = new StoreAccessCounterNode(ctl, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), MemNode::unordered);
-  if (PrintNodeDev) {
-    st->dump(0);
-  }
 
   if (require_atomic_access && bt == T_LONG) {
     st = StoreLNode::make_atomic(ctl, mem, adr, adr_type, val, mo);
@@ -1686,6 +1664,10 @@ Node* GraphKit::store_to_memory(Node* ctl, Node* base_oop, Node* adr, Node *val,
     record_for_igvn(st);
 
   return st;
+}
+
+Node* GraphKit::increase_access_counter(Node* obj) {
+  return 
 }
 
 Node* GraphKit::access_store_at(Node* ctl,
