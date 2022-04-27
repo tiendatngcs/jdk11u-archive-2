@@ -185,6 +185,7 @@ Node* Parse::do_increase_access_counter(Node* obj) {
     tty->print_cr("----------------------------------------");
     st->dump(-6);
   }
+  set_memory(st, TypeInstPtr::ACCESS_COUNTER);
   return st;
 }
 
