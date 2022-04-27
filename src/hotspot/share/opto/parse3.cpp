@@ -122,17 +122,17 @@ void Parse::do_field_access(bool is_get, bool is_field) {
     assert(_gvn.type(obj)->higher_equal(tjp), "cast_up is no longer needed");
 #endif
     // Dat mod
-    do_increase_access_counter(obj);
+    Node* ac_mem_node = do_increase_access_counter(obj);
 
     if (is_get) {
       (void) pop();  // pop receiver before getting
 
-      do_get_xxx(obj, field, is_field);
+      do_get_xxx(obj, field, is_field, ac_mem_node);
       // Node* ac_adr = basic_plus_adr(obj, oopDesc::access_counter_offset_in_bytes());
       // store_to_memory(control(), ac_adr, longcon(1), T_LONG, Compile::AliasIdxBot, MemNode::unordered);
     } else {
 
-      do_put_xxx(obj, field, is_field);
+      do_put_xxx(obj, field, is_field, ac_mem_node);
       (void) pop();  // pop receiver after putting
     }
   } else {
@@ -141,11 +141,11 @@ void Parse::do_field_access(bool is_get, bool is_field) {
     Node* ac_adr = basic_plus_adr(obj, oopDesc::access_counter_offset_in_bytes());
     // store_to_memory(control(), ac_adr, longcon(1), T_LONG, _gvn.type(ac_adr)->isa_ptr(), MemNode::unordered);
     // Dat mod
-    do_increase_access_counter(obj);
+    Node* ac_mem_node = do_increase_access_counter(obj);
     if (is_get) {
-      do_get_xxx(obj, field, is_field);
+      do_get_xxx(obj, field, is_field, ac_mem_node);
     } else {
-      do_put_xxx(obj, field, is_field);
+      do_put_xxx(obj, field, is_field, ac_mem_node);
     }
   }
 }
@@ -157,7 +157,7 @@ Node* Parse::do_increase_access_counter(Node* obj) {
   Node* ac_mem = memory(C->get_alias_index(TypeInstPtr::ACCESS_COUNTER));
 
   // Node* access_counter = LoadAccessCounterNode::make(_gvn, control(), ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER);
-  Node* access_counter = _gvn.transform(new LoadAccessCounterNode(ctl, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, TypeLong::LONG, MemNode::unordered));
+  Node* access_counter = _gvn.transform(new LoadAccessCounterNode(NULL, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, TypeLong::LONG, MemNode::unordered));
 
   Node* incr = _gvn.transform(new AddLNode(access_counter, longcon(1)));
 
@@ -179,7 +179,7 @@ Node* Parse::do_increase_access_counter(Node* obj) {
   // assert(false, "graphkit::store_to_memory");
   // Dat mod ends
   
-  Node* st = _gvn.transform(new StoreAccessCounterNode(ctl, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, incr, MemNode::unordered));
+  Node* st = _gvn.transform(new StoreAccessCounterNode(NULL, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, incr, MemNode::unordered));
   if (PrintNodeDev) {
     st->dump(6);
     tty->print_cr("----------------------------------------");
@@ -189,7 +189,7 @@ Node* Parse::do_increase_access_counter(Node* obj) {
 }
 
 
-void Parse::do_get_xxx(Node* obj, ciField* field, bool is_field) {
+void Parse::do_get_xxx(Node* obj, ciField* field, bool is_field, Node* ac_mem_node) {
   BasicType bt = field->layout_type();
 
   // Does this field have a constant value?  If so, just push the value.
@@ -250,6 +250,10 @@ void Parse::do_get_xxx(Node* obj, ciField* field, bool is_field) {
 
   Node* ld = access_load_at(obj, adr, adr_type, type, bt, decorators);
 
+  if (ac_mem_node != NULL) {
+    ld->add_prec(ac_mem_node);
+  }
+
   // Adjust Java stack
   if (type2size[bt] == 1)
     push(ld);
@@ -281,7 +285,7 @@ void Parse::do_get_xxx(Node* obj, ciField* field, bool is_field) {
   }
 }
 
-void Parse::do_put_xxx(Node* obj, ciField* field, bool is_field) {
+void Parse::do_put_xxx(Node* obj, ciField* field, bool is_field, Node* ac_mem_node) {
   bool is_vol = field->is_volatile();
 
   // Compute address and memory type.
@@ -308,7 +312,11 @@ void Parse::do_put_xxx(Node* obj, ciField* field, bool is_field) {
       field_type = Type::BOTTOM;
     }
   }
-  access_store_at(control(), obj, adr, adr_type, val, field_type, bt, decorators);
+  Node* st = access_store_at(control(), obj, adr, adr_type, val, field_type, bt, decorators);
+
+  if (ac_mem_node != NULL) {
+    st->add_prec(ac_mem_node);
+  }
 
   if (is_field) {
     // Remember we wrote a volatile field.

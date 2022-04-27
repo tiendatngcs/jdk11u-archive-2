@@ -532,8 +532,8 @@ class Parse : public GraphKit {
   Node* do_increase_access_counter(Node* obj);
 
   // common code for actually performing the load or store
-  void do_get_xxx(Node* obj, ciField* field, bool is_field);
-  void do_put_xxx(Node* obj, ciField* field, bool is_field);
+  void do_get_xxx(Node* obj, ciField* field, bool is_field, Node* ac_mem_node = NULL);
+  void do_put_xxx(Node* obj, ciField* field, bool is_field, Node* ac_mem_node = NULL);
 
   // implementation of object creation bytecodes
   void emit_guard_for_new(ciInstanceKlass* klass);
