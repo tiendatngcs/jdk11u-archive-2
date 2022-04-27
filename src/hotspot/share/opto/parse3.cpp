@@ -157,9 +157,9 @@ Node* Parse::do_increase_access_counter(Node* obj) {
   Node* ac_mem = memory(C->get_alias_index(TypeInstPtr::ACCESS_COUNTER));
 
   // Node* access_counter = LoadAccessCounterNode::make(_gvn, control(), ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER);
-  Node* access_counter = _gvn.transform(new LoadAccessCounterNode(NULL, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, TypeLong::LONG, MemNode::unordered));
+  // Node* access_counter = _gvn.transform(new LoadAccessCounterNode(NULL, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, TypeLong::LONG, MemNode::unordered));
 
-  Node* incr = _gvn.transform(new AddLNode(access_counter, longcon(1)));
+  // Node* incr = _gvn.transform(new AddLNode(access_counter, longcon(1)));
 
 
 
@@ -179,13 +179,21 @@ Node* Parse::do_increase_access_counter(Node* obj) {
   // assert(false, "graphkit::store_to_memory");
   // Dat mod ends
   
-  Node* st = _gvn.transform(new StoreAccessCounterNode(NULL, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, incr, MemNode::unordered));
+  Node* st = _gvn.transform(new StoreAccessCounterNode(NULL, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), MemNode::unordered));
   if (PrintNodeDev) {
     st->dump(6);
     tty->print_cr("----------------------------------------");
     st->dump(-6);
   }
   set_memory(st, TypeInstPtr::ACCESS_COUNTER);
+  // Back-to-back stores can only remove intermediate store with DU info
+  // so push on worklist for optimizer.
+  record_for_igvn(st);
+  // if (ac_mem->req() > MemNode::Address && ac_addr == ac_mem->in(MemNode::Address)) {
+  //   record_for_igvn(st);
+  // } else {
+  //   assert(false, "Should not reach here");
+  // }
   return st;
 }
 

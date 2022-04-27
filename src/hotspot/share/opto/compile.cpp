@@ -2993,6 +2993,7 @@ void Compile::final_graph_reshaping_impl( Node *n, Final_Reshape_Counts &frc) {
   case Op_StoreP:
   case Op_StoreN:
   case Op_StoreNKlass:
+  case Op_StoreAccessCounter:
   case Op_LoadB:
   case Op_LoadUB:
   case Op_LoadUS:
