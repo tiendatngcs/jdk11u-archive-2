@@ -1666,10 +1666,6 @@ Node* GraphKit::store_to_memory(Node* ctl, Node* base_oop, Node* adr, Node *val,
   return st;
 }
 
-Node* GraphKit::increase_access_counter(Node* obj) {
-  return 
-}
-
 Node* GraphKit::access_store_at(Node* ctl,
                                 Node* obj,
                                 Node* adr,
