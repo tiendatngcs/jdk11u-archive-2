@@ -60,6 +60,9 @@ void Parse::array_load(BasicType bt) {
   pop();                      // index (already used)
   Node* array = pop();        // the array itself
 
+  // Dat mod
+  do_increase_access_counter(array);
+
   if (elemtype == TypeInt::BOOL) {
     bt = T_BOOLEAN;
   }
@@ -95,6 +98,9 @@ void Parse::array_store(BasicType bt) {
   }
   pop();                      // index (already used)
   Node* array = pop();        // the array itself
+
+  // Dat mod
+  do_increase_access_counter(array);
 
   if (elemtype == TypeInt::BOOL) {
     bt = T_BOOLEAN;

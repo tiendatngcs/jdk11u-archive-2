@@ -150,11 +150,12 @@ void Parse::do_field_access(bool is_get, bool is_field) {
 
 Node* Parse::do_increase_access_counter(Node* obj) {
   // Dat mod
+  Node* ctl = control();
   Node* ac_addr = basic_plus_adr(obj, oopDesc::access_counter_offset_in_bytes());
   Node* ac_mem = memory(C->get_alias_index(TypeInstPtr::ACCESS_COUNTER));
 
   // Node* access_counter = LoadAccessCounterNode::make(_gvn, control(), ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER);
-  Node* access_counter = _gvn.transform(new LoadAccessCounterNode(control(), ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, TypeLong::LONG, MemNode::unordered));
+  Node* access_counter = _gvn.transform(new LoadAccessCounterNode(ctl, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, TypeLong::LONG, MemNode::unordered));
 
   Node* incr = _gvn.transform(new AddLNode(access_counter, longcon(1)));
 
@@ -176,7 +177,7 @@ Node* Parse::do_increase_access_counter(Node* obj) {
   // assert(false, "graphkit::store_to_memory");
   // Dat mod ends
   
-  Node* st = _gvn.transform(new StoreAccessCounterNode(NULL, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, incr, MemNode::unordered));
+  Node* st = _gvn.transform(new StoreAccessCounterNode(ctl, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, incr, MemNode::unordered));
   if (PrintNodeDev) {
     st->dump(0);
   }
