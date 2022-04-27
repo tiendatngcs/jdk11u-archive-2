@@ -252,9 +252,9 @@ void Parse::do_get_xxx(Node* obj, ciField* field, bool is_field, Node* ac_mem_no
   Node* ld = access_load_at(obj, adr, adr_type, type, bt, decorators);
 
   // Dat mod
-  if (ac_mem_node != NULL) {
-    ld->add_req(ac_mem_node);
-  }
+  // if (ac_mem_node != NULL) {
+  //   ld->add_req(ac_mem_node);
+  // }
 
   // Adjust Java stack
   if (type2size[bt] == 1)
@@ -317,9 +317,9 @@ void Parse::do_put_xxx(Node* obj, ciField* field, bool is_field, Node* ac_mem_no
   Node* st = access_store_at(control(), obj, adr, adr_type, val, field_type, bt, decorators);
 
   // Dat mod
-  if (ac_mem_node != NULL) {
-    st->add_req(ac_mem_node);
-  }
+  // if (ac_mem_node != NULL) {
+  //   st->add_req(ac_mem_node);
+  // }
 
   if (is_field) {
     // Remember we wrote a volatile field.
