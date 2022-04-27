@@ -111,8 +111,6 @@ void Parse::do_field_access(bool is_get, bool is_field) {
 
   // Generate code for the object pointer.
   Node* obj;
-  // Dat mod
-  do_increase_access_counter(obj);
   if (is_field) {
     int obj_depth = is_get ? 0 : field->type()->size();
     obj = null_check(peek(obj_depth));
@@ -123,6 +121,8 @@ void Parse::do_field_access(bool is_get, bool is_field) {
     const TypeInstPtr *tjp = TypeInstPtr::make(TypePtr::NotNull, iter().get_declared_field_holder());
     assert(_gvn.type(obj)->higher_equal(tjp), "cast_up is no longer needed");
 #endif
+    // Dat mod
+    do_increase_access_counter(obj);
 
     if (is_get) {
       (void) pop();  // pop receiver before getting
@@ -140,6 +140,8 @@ void Parse::do_field_access(bool is_get, bool is_field) {
     obj = _gvn.makecon(tip);
     Node* ac_adr = basic_plus_adr(obj, oopDesc::access_counter_offset_in_bytes());
     // store_to_memory(control(), ac_adr, longcon(1), T_LONG, _gvn.type(ac_adr)->isa_ptr(), MemNode::unordered);
+    // Dat mod
+    do_increase_access_counter(obj);
     if (is_get) {
       do_get_xxx(obj, field, is_field);
     } else {
