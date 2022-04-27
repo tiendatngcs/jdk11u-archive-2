@@ -182,10 +182,15 @@ Node* Parse::do_increase_access_counter(Node* obj) {
   // Node* st = _gvn.transform(new StoreAccessCounterNode(NULL, ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER, longcon(1), MemNode::unordered));
 
   // use normal Load and store nodes
-  int adr_type = Compile::AliasIdxRaw;
-  Node* access_counter  = make_load(ctl, ac_addr, TypeLong::LONG, T_LONG, TypeInstPtr::ACCESS_COUNTER, MemNode::unordered);
-  Node* incr = _gvn.transform(new AddLNode(access_counter, longcon(1)));
-  Node* st = store_to_memory(ctl, ac_addr, incr, T_LONG, TypeInstPtr::ACCESS_COUNTER, MemNode::unordered);
+  // int adr_type = Compile::AliasIdxRaw;
+  // Node* access_counter  = make_load(ctl, ac_addr, TypeLong::LONG, T_LONG, TypeInstPtr::ACCESS_COUNTER, MemNode::unordered);
+  // Node* incr = _gvn.transform(new AddLNode(access_counter, longcon(1)));
+  // Node* st = store_to_memory(ctl, ac_addr, incr, T_LONG, TypeInstPtr::ACCESS_COUNTER, MemNode::unordered);
+
+  // ---------------------------------------------------
+  Node* access_counter = _gvn.transform(new LoadLNode(ctl, ac_mem, ac_addr, TypeRawPtr::BOTTOM, TypeLong::LONG, MemNode::unordered));
+  Node* incr = _gvn.transform(new AddLNode(access_counter, _gvn.transform(longcon(1))));
+  Node* st = _gvn.transform(new StoreLNode(ctl, ac_mem, ac_addr, TypeRawPtr::BOTTOM, incr, MemNode::unordered))
 
   if (PrintNodeDev) {
     st->dump(6);
@@ -195,7 +200,7 @@ Node* Parse::do_increase_access_counter(Node* obj) {
   // set_memory(st, TypeInstPtr::ACCESS_COUNTER);
   // Back-to-back stores can only remove intermediate store with DU info
   // so push on worklist for optimizer.
-  // record_for_igvn(st);
+  record_for_igvn(st);
   // if (ac_mem->req() > MemNode::Address && ac_addr == ac_mem->in(MemNode::Address)) {
   //   record_for_igvn(st);
   // } else {
