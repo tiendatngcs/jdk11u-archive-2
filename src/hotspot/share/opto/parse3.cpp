@@ -150,8 +150,8 @@ void Parse::do_field_access(bool is_get, bool is_field) {
 
 Node* Parse::do_increase_access_counter(Node* obj) {
   // Dat mod
-  // Node* ac_addr = basic_plus_adr(obj, oopDesc::access_counter_offset_in_bytes());
-  // Node* ac_mem = memory(C->get_alias_index(TypeInstPtr::ACCESS_COUNTER));
+  Node* ac_addr = basic_plus_adr(obj, oopDesc::access_counter_offset_in_bytes());
+  Node* ac_mem = memory(C->get_alias_index(TypeInstPtr::ACCESS_COUNTER));
 
   // Node* access_counter = LoadAccessCounterNode::make(_gvn, control(), ac_mem, ac_addr, TypeInstPtr::ACCESS_COUNTER);
   // Node* incr = new AddLNode(access_counter, longcon(1));
