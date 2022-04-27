@@ -190,9 +190,9 @@ Node* Parse::do_increase_access_counter(Node* obj) {
   // ---------------------------------------------------
   Node* access_counter = _gvn.transform(new LoadLNode(ctl, ac_mem, ac_addr, TypeRawPtr::BOTTOM, TypeLong::LONG, MemNode::unordered));
   Node* incr = _gvn.transform(new AddLNode(access_counter, _gvn.transform(longcon(1))));
-  Node* st = _gvn.transform(new StoreLNode(ctl, ac_mem, ac_addr, TypeRawPtr::BOTTOM, incr, MemNode::unordered, false, true));
+  Node* st = _gvn.transform(new StoreLNode(ctl, ac_mem, ac_addr, TypeRawPtr::BOTTOM, incr, MemNode::unordered));
   st->set_is_under_investigation();
-  
+
   if (PrintNodeDev) {
     st->dump(6);
     tty->print_cr("----------------------------------------");
