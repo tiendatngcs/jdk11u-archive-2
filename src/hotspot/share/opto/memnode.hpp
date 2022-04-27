@@ -689,14 +689,6 @@ public:
     if (_require_atomic_access)  st->print(" Atomic!");
   }
 #endif
-
-  void dump() const {
-    if (_is_under_investigate) {
-      dump(" is_under_investigate \n");
-    } else {
-      dump("\n");
-    }
-  }
 };
 
 //------------------------------StoreACNode-------------------------------------

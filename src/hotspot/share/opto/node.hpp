@@ -318,6 +318,11 @@ protected:
   const node_idx_t _idx;
   DEBUG_ONLY(const node_idx_t _parse_idx;)
 
+  bool is_under_investigation;
+  void set_is_under_investigation() {
+    is_under_investigation = true;
+  }
+
   // Get the (read-only) number of input edges
   uint req() const { return _cnt; }
   uint len() const { return _max; }
@@ -1130,7 +1135,14 @@ public:
 #ifndef PRODUCT
   Node* find(int idx) const;         // Search the graph for the given idx.
   Node* find_ctrl(int idx) const;    // Search control ancestors for the given idx.
-  void dump() const { dump("\n"); }  // Print this node.
+  void dump() const {
+      // Print this node.
+    if (is_under_investigation) {
+      dump("is_under_investigation \n");
+    } else {
+      dump("\n");
+    }
+  }
   void dump(const char* suffix, bool mark = false, outputStream *st = tty) const; // Print this node.
   void dump(int depth) const;        // Print this node, recursively to depth d
   void dump_ctrl(int depth) const;   // Print control nodes, to depth d
