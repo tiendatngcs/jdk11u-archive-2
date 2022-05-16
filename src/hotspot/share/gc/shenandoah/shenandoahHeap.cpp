@@ -823,6 +823,18 @@ void ShenandoahHeap::increase_oop_stats_mark(oop obj) {
       _dummy_count += 1;
       _dummy_size += obj->size();
     }
+    else {
+      if (PrintInvalidObject) {
+        ResourceMark rm;
+        tty->print_cr("Invalid oop | ac %lu | gc_epoch %lu | size %d | header_size %d | name %s | is_array_class %d",
+                      obj->access_counter(),
+                      obj->gc_epoch(),
+                      obj->size(),
+                      obj->header_size(),
+                      obj->klass()->external_name(),
+                      obj->klass()->is_array_klass());
+      }
+    }
   }
 }
 

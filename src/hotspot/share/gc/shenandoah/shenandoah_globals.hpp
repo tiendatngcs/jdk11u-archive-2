@@ -287,6 +287,9 @@
   experimental(bool, ShenandoahCSCollectAll, true,                          \
           "To include all regions in the collection set or not")            \
                                                                             \
+  experimental(bool, PrintInvalidObject, false,                             \
+          "")                                                               \
+                                                                            \
   diagnostic(bool, ShenandoahHumongousMoves, true,                          \
           "Allow moving humongous regions. This makes GC more resistant "   \
           "to external fragmentation that may otherwise fail other "        \
