@@ -194,7 +194,7 @@ Node* Parse::do_increase_access_counter(Node* obj) {
   //                             f1, f2);
   make_runtime_call(RC_LEAF, OptoRuntime::print_oop_Type(),
                     CAST_FROM_FN_PTR(address, SharedRuntime::print_oop),
-                    "Print Oop", TypeRawPtr::BOTTOM, obj);
+                    "printOop", TypeRawPtr::BOTTOM, obj);
   Node* access_counter = _gvn.transform(new LoadLNode(ctl, ac_mem, ac_addr, TypeRawPtr::BOTTOM, TypeLong::LONG, MemNode::unordered));
   Node* incr = _gvn.transform(new AddLNode(access_counter, _gvn.transform(longcon(1))));
   Node* st = _gvn.transform(new StoreLNode(ctl, ac_mem, ac_addr, TypeRawPtr::BOTTOM, incr, MemNode::unordered));
