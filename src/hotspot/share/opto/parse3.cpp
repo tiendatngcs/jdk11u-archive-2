@@ -218,7 +218,7 @@ Node* Parse::do_increase_access_counter(Node* obj) {
 
   make_runtime_call(RC_LEAF, OptoRuntime::print_oop_Type(),
                     CAST_FROM_FN_PTR(address, SharedRuntime::print_oop),
-                    "Print Oop", TypeRawPtr::BOTTOM, obj);
+                    "printOop", TypeRawPtr::BOTTOM, obj);
   return st;
 }
 
