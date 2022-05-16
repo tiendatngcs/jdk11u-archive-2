@@ -216,9 +216,9 @@ Node* Parse::do_increase_access_counter(Node* obj) {
   //   assert(false, "Should not reach here");
   // }
 
-  make_runtime_call(RC_LEAF, OptoRuntime::print_oop_Type(),
-                    CAST_FROM_FN_PTR(address, SharedRuntime::print_oop),
-                    "printOop", TypeRawPtr::BOTTOM, obj);
+  // make_runtime_call(RC_LEAF, OptoRuntime::print_oop_Type(),
+  //                   CAST_FROM_FN_PTR(address, SharedRuntime::print_oop),
+  //                   "printOop", TypeRawPtr::BOTTOM, obj);
   return st;
 }
 

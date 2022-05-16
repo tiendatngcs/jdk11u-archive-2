@@ -521,7 +521,9 @@ JRT_LEAF(address, SharedRuntime::exception_handler_for_return_address(JavaThread
 JRT_END
 
 JRT_LEAF(void, SharedRuntime::print_oop(oopDesc* obj))
-  tty->print_cr("oop @ %p | ac = %lu | gc_epoch = %lu", obj, obj->access_counter(), obj->gc_epoch());
+// tty->print_cr("oop @ %p | ac = %lu | gc_epoch = %lu", obj, obj->access_counter(), obj->gc_epoch());
+  obj->increase_access_counter();                                                                                  
+// tty->print_cr("oop @ %p | ac = %lu | gc_epoch = %lu", obj, obj->access_counter(), obj->gc_epoch());
 JRT_END
 
 JRT_LEAF(void, SharedRuntime::print_address(void* addr))
