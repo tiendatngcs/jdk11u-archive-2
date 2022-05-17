@@ -2808,12 +2808,12 @@ void ShenandoahHeap::op_stats_logging() {
   }
 
   log_info(gc)("Valid/invalid oop stats mark\n"
-                "valid_count: %lu bytes\n"
-                "valid_size: %lu bytes\n"
-                "invalid_count: %lu bytes\n"
-                "invalid_size: %lu bytes\n"
-                "dummy_count: %lu bytes\n"
-                "dummy_size: %lu bytes\n",
+                "valid_count: %lu\n"
+                "valid_size: %lu words\n"
+                "invalid_count: %lu\n"
+                "invalid_size: %lu words\n"
+                "dummy_count: %lu\n"
+                "dummy_size: %lu words\n",
                 heap->oop_stats_mark(true, true),
                 heap->oop_stats_mark(true, false),
                 heap->oop_stats_mark(false, true),
@@ -2849,6 +2849,20 @@ void ShenandoahHeap::op_stats_logging() {
   heap->reset_total_object_size();
   heap->set_after_heap_scan(false);
   oopDesc::static_gc_epoch += 1;
+
+  log_info(gc)("Valid/invalid oop stats mark after reset\n"
+                "valid_count post reset: %lu\n"
+                "valid_size post reset: %lu words\n"
+                "invalid_count post reset: %lu\n"
+                "invalid_size post reset: %lu words\n"
+                "dummy_count post reset: %lu\n"
+                "dummy_size post reset: %lu words\n",
+                heap->oop_stats_mark(true, true),
+                heap->oop_stats_mark(true, false),
+                heap->oop_stats_mark(false, true),
+                heap->oop_stats_mark(false, false),
+                heap->dummy_oop_stats_mark(true),
+                heap->dummy_oop_stats_mark(false));
 }
 
 void ShenandoahHeap::print_extended_on(outputStream *st) const {
