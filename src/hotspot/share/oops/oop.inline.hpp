@@ -56,24 +56,29 @@ markOop* oopDesc::mark_addr_raw() const {
 }
 
 intptr_t oopDesc::true_access_counter() {
+  // check gc_epoch and reset ac if necessary
   if (gc_epoch() != static_gc_epoch) {
     set_access_counter(0);
     set_gc_epoch(static_gc_epoch);
+    return 0; // can do access_counter() but why go there?
   }
   return access_counter();
 }
 
 intptr_t oopDesc::access_counter() {
-  return _access_counter;
+  // return _access_counter;
+  return HeapAccess<MO_VOLATILE>::load_at(as_oop(), access_counter_offset_in_bytes());
 }
 
 intptr_t oopDesc::gc_epoch() {
   // return _gc_epoch & GC_EPOCH_MASK; // Clear first bit
-  return _gc_epoch;
+  // return _gc_epoch;
+  return HeapAccess<MO_VOLATILE>::load_at(as_oop(), gc_epoch_offset_in_bytes());
 }
 
 void oopDesc::set_access_counter(intptr_t new_value) {
-  _access_counter = new_value;
+  // _access_counter = new_value;
+  HeapAccess<MO_VOLATILE>::store_at(as_oop(), access_counter_offset_in_bytes(), new_value);
 }
 
 void oopDesc::set_access_counter(HeapWord* mem, intptr_t new_value){ 
@@ -82,18 +87,21 @@ void oopDesc::set_access_counter(HeapWord* mem, intptr_t new_value){
 
 void oopDesc::increase_access_counter() {
   intptr_t ac = true_access_counter();
-  if (INT_MAX - 1 < ac) {
-    // overflow
-    set_access_counter(INT_MAX);
-    return;
-  }
-  set_access_counter(ac + 1);
+  if (ac == INT_MAX) return;
+  // if (INT_MAX - 1 < ac) {
+  //   // overflow
+  //   set_access_counter(INT_MAX);
+  //   return;
+  // }
+  // set_access_counter(ac + 1);
+  Atomic::add(1, &_access_counter);
   // tty->print_cr("Increasing access counter ac %lu | gc_epoch %lu", access_counter(), gc_epoch());
 }
 
 void oopDesc::set_gc_epoch(intptr_t new_value) {
   // _gc_epoch = (_gc_epoch & ~GC_EPOCH_MASK) | (new_value & GC_EPOCH_MASK);
-  _gc_epoch = new_value;
+  // _gc_epoch = new_value;
+  HeapAccess<MO_VOLATILE>::store_at(as_oop(), gc_epoch_offset_in_bytes(), new_value);
 }
 
 void oopDesc::set_gc_epoch(HeapWord* mem, intptr_t new_value){ 

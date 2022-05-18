@@ -154,42 +154,54 @@ protected:
 public:
   // Primitive heap accesses
   static inline AccessInternal::LoadAtProxy<decorators> load_at(oop base, ptrdiff_t offset) {
-    base->increase_access_counter();
+    if (static_cast<int>(offset) > base->header_size()*HeapWordSize ) {
+      base->increase_access_counter();
+    }
     verify_primitive_decorators<load_mo_decorators>();
     return AccessInternal::LoadAtProxy<decorators>(base, offset);
   }
 
   template <typename T>
   static inline void store_at(oop base, ptrdiff_t offset, T value) {
-    base->increase_access_counter();
+    if (static_cast<int>(offset) > base->header_size()*HeapWordSize ) {
+      base->increase_access_counter();
+    }
     verify_primitive_decorators<store_mo_decorators>();
     AccessInternal::store_at<decorators>(base, offset, value);
   }
 
   template <typename T>
   static inline T atomic_cmpxchg_at(T new_value, oop base, ptrdiff_t offset, T compare_value) {
-    base->increase_access_counter();
+    if (static_cast<int>(offset) > base->header_size()*HeapWordSize ) {
+      base->increase_access_counter();
+    }
     verify_primitive_decorators<atomic_cmpxchg_mo_decorators>();
     return AccessInternal::atomic_cmpxchg_at<decorators>(new_value, base, offset, compare_value);
   }
 
   template <typename T>
   static inline T atomic_xchg_at(T new_value, oop base, ptrdiff_t offset) {
-    base->increase_access_counter();
+    if (static_cast<int>(offset) > base->header_size()*HeapWordSize ) {
+      base->increase_access_counter();
+    }
     verify_primitive_decorators<atomic_xchg_mo_decorators>();
     return AccessInternal::atomic_xchg_at<decorators>(new_value, base, offset);
   }
 
   // Oop heap accesses
   static inline AccessInternal::OopLoadAtProxy<decorators> oop_load_at(oop base, ptrdiff_t offset) {
-    base->increase_access_counter();
+    if (static_cast<int>(offset) > base->header_size()*HeapWordSize ) {
+      base->increase_access_counter();
+    }
     verify_heap_oop_decorators<load_mo_decorators>();
     return AccessInternal::OopLoadAtProxy<decorators>(base, offset);
   }
 
   template <typename T>
   static inline void oop_store_at(oop base, ptrdiff_t offset, T value) {
-    base->increase_access_counter();
+    if (static_cast<int>(offset) > base->header_size()*HeapWordSize ) {
+      base->increase_access_counter();
+    }
     verify_heap_oop_decorators<store_mo_decorators>();
     typedef typename AccessInternal::OopOrNarrowOop<T>::type OopType;
     OopType oop_value = value;
@@ -198,7 +210,9 @@ public:
 
   template <typename T>
   static inline T oop_atomic_cmpxchg_at(T new_value, oop base, ptrdiff_t offset, T compare_value) {
-    base->increase_access_counter();
+    if (static_cast<int>(offset) > base->header_size()*HeapWordSize ) {
+      base->increase_access_counter();
+    }
     verify_heap_oop_decorators<atomic_cmpxchg_mo_decorators>();
     typedef typename AccessInternal::OopOrNarrowOop<T>::type OopType;
     OopType new_oop_value = new_value;
@@ -208,7 +222,9 @@ public:
 
   template <typename T>
   static inline T oop_atomic_xchg_at(T new_value, oop base, ptrdiff_t offset) {
-    base->increase_access_counter();
+    if (static_cast<int>(offset) > base->header_size()*HeapWordSize ) {
+      base->increase_access_counter();
+    }
     verify_heap_oop_decorators<atomic_xchg_mo_decorators>();
     typedef typename AccessInternal::OopOrNarrowOop<T>::type OopType;
     OopType new_oop_value = new_value;

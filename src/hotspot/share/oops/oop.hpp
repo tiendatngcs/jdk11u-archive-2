@@ -58,8 +58,8 @@ class oopDesc {
   friend class VMStructs;
   friend class JVMCIVMStructs;
  private:
-  intptr_t _access_counter;
-  intptr_t _gc_epoch; // Contain initialize bit as first bit, the rest is gc_epoch
+  volatile intptr_t _access_counter;
+  volatile intptr_t _gc_epoch; // Contain initialize bit as first bit, the rest is gc_epoch
   volatile markOop _mark;
   union _metadata {
     Klass*      _klass;
