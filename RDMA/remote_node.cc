@@ -176,6 +176,8 @@ static int remote_node_run()
 	else
 		ret = 0;
 
+	print_a_buffer(recv_msg, BUFFER_SIZE, (char*)"recv_msg");
+
 out_dereg_rdma_mr:
 	rdma_dereg_mr(rdma_mr);
 out_disconnect:
