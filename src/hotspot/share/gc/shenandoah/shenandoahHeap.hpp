@@ -144,6 +144,8 @@ public:
   void initialize_heuristics();
 
   void initialize_serviceability();
+  
+  bool initialize_remote_regions();
 
   void print_on(outputStream* st)              const;
   void print_extended_on(outputStream *st)     const;
@@ -155,6 +157,7 @@ public:
 
   void prepare_for_verify();
   void verify(VerifyOption vo);
+
 
 // ---------- Heap counters and metrics
 //

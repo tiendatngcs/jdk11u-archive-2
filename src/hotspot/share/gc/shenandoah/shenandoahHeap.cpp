@@ -395,6 +395,9 @@ jint ShenandoahHeap::initialize() {
                      SafepointMechanism::uses_thread_local_poll() ? "thread-local poll" :
                      (SafepointMechanism::uses_global_page_poll() ? "global-page poll" : "unknown"));
 
+
+  // initialize the remote memory
+
   return JNI_OK;
 }
 
@@ -640,6 +643,13 @@ void ShenandoahHeap::post_initialize() {
   _heuristics->initialize();
 
   JFR_ONLY(ShenandoahJFRSupport::register_jfr_type_serializers());
+}
+
+bool ShenandoahHeap::initialize_remote_regions() {
+  tty->printf("Initializing remote regions ...");
+  
+  
+  tty->printf("Finished initializing remote regions ...");
 }
 
 size_t ShenandoahHeap::used() const {
