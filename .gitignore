@@ -13,5 +13,7 @@ test/nashorn/lib
 NashornProfile.txt
 **/JTreport/**
 **/JTwork/**
-/make/*
+make/core*
+make/*.log
+/.vscode/
 *.exe

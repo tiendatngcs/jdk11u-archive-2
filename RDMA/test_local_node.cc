@@ -58,6 +58,9 @@ static void print_buffers() {
 	print_a_buffer(send_msg, BUFFER_SIZE, (char*)"send_msg");
 	print_a_buffer(recv_msg, BUFFER_SIZE, (char*)"recv_msg");
     printf("-----------\n");
+	print_a_buffer(send_msg2, BUFFER_SIZE, (char*)"send_msg2");
+	print_a_buffer(recv_msg2, BUFFER_SIZE, (char*)"recv_msg2");
+    printf("-----------\n");
 }
 
 
@@ -67,374 +70,480 @@ static void get_wc_status(struct ibv_wc* wc) {
     printf("--------------\n");
 }
 
-static int local_node_run () {
-    struct rdma_addrinfo hints, *res;
-	struct ibv_qp_init_attr init_attr;
-	struct ibv_qp_attr qp_attr;
-	struct ibv_wc wc;
-	int ret;
-    void* temp;
+class LocalNode  {
 
-    struct rdma_addrinfo hints2, *res2;
-	struct ibv_qp_init_attr init_attr2;
-	struct ibv_qp_attr qp_attr2;
-	struct ibv_wc wc2;
-    void* temp2;
+public:
+    int local_node_run () {
+        struct rdma_addrinfo hints, *res;
+        struct ibv_qp_init_attr init_attr;
+        struct ibv_qp_attr qp_attr;
+        struct ibv_wc wc;
+        int ret;
+        void* temp;
 
-
-    print_buffers();
-
-	memset(&hints, 0, sizeof hints);
-	hints.ai_flags = RAI_PASSIVE;
-	hints.ai_port_space = RDMA_PS_TCP;
-	ret = rdma_getaddrinfo(local_addr, port, &hints, &res);
-	if (ret) {
-		printf("rdma_getaddrinfo: %s\n", gai_strerror(ret));
-		return ret;
-	}
-
-	memset(&init_attr, 0, sizeof init_attr);
-	init_attr.cap.max_send_wr = init_attr.cap.max_recv_wr = 1;
-	init_attr.cap.max_send_sge = init_attr.cap.max_recv_sge = 1;
-	init_attr.cap.max_inline_data = 16;
-	init_attr.sq_sig_all = 1;
-	ret = rdma_create_ep(&listen_id, res, NULL, &init_attr);
-	if (ret) {
-		perror("rdma_create_ep");
-		goto out_free_addrinfo;
-	}
-    printf("Server listening ...\n");
-	ret = rdma_listen(listen_id, 0);
-	if (ret) {
-		perror("rdma_listen");
-		goto out_destroy_listen_ep;
-	}
+        struct rdma_addrinfo hints2, *res2;
+        struct ibv_qp_init_attr init_attr2;
+        struct ibv_qp_attr qp_attr2;
+        struct ibv_wc wc2;
+        void* temp2;
 
 
-    printf("Getting connection request ...\n");
-	ret = rdma_get_request(listen_id, &id);
-	if (ret) {
-		perror("rdma_get_request");
-		goto out_destroy_listen_ep;
-	}
+        print_buffers();
 
-    print_buffers();
+        memset(&hints, 0, sizeof hints);
+        hints.ai_flags = RAI_PASSIVE;
+        hints.ai_port_space = RDMA_PS_TCP;
+        ret = rdma_getaddrinfo(local_addr, port, &hints, &res);
+        if (ret) {
+            printf("rdma_getaddrinfo: %s\n", gai_strerror(ret));
+            return ret;
+        }
 
-	memset(&qp_attr, 0, sizeof qp_attr);
-	memset(&init_attr, 0, sizeof init_attr);
-	ret = ibv_query_qp(id->qp, &qp_attr, IBV_QP_CAP,
-			   &init_attr);
-	if (ret) {
-		perror("ibv_query_qp");
-		goto out_destroy_accept_ep;
-	}
-	if (init_attr.cap.max_inline_data >= 16)
-		send_flags = IBV_SEND_INLINE;
-	else
-		printf("rdma_server: device doesn't support IBV_SEND_INLINE, "
-		       "using sge sends\n");
-
-    printf("Registering mr ...\n");
-	mr = rdma_reg_msgs(id, recv_msg, 16);
-	if (!mr) {
-		ret = -1;
-		perror("rdma_reg_msgs for recv_msg");
-		goto out_destroy_accept_ep;
-	}
-	if ((send_flags & IBV_SEND_INLINE) == 0) {
-        printf("Registering mr ...");
-		send_mr = rdma_reg_msgs(id, send_msg, 16);
-		if (!send_mr) {
-			ret = -1;
-			perror("rdma_reg_msgs for send_msg");
-			goto out_dereg_recv;
-		}
-	}
-    print_buffers();
-
-    printf("rdma_post_recv ...\n");
-	ret = rdma_post_recv(id, NULL, recv_msg, 16, mr);
-	if (ret) {
-		perror("rdma_post_recv");
-		goto out_dereg_send;
-	}
-
-    print_buffers();
-
-    
-    printf("Server accepting connection ...\n");
-	ret = rdma_accept(id, NULL);
-	if (ret) {
-		perror("rdma_accept");
-		goto out_dereg_send;
-	}
-    print_buffers();
+        memset(&init_attr, 0, sizeof init_attr);
+        init_attr.cap.max_send_wr = init_attr.cap.max_recv_wr = 1;
+        init_attr.cap.max_send_sge = init_attr.cap.max_recv_sge = 1;
+        init_attr.cap.max_inline_data = 16;
+        init_attr.sq_sig_all = 1;
+        ret = rdma_create_ep(&listen_id, res, NULL, &init_attr);
+        if (ret) {
+            perror("rdma_create_ep");
+            goto out_free_addrinfo;
+        }
+        printf("Server listening ...\n");
+        ret = rdma_listen(listen_id, 100);
+        if (ret) {
+            perror("rdma_listen");
+            goto out_destroy_listen_ep;
+        }
 
 
+        printf("Getting connection request ...\n");
+        ret = rdma_get_request(listen_id, &id);
+        if (ret) {
+            perror("rdma_get_request");
+            goto out_destroy_listen_ep;
+        }
 
-    printf("rdma_get_recv_comp ...\n");
-	while ((ret = rdma_get_recv_comp(id, &wc)) == 0);
-	if (ret < 0) {
-		perror("rdma_get_recv_comp");
-		goto out_disconnect;
-	}
-    print_buffers();
-
-    printf("rdma_post_send ...\n");
-	ret = rdma_post_send(id, NULL, send_msg, 16, send_mr, send_flags);
-	if (ret) {
-		perror("rdma_post_send");
-		goto out_disconnect;
-	}
-    print_buffers();
-
-    printf("rdma_get_send_comp ...\n");
-	while ((ret = rdma_get_send_comp(id, &wc)) == 0);
-	if (ret < 0)
-		perror("rdma_get_send_comp");
-	else
-		ret = 0;
-
-    print_buffers();
+        printf("Getting connection request ...\n");
+        ret = rdma_get_request(listen_id, &id2);
+        if (ret) {
+            perror("rdma_get_request");
+            goto out_destroy_listen_ep;
+        }
 
 
-    // ---------------------------------------------
+        memset(&qp_attr, 0, sizeof qp_attr);
+        memset(&init_attr, 0, sizeof init_attr);
+        ret = ibv_query_qp(id->qp, &qp_attr, IBV_QP_CAP,
+                &init_attr);
+        if (ret) {
+            perror("ibv_query_qp");
+            goto out_destroy_accept_ep;
+        }
+        if (init_attr.cap.max_inline_data >= 16)
+            send_flags = IBV_SEND_INLINE;
+        else
+            printf("rdma_server: device doesn't support IBV_SEND_INLINE, "
+                "using sge sends\n");
 
-	// new code
+        memset(&qp_attr, 0, sizeof qp_attr);
+        memset(&init_attr, 0, sizeof init_attr);
+        ret = ibv_query_qp(id2->qp, &qp_attr, IBV_QP_CAP,
+                &init_attr);
+        if (ret) {
+            perror("ibv_query_qp");
+            goto out_destroy_accept_ep;
+        }
+        if (init_attr.cap.max_inline_data >= 16)
+            send_flags2 = IBV_SEND_INLINE;
+        else
+            printf("rdma_server: device doesn't support IBV_SEND_INLINE, "
+                "using sge sends\n");
 
-    // receive remote mr rkey and addr of client
-	printf("rdma_post_recv ...\n");
-	ret = rdma_post_recv(id, NULL, recv_msg, 16, mr);
-	if (ret) {
-		perror("rdma_post_recv");
-		goto out_dereg_send;
-	}
+        printf("Registering mr1 ...\n");
+        mr = rdma_reg_msgs(id, recv_msg, 16);
+        if (!mr) {
+            ret = -1;
+            perror("rdma_reg_msgs for recv_msg");
+            goto out_destroy_accept_ep;
+        }
+        if ((send_flags & IBV_SEND_INLINE) == 0) {
+            printf("Registering mr2 ...");
+            send_mr = rdma_reg_msgs(id, send_msg, 16);
+            if (!send_mr) {
+                ret = -1;
+                perror("rdma_reg_msgs for send_msg");
+                goto out_dereg_recv;
+            }
+        }
+        print_buffers();
 
-    print_buffers();
+        printf("Registering mr2 ...\n");
+        mr2 = rdma_reg_msgs(id2, recv_msg2, 16);
+        if (!mr) {
+            ret = -1;
+            perror("rdma_reg_msgs for recv_msg");
+            goto out_destroy_accept_ep;
+        }
+        if ((send_flags & IBV_SEND_INLINE) == 0) {
+            printf("Registering mr2 ...");
+            send_mr2 = rdma_reg_msgs(id2, send_msg2, 16);
+            if (!send_mr2) {
+                ret = -1;
+                perror("rdma_reg_msgs for send_msg");
+                goto out_dereg_recv;
+            }
+        }
 
-	printf("rdma_get_recv_comp ...\n");
-	while ((ret = rdma_get_recv_comp(id, &wc)) == 0);
-	if (ret < 0) {
-		perror("rdma_get_recv_comp");
-		goto out_disconnect;
-	}
-    print_buffers();
+        printf("rdma_post_recv ...\n");
+        ret = rdma_post_recv(id, NULL, recv_msg, 16, mr);
+        if (ret) {
+            perror("rdma_post_recv");
+            goto out_dereg_send;
+        }
 
-	// extract information
+        print_buffers();
 
-	memcpy(&rkey, recv_msg, sizeof(rkey));
-	print_a_buffer((uint8_t*)&rkey, sizeof(rkey), (char*)"rkey");
 
-	memcpy(&remote_addr, recv_msg + sizeof(rkey), sizeof(remote_addr));
+        printf("rdma_post_recv ...\n");
+        ret = rdma_post_recv(id2, NULL, recv_msg2, 16, mr2);
+        if (ret) {
+            perror("rdma_post_recv");
+            goto out_dereg_send;
+        }
 
-	print_a_buffer((uint8_t*)&remote_addr, sizeof(remote_addr), (char*)"remote addr");
+        print_buffers();
 
-    // register a local buffer
-	strcpy((char*)buff_local_send, "Dat");
-	
-	print_a_buffer(buff_local_send, BUFFER_SIZE, (char*)"buff_local_send");
-	local_mr = ibv_reg_mr(id->pd, buff_local_send, BUFFER_SIZE, IBV_ACCESS_LOCAL_WRITE);
+        
+        printf("Server accepting connection 1 ...\n");
+        ret = rdma_accept(id, NULL);
+        if (ret) {
+            perror("rdma_accept");
+            goto out_dereg_send;
+        }
+        print_buffers();
 
-	// use the retrieved information for rdma read and write
-	// Write to remote mem first
-	printf("RDMA write ...\n");
-	ret = rdma_post_write(id, NULL, buff_local_send, BUFFER_SIZE, local_mr, IBV_SEND_SIGNALED, (uint64_t)remote_addr, rkey);
-	if (ret) {
-        perror("Error rdma write\n");
-        goto out_disconnect;
+        printf("Server accepting connection 2 ...\n");
+        ret = rdma_accept(id2, NULL);
+        if (ret) {
+            perror("rdma_accept");
+            goto out_dereg_send;
+        }
+        print_buffers();
+
+
+
+        printf("rdma_get_recv_comp ...\n");
+        while ((ret = rdma_get_recv_comp(id, &wc)) == 0);
+        if (ret < 0) {
+            perror("rdma_get_recv_comp");
+            goto out_disconnect;
+        }
+        print_buffers();
+
+        printf("rdma_get_recv_comp ...\n");
+        while ((ret = rdma_get_recv_comp(id2, &wc2)) == 0);
+        if (ret < 0) {
+            perror("rdma_get_recv_comp");
+            goto out_disconnect;
+        }
+        print_buffers();
+
+        printf("rdma_post_send ...\n");
+        ret = rdma_post_send(id, NULL, send_msg, 16, send_mr, send_flags);
+        if (ret) {
+            perror("rdma_post_send");
+            goto out_disconnect;
+        }
+        print_buffers();
+
+        printf("rdma_post_send ...\n");
+        ret = rdma_post_send(id2, NULL, send_msg2, 16, send_mr2, send_flags2);
+        if (ret) {
+            perror("rdma_post_send");
+            goto out_disconnect;
+        }
+        print_buffers();
+
+        printf("rdma_get_send_comp ...\n");
+        while ((ret = rdma_get_send_comp(id, &wc)) == 0);
+        if (ret < 0)
+            perror("rdma_get_send_comp");
+        else
+            ret = 0;
+
+        print_buffers();
+
+        printf("rdma_get_send_comp ...\n");
+        while ((ret = rdma_get_send_comp(id2, &wc2)) == 0);
+        if (ret < 0)
+            perror("rdma_get_send_comp");
+        else
+            ret = 0;
+
+        print_buffers();
+
+
+        // ---------------------------------------------
+
+        // new code
+
+        // receive remote mr rkey and addr of client
+        printf("rdma_post_recv ...\n");
+        ret = rdma_post_recv(id, NULL, recv_msg, 16, mr);
+        if (ret) {
+            perror("rdma_post_recv");
+            goto out_dereg_send;
+        }
+
+        print_buffers();
+
+        printf("rdma_get_recv_comp ...\n");
+        while ((ret = rdma_get_recv_comp(id, &wc)) == 0);
+        if (ret < 0) {
+            perror("rdma_get_recv_comp");
+            goto out_disconnect;
+        }
+        print_buffers();
+
+        printf("rdma_post_recv ...\n");
+        ret = rdma_post_recv(id2, NULL, recv_msg2, 16, mr2);
+        if (ret) {
+            perror("rdma_post_recv");
+            goto out_dereg_send;
+        }
+
+        print_buffers();
+
+        printf("rdma_get_recv_comp ...\n");
+        while ((ret = rdma_get_recv_comp(id2, &wc2)) == 0);
+        if (ret < 0) {
+            perror("rdma_get_recv_comp");
+            goto out_disconnect;
+        }
+        print_buffers();
+
+        // extract information
+
+        memcpy(&rkey, recv_msg, sizeof(rkey));
+        print_a_buffer((uint8_t*)&rkey, sizeof(rkey), (char*)"rkey");
+
+        memcpy(&remote_addr, recv_msg + sizeof(rkey), sizeof(remote_addr));
+
+        print_a_buffer((uint8_t*)&remote_addr, sizeof(remote_addr), (char*)"remote addr");
+
+        // register a local buffer
+        strcpy((char*)buff_local_send, "Dat");
+        
+        print_a_buffer(buff_local_send, BUFFER_SIZE, (char*)"buff_local_send");
+        local_mr = ibv_reg_mr(id->pd, buff_local_send, BUFFER_SIZE, IBV_ACCESS_LOCAL_WRITE);
+
+        // use the retrieved information for rdma read and write
+        // Write to remote mem first
+        printf("RDMA write ...\n");
+        ret = rdma_post_write(id, NULL, buff_local_send, BUFFER_SIZE, local_mr, IBV_SEND_SIGNALED, (uint64_t)remote_addr, rkey);
+        if (ret) {
+            perror("Error rdma write\n");
+            goto out_disconnect;
+        }
+        do {
+            ret = ibv_poll_cq(id->send_cq, 1, &wc);
+        } while (ret == 0);
+
+        
+        print_a_buffer(buff_local_send, BUFFER_SIZE, (char*)"buff_local_send");
+
+        get_wc_status(&wc);
+
+        // Now try reading from remote mem
+        printf("RDMA read ...\n");
+
+        memset(buff_local_send, 0, sizeof(buff_local_send));
+        print_a_buffer(buff_local_send, BUFFER_SIZE, (char*)"buff_local_send");
+
+        ret = rdma_post_read(id, NULL, buff_local_send, BUFFER_SIZE, local_mr, IBV_SEND_SIGNALED, (uint64_t)((uint8_t*)remote_addr+1), rkey);
+        if (ret) {
+            perror("Error rdma read\n");
+            goto out_disconnect;
+        }
+        do {
+            ret = ibv_poll_cq(id->send_cq, 1, &wc);
+        } while (ret == 0);
+
+        print_a_buffer(buff_local_send, BUFFER_SIZE, (char*)"buff_local_send");
+
+        get_wc_status(&wc);
+
+
+
+        // -----------------------------------------------------------------
+        // now try to listen to another end point
+
+        // memset(&hints2, 0, sizeof hints2);
+        // hints2.ai_flags = RAI_PASSIVE;
+        // hints2.ai_port_space = RDMA_PS_TCP;
+        // ret = rdma_getaddrinfo(local_addr, port, &hints2, &res2);
+        // if (ret) {
+        // 	printf("rdma_getaddrinfo: %s\n", gai_strerror(ret));
+        // 	return ret;
+        // }
+
+        // memset(&init_attr2, 0, sizeof init_attr2);
+        // init_attr2.cap.max_send_wr = init_attr2.cap.max_recv_wr = 1;
+        // init_attr2.cap.max_send_sge = init_attr2.cap.max_recv_sge = 1;
+        // init_attr2.cap.max_inline_data = 16;
+        // init_attr2.sq_sig_all = 1;
+        // ret = rdma_create_ep(&listen_id2, res, NULL, &init_attr2);
+        // if (ret) {
+        // 	perror("rdma_create_ep");
+        // 	goto out_free_addrinfo;
+        // }
+
+
+
+        // printf("Server listening ...\n");
+        // ret = rdma_listen(listen_id, 0);
+        // if (ret) {
+        // 	perror("rdma_listen");
+        // 	goto out_destroy_listen_ep;
+        // }
+
+
+        // printf("Getting connection request ...\n");
+        // ret = rdma_get_request(listen_id, &id2);
+        // if (ret) {
+        // 	perror("rdma_get_request");
+        // 	goto out_destroy_listen_ep;
+        // }
+
+
+        // memset(&qp_attr2, 0, sizeof qp_attr2);
+        // memset(&init_attr2, 0, sizeof init_attr2);
+        // ret = ibv_query_qp(id2->qp, &qp_attr2, IBV_QP_CAP,
+        // 		   &init_attr2);
+        // if (ret) {
+        // 	perror("ibv_query_qp");
+        // 	goto out_destroy_accept_ep;
+        // }
+        // if (init_attr2.cap.max_inline_data >= 16)
+        // 	send_flags2 = IBV_SEND_INLINE;
+        // else
+        // 	printf("rdma_server: device doesn't support IBV_SEND_INLINE, "
+        // 	       "using sge sends\n");
+
+        // printf("Registering mr ...\n");
+        // mr2 = rdma_reg_msgs(id2, recv_msg2, 16);
+        // if (!mr2) {
+        // 	ret = -1;
+        // 	perror("rdma_reg_msgs for recv_msg");
+        // 	goto out_destroy_accept_ep;
+        // }
+        // if ((send_flags2 & IBV_SEND_INLINE) == 0) {
+        //     printf("Registering mr ...");
+        // 	send_mr2 = rdma_reg_msgs(id2, send_msg2, 16);
+        // 	if (!send_mr2) {
+        // 		ret = -1;
+        // 		perror("rdma_reg_msgs for send_msg");
+        // 		goto out_dereg_recv;
+        // 	}
+        // }
+
+        // printf("rdma_post_recv ...\n");
+        // ret = rdma_post_recv(id2, NULL, recv_msg2, 16, mr2);
+        // if (ret) {
+        // 	perror("rdma_post_recv");
+        // 	goto out_dereg_send;
+        // }
+
+        
+        // printf("Server accepting connection ...\n");
+        // ret = rdma_accept(id2, NULL);
+        // if (ret) {
+        // 	perror("rdma_accept");
+        // 	goto out_dereg_send;
+        // }
+
+
+
+        // printf("rdma_get_recv_comp ...\n");
+        // while ((ret = rdma_get_recv_comp(id2, &wc2)) == 0);
+        // if (ret < 0) {
+        // 	perror("rdma_get_recv_comp");
+        // 	goto out_disconnect;
+        // }
+
+        // strcpy((char*)send_msg2, "Dat");
+        // print_a_buffer(send_msg2, BUFFER_SIZE, (char*)"send_msg2");
+
+        // printf("rdma_post_send ...\n");
+        // ret = rdma_post_send(id2, NULL, send_msg2, 16, send_mr2, send_flags2);
+        // if (ret) {
+        // 	perror("rdma_post_send");
+        // 	goto out_disconnect;
+        // }
+
+        // printf("rdma_get_send_comp ...\n");
+        // while ((ret = rdma_get_send_comp(id2, &wc2)) == 0);
+        // if (ret < 0)
+        // 	perror("rdma_get_send_comp");
+        // else
+        // 	ret = 0;
+
+
+        // now we can close both process by posting a send
+
+        printf("Sending to close both processes ...\n");
+        printf("rdma_post_send ...\n");
+        ret = rdma_post_send(id, NULL, send_msg, 16, send_mr, send_flags);
+        if (ret) {
+            perror("rdma_post_send");
+            goto out_disconnect;
+        }
+        print_buffers();
+
+        printf("rdma_get_send_comp ...\n");
+        while ((ret = rdma_get_send_comp(id, &wc)) == 0);
+        if (ret < 0)
+            perror("rdma_get_send_comp");
+        else
+            ret = 0;
+
+    out_disconnect:
+        rdma_disconnect(id);
+    out_dereg_send:
+        if ((send_flags & IBV_SEND_INLINE) == 0)
+            rdma_dereg_mr(send_mr);
+    out_dereg_recv:
+        rdma_dereg_mr(mr);
+    out_destroy_accept_ep:
+        rdma_destroy_ep(id);
+    out_destroy_listen_ep:
+        rdma_destroy_ep(listen_id);
+    out_free_addrinfo:
+        rdma_freeaddrinfo(res);
+        goto out;
+
+    // out_disconnect2:
+    // 	rdma_disconnect(id2);
+    // out_dereg_send2:
+    // 	if ((send_flags & IBV_SEND_INLINE) == 0)
+    // 		rdma_dereg_mr(send_mr2);
+    // out_dereg_recv2:
+    // 	rdma_dereg_mr(mr2);
+    // out_destroy_accept_ep2:
+    // 	rdma_destroy_ep(id2);
+    // out_destroy_listen_ep2:
+    // 	rdma_destroy_ep(listen_id2);
+    // out_free_addrinfo2:
+    // 	rdma_freeaddrinfo(res2);
+    //     goto out;
+
+    out:
+        return ret;
     }
-	do {
-        ret = ibv_poll_cq(id->send_cq, 1, &wc);
-    } while (ret == 0);
-
-	
-	print_a_buffer(buff_local_send, BUFFER_SIZE, (char*)"buff_local_send");
-
-	get_wc_status(&wc);
-
-	// Now try reading from remote mem
-	printf("RDMA read ...\n");
-
-	memset(buff_local_send, 0, sizeof(buff_local_send));
-	print_a_buffer(buff_local_send, BUFFER_SIZE, (char*)"buff_local_send");
-
-	ret = rdma_post_read(id, NULL, buff_local_send, BUFFER_SIZE, local_mr, IBV_SEND_SIGNALED, (uint64_t)((uint8_t*)remote_addr+1), rkey);
-	if (ret) {
-        perror("Error rdma read\n");
-        goto out_disconnect;
-    }
-	do {
-        ret = ibv_poll_cq(id->send_cq, 1, &wc);
-    } while (ret == 0);
-
-	print_a_buffer(buff_local_send, BUFFER_SIZE, (char*)"buff_local_send");
-
-	get_wc_status(&wc);
+};
 
 
-
-    // -----------------------------------------------------------------
-    // now try to listen to another end point
-
-    memset(&hints2, 0, sizeof hints2);
-	hints2.ai_flags = RAI_PASSIVE;
-	hints2.ai_port_space = RDMA_PS_TCP;
-	ret = rdma_getaddrinfo(local_addr, port, &hints2, &res2);
-	if (ret) {
-		printf("rdma_getaddrinfo: %s\n", gai_strerror(ret));
-		return ret;
-	}
-
-	memset(&init_attr2, 0, sizeof init_attr2);
-	init_attr2.cap.max_send_wr = init_attr2.cap.max_recv_wr = 1;
-	init_attr2.cap.max_send_sge = init_attr2.cap.max_recv_sge = 1;
-	init_attr2.cap.max_inline_data = 16;
-	init_attr2.sq_sig_all = 1;
-	ret = rdma_create_ep(&listen_id2, res, NULL, &init_attr2);
-	if (ret) {
-		perror("rdma_create_ep");
-		goto out_free_addrinfo;
-	}
-    printf("Server listening ...\n");
-	ret = rdma_listen(listen_id2, 0);
-	if (ret) {
-		perror("rdma_listen");
-		goto out_destroy_listen_ep;
-	}
-
-
-    printf("Getting connection request ...\n");
-	ret = rdma_get_request(listen_id2, &id2);
-	if (ret) {
-		perror("rdma_get_request");
-		goto out_destroy_listen_ep;
-	}
-
-
-	memset(&qp_attr2, 0, sizeof qp_attr2);
-	memset(&init_attr2, 0, sizeof init_attr2);
-	ret = ibv_query_qp(id2->qp, &qp_attr2, IBV_QP_CAP,
-			   &init_attr2);
-	if (ret) {
-		perror("ibv_query_qp");
-		goto out_destroy_accept_ep;
-	}
-	if (init_attr2.cap.max_inline_data >= 16)
-		send_flags2 = IBV_SEND_INLINE;
-	else
-		printf("rdma_server: device doesn't support IBV_SEND_INLINE, "
-		       "using sge sends\n");
-
-    printf("Registering mr ...\n");
-	mr2 = rdma_reg_msgs(id2, recv_msg2, 16);
-	if (!mr2) {
-		ret = -1;
-		perror("rdma_reg_msgs for recv_msg");
-		goto out_destroy_accept_ep;
-	}
-	if ((send_flags2 & IBV_SEND_INLINE) == 0) {
-        printf("Registering mr ...");
-		send_mr2 = rdma_reg_msgs(id2, send_msg2, 16);
-		if (!send_mr2) {
-			ret = -1;
-			perror("rdma_reg_msgs for send_msg");
-			goto out_dereg_recv;
-		}
-	}
-
-    printf("rdma_post_recv ...\n");
-	ret = rdma_post_recv(id2, NULL, recv_msg2, 16, mr2);
-	if (ret) {
-		perror("rdma_post_recv");
-		goto out_dereg_send;
-	}
-
-    
-    printf("Server accepting connection ...\n");
-	ret = rdma_accept(id2, NULL);
-	if (ret) {
-		perror("rdma_accept");
-		goto out_dereg_send;
-	}
-
-
-
-    printf("rdma_get_recv_comp ...\n");
-	while ((ret = rdma_get_recv_comp(id2, &wc2)) == 0);
-	if (ret < 0) {
-		perror("rdma_get_recv_comp");
-		goto out_disconnect;
-	}
-
-	strcpy((char*)send_msg2, "Dat");
-	print_a_buffer(send_msg2, BUFFER_SIZE, (char*)"send_msg2");
-
-    printf("rdma_post_send ...\n");
-	ret = rdma_post_send(id2, NULL, send_msg2, 16, send_mr2, send_flags2);
-	if (ret) {
-		perror("rdma_post_send");
-		goto out_disconnect;
-	}
-
-    printf("rdma_get_send_comp ...\n");
-	while ((ret = rdma_get_send_comp(id2, &wc2)) == 0);
-	if (ret < 0)
-		perror("rdma_get_send_comp");
-	else
-		ret = 0;
-
-
-	// now we can close both process by posting a send
-
-	printf("Sending to close both processes ...\n");
-	printf("rdma_post_send ...\n");
-	ret = rdma_post_send(id, NULL, send_msg, 16, send_mr, send_flags);
-	if (ret) {
-		perror("rdma_post_send");
-		goto out_disconnect;
-	}
-    print_buffers();
-
-    printf("rdma_get_send_comp ...\n");
-	while ((ret = rdma_get_send_comp(id, &wc)) == 0);
-	if (ret < 0)
-		perror("rdma_get_send_comp");
-	else
-		ret = 0;
-
-out_disconnect:
-	rdma_disconnect(id);
-out_dereg_send:
-	if ((send_flags & IBV_SEND_INLINE) == 0)
-		rdma_dereg_mr(send_mr);
-out_dereg_recv:
-	rdma_dereg_mr(mr);
-out_destroy_accept_ep:
-	rdma_destroy_ep(id);
-out_destroy_listen_ep:
-	rdma_destroy_ep(listen_id);
-out_free_addrinfo:
-	rdma_freeaddrinfo(res);
-    goto out;
-
-out_disconnect2:
-	rdma_disconnect(id2);
-out_dereg_send2:
-	if ((send_flags & IBV_SEND_INLINE) == 0)
-		rdma_dereg_mr(send_mr2);
-out_dereg_recv2:
-	rdma_dereg_mr(mr2);
-out_destroy_accept_ep2:
-	rdma_destroy_ep(id2);
-out_destroy_listen_ep2:
-	rdma_destroy_ep(listen_id2);
-out_free_addrinfo2:
-	rdma_freeaddrinfo(res2);
-    goto out;
-
-out:
-    return ret;
-}
 
 int main (int argc, char** argv) {
     int ret, op;
@@ -463,7 +572,7 @@ int main (int argc, char** argv) {
 		}
 	}
 
-    printf("Address of local node %s\n", local_addr);
+    printf("Address of remote node %s\n", local_addr);
     printf("Port of local node %s\n", port);
     printf("Size of Remote Memory %d\n", rm_size);
 
@@ -478,5 +587,6 @@ int main (int argc, char** argv) {
         
     // }
 
-    local_node_run();
+    LocalNode ln;
+    ln.local_node_run();
 }

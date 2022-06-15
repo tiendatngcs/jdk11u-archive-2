@@ -1,0 +1,47 @@
+Building target 'images' in configuration 'linux-x86_64-normal-server-fastdebug'
+
+ERROR: Build failed for target 'images' in configuration 'linux-x86_64-normal-server-fastdebug' (exit code 2) 
+
+=== Output from failing command(s) repeated here ===
+* For target hotspot_variant-server_libjvm_gtest_objs_precompiled_precompiled.hpp.gch:
+In file included from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/gc/shenandoah/remoteRegion.hpp:12,
+                 from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/gc/shenandoah/shenandoahHeap.hpp:30,
+                 from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/gc/shenandoah/shenandoahBarrierSet.hpp:29,
+                 from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/gc/shenandoah/shenandoahBarrierSet.inline.hpp:28,
+                 from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/gc/shared/barrierSetConfig.inline.hpp:40,
+                 from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/oops/access.inline.hpp:29,
+                 from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/oops/oop.inline.hpp:30,
+                 from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/oops/markOop.inline.hpp:30,
+                 from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/precompiled/precompiled.hpp:147:
+/home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/gc/shenandoah/shenandoahAllocRequest.hpp:102:57: error: macro "assert" passed 2 arguments, but takes just 1
+  102 |     assert (is_lab_alloc(), "Only access for LAB allocs");
+      |                                                         ^
+In file included from /usr/include/rdma/rdma_verbs.h:36,
+                 from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/gc/shenandoah/remoteRegion.hpp:9,
+                 from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/gc/shenandoah/shenandoahHeap.hpp:30,
+   ... (rest of output omitted)
+* For target hotspot_variant-server_libjvm_objs_precompiled_precompiled.hpp.gch:
+In file included from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/gc/shenandoah/remoteRegion.hpp:12,
+                 from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/gc/shenandoah/shenandoahHeap.hpp:30,
+                 from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/gc/shenandoah/shenandoahBarrierSet.hpp:29,
+                 from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/gc/shenandoah/shenandoahBarrierSet.inline.hpp:28,
+                 from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/gc/shared/barrierSetConfig.inline.hpp:40,
+                 from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/oops/access.inline.hpp:29,
+                 from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/oops/oop.inline.hpp:30,
+                 from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/oops/markOop.inline.hpp:30,
+                 from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/precompiled/precompiled.hpp:147:
+/home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/gc/shenandoah/shenandoahAllocRequest.hpp:102:57: error: macro "assert" passed 2 arguments, but takes just 1
+  102 |     assert (is_lab_alloc(), "Only access for LAB allocs");
+      |                                                         ^
+In file included from /usr/include/rdma/rdma_verbs.h:36,
+                 from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/gc/shenandoah/remoteRegion.hpp:9,
+                 from /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/src/hotspot/share/gc/shenandoah/shenandoahHeap.hpp:30,
+   ... (rest of output omitted)
+
+* All command lines available in /home/grads/t/tiendat.ng.cs/github_repos/jdk11u-1/build/linux-x86_64-normal-server-fastdebug/make-support/failure-logs.
+=== End of repeated output ===
+
+No indication of failed target found.
+Hint: Try searching the build log for '] Error'.
+Hint: See doc/building.html#troubleshooting for assistance.
+

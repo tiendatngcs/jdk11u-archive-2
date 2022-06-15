@@ -62,6 +62,7 @@
 #include "gc/shenandoah/mode/shenandoahIUMode.hpp"
 #include "gc/shenandoah/mode/shenandoahPassiveMode.hpp"
 #include "gc/shenandoah/mode/shenandoahSATBMode.hpp"
+#include "gc/shenandoah/remoteRegion.hpp"
 #if INCLUDE_JFR
 #include "gc/shenandoah/shenandoahJfrSupport.hpp"
 #endif
@@ -397,7 +398,7 @@ jint ShenandoahHeap::initialize() {
 
 
   // initialize the remote memory
-
+  initialize_remote_regions();
   return JNI_OK;
 }
 
@@ -476,6 +477,7 @@ ShenandoahHeap::ShenandoahHeap(ShenandoahCollectorPolicy* policy) :
   _dummy_size(0),
   _histogram(),
   _size_histogram(),
+  _rdma_connection(NULL),
   _max_workers(MAX2(ConcGCThreads, ParallelGCThreads)),
   _workers(NULL),
   _safepoint_workers(NULL),
@@ -645,11 +647,12 @@ void ShenandoahHeap::post_initialize() {
   JFR_ONLY(ShenandoahJFRSupport::register_jfr_type_serializers());
 }
 
-bool ShenandoahHeap::initialize_remote_regions() {
-  tty->printf("Initializing remote regions ...");
-  
-  
-  tty->printf("Finished initializing remote regions ...");
+void ShenandoahHeap::initialize_remote_regions() {
+  tty->print_cr("Initializing remote regions ...");
+  _rdma_connection = new RDMAConnection(this, numRDMAConnections);
+  _rdma_connection->establish_connections(const_cast<char*>(RDMALocalAddr), const_cast<char*>(RDMAPort));
+  tty->print_cr("Finished initializing remote regions ...");
+  // return true;
 }
 
 size_t ShenandoahHeap::used() const {

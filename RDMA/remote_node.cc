@@ -50,6 +50,11 @@ static void get_wc_status(struct ibv_wc* wc) {
     printf("--------------\n");
 }
 
+static bool is_exit_signal(char* buffer, char* exit_signal) {
+	if (strcmp(buffer, exit_signal) == 0) return true;
+	return false;
+}
+
 static int remote_node_run()
 {
 	struct rdma_addrinfo hints, *res;
@@ -106,11 +111,11 @@ static int remote_node_run()
 		}
 	}
 
-	ret = rdma_post_recv(id, NULL, recv_msg, 16, mr);
-	if (ret) {
-		perror("rdma_post_recv");
-		goto out_dereg_send;
-	}
+	// ret = rdma_post_recv(id, NULL, recv_msg, 16, mr);
+	// if (ret) {
+	// 	perror("rdma_post_recv");
+	// 	goto out_dereg_send;
+	// }
 
 	ret = rdma_connect(id, NULL);
 	if (ret) {
@@ -118,23 +123,23 @@ static int remote_node_run()
 		goto out_dereg_send;
 	}
 
-	ret = rdma_post_send(id, NULL, send_msg, 16, send_mr, send_flags);
-	if (ret) {
-		perror("rdma_post_send");
-		goto out_disconnect;
-	}
+	// ret = rdma_post_send(id, NULL, send_msg, 16, send_mr, send_flags);
+	// if (ret) {
+	// 	perror("rdma_post_send");
+	// 	goto out_disconnect;
+	// }
 
-	while ((ret = rdma_get_send_comp(id, &wc)) == 0);
-	if (ret < 0) {
-		perror("rdma_get_send_comp");
-		goto out_disconnect;
-	}
+	// while ((ret = rdma_get_send_comp(id, &wc)) == 0);
+	// if (ret < 0) {
+	// 	perror("rdma_get_send_comp");
+	// 	goto out_disconnect;
+	// }
 
-	while ((ret = rdma_get_recv_comp(id, &wc)) == 0);
-	if (ret < 0)
-		perror("rdma_get_recv_comp");
-	else
-		ret = 0;
+	// while ((ret = rdma_get_recv_comp(id, &wc)) == 0);
+	// if (ret < 0)
+	// 	perror("rdma_get_recv_comp");
+	// else
+	// 	ret = 0;
 
     // ------------------------------------
     // new code here
@@ -150,7 +155,7 @@ static int remote_node_run()
 
 	print_buffers();
 
-	// now send buffer to server
+	// now send rkey and addr to server
 	ret = rdma_post_send(id, NULL, send_msg, 16, send_mr, send_flags);
 	if (ret) {
 		perror("rdma_post_send");
@@ -164,19 +169,23 @@ static int remote_node_run()
 	}
 
 	// Post a recv and wait for signal from server to exit
-	ret = rdma_post_recv(id, NULL, recv_msg, 16, mr);
-	if (ret) {
-		perror("rdma_post_recv");
-		goto out_dereg_send;
+	while (strcmp((char*)recv_msg, "exit") != 0) {
+		ret = rdma_post_recv(id, NULL, recv_msg, 16, mr);
+		if (ret) {
+			perror("rdma_post_recv");
+			goto out_dereg_send;
+		}
+
+		while ((ret = rdma_get_recv_comp(id, &wc)) == 0);
+		if (ret < 0)
+			perror("rdma_get_recv_comp");
+		else
+			ret = 0;
 	}
-
-	while ((ret = rdma_get_recv_comp(id, &wc)) == 0);
-	if (ret < 0)
-		perror("rdma_get_recv_comp");
-	else
-		ret = 0;
-
 	print_a_buffer(recv_msg, BUFFER_SIZE, (char*)"recv_msg");
+
+	printf("Exiting remote server\n");
+
 
 out_dereg_rdma_mr:
 	rdma_dereg_mr(rdma_mr);

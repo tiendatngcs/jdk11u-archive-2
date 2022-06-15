@@ -57,6 +57,7 @@ class ShenandoahMonitoringSupport;
 class ShenandoahPacer;
 class ShenandoahVerifier;
 class ShenandoahWorkGang;
+class RDMAConnection;
 class VMStructs;
 
 // Used for buffering per-region liveness data.
@@ -145,7 +146,7 @@ public:
 
   void initialize_serviceability();
   
-  bool initialize_remote_regions();
+  void initialize_remote_regions();
 
   void print_on(outputStream* st)              const;
   void print_extended_on(outputStream *st)     const;
@@ -198,6 +199,8 @@ private:
 
   size_t _histogram[30];
   size_t _size_histogram[30];
+
+  RDMAConnection* _rdma_connection;
 
 public:
   void increase_used(size_t bytes);

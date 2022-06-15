@@ -287,6 +287,15 @@
   experimental(bool, ShenandoahCSCollectAll, true,                          \
           "To include all regions in the collection set or not")            \
                                                                             \
+  experimental(uintx, numRDMAConnections, 2,                                \
+          "Number of RDMA connections")                                     \
+                                                                            \
+  experimental(ccstr, RDMALocalAddr, "",                                    \
+          "Address of rdma server")                                         \
+                                                                            \
+  experimental(ccstr, RDMAPort, "",                                         \
+          "Port of rdma server")                                         \
+                                                                            \
   experimental(bool, PrintInvalidObject, false,                             \
           "")                                                               \
                                                                             \

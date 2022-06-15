@@ -123,6 +123,11 @@ AC_DEFUN_ONCE([LIB_SETUP_LIBRARIES],
     BASIC_JVM_LIBS="$BASIC_JVM_LIBS $LIBDL"
   fi
 
+  # RDMA libraries
+  if test "x$OPENJDK_TARGET_OS" = xlinux; then
+    BASIC_JVM_LIBS="$BASIC_JVM_LIBS -lrdmacm -libverbs"
+  fi
+
   # Threading library
   if test "x$OPENJDK_TARGET_OS" = xlinux || test "x$OPENJDK_TARGET_OS" = xaix; then
     BASIC_JVM_LIBS="$BASIC_JVM_LIBS -lpthread"
