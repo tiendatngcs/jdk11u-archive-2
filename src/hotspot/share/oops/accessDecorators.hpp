@@ -212,8 +212,10 @@ const DecoratorSet ARRAYCOPY_DECORATOR_MASK       = ARRAYCOPY_CHECKCAST | ARRAYC
                                                     ARRAYCOPY_DISJOINT | ARRAYCOPY_ARRAYOF |
                                                     ARRAYCOPY_ATOMIC | ARRAYCOPY_ALIGNED;
 
+const DecoratorSet OOP_HEADER_ACCESS              = UCONST64(1) << 29;
+
 // Keep track of the last decorator.
-const DecoratorSet DECORATOR_LAST = UCONST64(1) << 28;
+const DecoratorSet DECORATOR_LAST = UCONST64(1) << 29;
 
 namespace AccessInternal {
   // This class adds implied decorators that follow according to decorator rules.

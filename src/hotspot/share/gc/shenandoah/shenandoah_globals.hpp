@@ -287,14 +287,22 @@
   experimental(bool, ShenandoahCSCollectAll, true,                          \
           "To include all regions in the collection set or not")            \
                                                                             \
-  experimental(uintx, numRDMAConnections, 2,                                \
+  experimental(bool, doEvacToRemote, false,                                 \
+          "Perform evacucation of cold obj to remote mem")                  \
+                                                                            \
+  experimental(uintx, numRemoteMems, 2,                                     \
           "Number of RDMA connections")                                     \
+                                                                            \
+  experimental(uintx, expectedMemPerServer, 40,                             \
+          "Amout of memory per server in power of 2, should not be very"    \
+          "important since failure should be managed by using another "     \
+          "server.")                                                        \
                                                                             \
   experimental(ccstr, RDMALocalAddr, "",                                    \
           "Address of rdma server")                                         \
                                                                             \
   experimental(ccstr, RDMAPort, "",                                         \
-          "Port of rdma server")                                         \
+          "Port of rdma server")                                            \
                                                                             \
   experimental(bool, PrintInvalidObject, false,                             \
           "")                                                               \

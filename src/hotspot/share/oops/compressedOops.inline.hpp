@@ -47,6 +47,7 @@ namespace CompressedOops {
     assert(!is_null(v), "narrow oop value can never be zero");
     address base = Universe::narrow_oop_base();
     int    shift = Universe::narrow_oop_shift();
+    // tty->print_cr("Compressed oop shift: %d", shift);
     oop result = (oop)(void*)((uintptr_t)base + ((uintptr_t)v << shift));
     assert(check_obj_alignment(result), "address not aligned: " INTPTR_FORMAT, p2i((void*) result));
     return result;

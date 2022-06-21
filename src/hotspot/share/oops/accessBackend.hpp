@@ -41,6 +41,8 @@
 #include "utilities/debug.hpp"
 #include "utilities/globalDefinitions.hpp"
 
+#include <infiniband/verbs.h>
+
 
 // This metafunction returns either oop or narrowOop depending on whether
 // an access needs to use compressed oops or not.
@@ -345,6 +347,13 @@ public:
   }
 
   template <typename T>
+  static inline T load_remote(struct ibv_mr* mr, void* addr) {
+
+    // perform load from a remote memory region and return here
+    return load_internal<decorators, T>(addr);
+  }
+
+  template <typename T>
   static inline T atomic_cmpxchg(T new_value, void* addr, T compare_value) {
     return atomic_cmpxchg_maybe_locked<decorators>(new_value, addr, compare_value);
   }
@@ -387,6 +396,11 @@ public:
   template <typename T>
   static T load_at(oop base, ptrdiff_t offset) {
     return load<T>(field_addr(base, offset));
+  }
+
+  template <typename T>
+  static T load_remote_at(struct ibv_mr* mr, oop base, ptrdiff_t offset) {
+    return load_remote<T>(mr, field_addr(base, offset));
   }
 
   template <typename T>
@@ -1152,6 +1166,13 @@ namespace AccessInternal {
 
   template <DecoratorSet decorators, typename T>
   inline void store_at(oop base, ptrdiff_t offset, T value) {
+
+    // Dat mod Increase access counter
+    // if (!HasDecorator<decorators, OOP_HEADER_ACCESS>) {
+    //   oopDesc::increase_access_counter(base);
+    // }
+
+    //
     verify_types<decorators, T>();
     typedef typename Decay<T>::type DecayedT;
     DecayedT decayed_value = value;
@@ -1178,6 +1199,13 @@ namespace AccessInternal {
 
   template <DecoratorSet decorators, typename T>
   inline T load_at(oop base, ptrdiff_t offset) {
+
+    // Dat mod Increase access counter
+    // if (!HasDecorator<decorators, OOP_HEADER_ACCESS>) {
+    //   oopDesc::increase_access_counter(base);
+    // }
+
+    //
     verify_types<decorators, T>();
     typedef typename Conditional<HasDecorator<decorators, INTERNAL_VALUE_IS_OOP>::value,
                                  typename OopOrNarrowOop<T>::type,

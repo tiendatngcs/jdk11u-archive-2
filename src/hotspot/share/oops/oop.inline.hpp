@@ -98,6 +98,19 @@ void oopDesc::increase_access_counter() {
   // tty->print_cr("Increasing access counter ac %lu | gc_epoch %lu", access_counter(), gc_epoch());
 }
 
+// void oopDesc::increase_access_counter(oop obj) {
+//   int ac = HeapAccess<MO_VOLATILE|OOP_HEADER_ACCESS>::load_at(obj, access_counter_offset_in_bytes());
+//   int epoch = HeapAccess<MO_VOLATILE|OOP_HEADER_ACCESS>::load_at(obj, gc_epoch_offset_in_bytes());
+
+//   if (epoch != static_gc_epoch) {
+//     HeapAccess<MO_VOLATILE|OOP_HEADER_ACCESS>::store_at(obj, access_counter_offset_in_bytes(), 1);
+//     HeapAccess<MO_VOLATILE|OOP_HEADER_ACCESS>::store_at(obj, gc_epoch_offset_in_bytes(), static_gc_epoch);
+//     return;
+//   }
+//   ac++;
+//   HeapAccess<MO_VOLATILE|OOP_HEADER_ACCESS>::store_at(obj, access_counter_offset_in_bytes(), ac);
+// }
+
 void oopDesc::set_gc_epoch(intptr_t new_value) {
   // _gc_epoch = (_gc_epoch & ~GC_EPOCH_MASK) | (new_value & GC_EPOCH_MASK);
   // _gc_epoch = new_value;

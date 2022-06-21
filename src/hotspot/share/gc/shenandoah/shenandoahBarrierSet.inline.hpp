@@ -192,6 +192,8 @@ template <typename T>
 inline oop ShenandoahBarrierSet::AccessBarrier<decorators, BarrierSetT>::oop_load_not_in_heap(T *addr)
 {
   oop value = Raw::oop_load_not_in_heap(addr);
+  // load an object from an address
+  // value->increase_access_counter();
   if (value != NULL)
   {
     ShenandoahBarrierSet *const bs = ShenandoahBarrierSet::barrier_set();
@@ -209,6 +211,8 @@ template <typename T>
 inline oop ShenandoahBarrierSet::AccessBarrier<decorators, BarrierSetT>::oop_load_in_heap(T *addr)
 {
   oop value = Raw::oop_load_in_heap(addr);
+
+  // Load an oop from an address. Increase access counter of such obj.
   // value->increase_access_counter();
   if (value != NULL)
   {

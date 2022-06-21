@@ -23,6 +23,7 @@
 
 #include "precompiled.hpp"
 #include "memory/allocation.hpp"
+#include "memory/remoteMem.hpp"
 
 #include "gc/shared/gcTimer.hpp"
 #include "gc/shared/gcTraceTime.inline.hpp"
@@ -62,7 +63,6 @@
 #include "gc/shenandoah/mode/shenandoahIUMode.hpp"
 #include "gc/shenandoah/mode/shenandoahPassiveMode.hpp"
 #include "gc/shenandoah/mode/shenandoahSATBMode.hpp"
-#include "gc/shenandoah/remoteRegion.hpp"
 #if INCLUDE_JFR
 #include "gc/shenandoah/shenandoahJfrSupport.hpp"
 #endif
@@ -398,7 +398,9 @@ jint ShenandoahHeap::initialize() {
 
 
   // initialize the remote memory
-  initialize_remote_regions();
+  if (doEvacToRemote) {
+    initialize_remote_regions();
+  }
   return JNI_OK;
 }
 
@@ -531,6 +533,9 @@ ShenandoahHeap::ShenandoahHeap(ShenandoahCollectorPolicy* policy) :
                  /* are_ConcurrentGC_threads */ false);
     _safepoint_workers->initialize_workers();
   }
+
+  // Dat mod
+  set_do_remote_evac(false);
   reset_histogram();
 }
 
@@ -649,7 +654,7 @@ void ShenandoahHeap::post_initialize() {
 
 void ShenandoahHeap::initialize_remote_regions() {
   tty->print_cr("Initializing remote regions ...");
-  _rdma_connection = new RDMAConnection(this, numRDMAConnections);
+  _rdma_connection = new RemoteMem(this, numRemoteMems);
   _rdma_connection->establish_connections(const_cast<char*>(RDMALocalAddr), const_cast<char*>(RDMAPort));
   tty->print_cr("Finished initializing remote regions ...");
   // return true;
@@ -2164,6 +2169,14 @@ void ShenandoahHeap::set_after_heap_scan(bool value) {
     _after_heap_scan.set();
   } else {
     _after_heap_scan.unset();
+  }
+}
+
+void ShenandoahHeap::set_do_remote_evac(bool value) {
+  if (value) {
+    _do_remote_evac.set();
+  } else {
+    _do_remote_evac.unset();
   }
 }
 

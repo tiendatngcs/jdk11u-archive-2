@@ -57,7 +57,7 @@ class ShenandoahMonitoringSupport;
 class ShenandoahPacer;
 class ShenandoahVerifier;
 class ShenandoahWorkGang;
-class RDMAConnection;
+class RemoteMem;
 class VMStructs;
 
 // Used for buffering per-region liveness data.
@@ -200,7 +200,7 @@ private:
   size_t _histogram[30];
   size_t _size_histogram[30];
 
-  RDMAConnection* _rdma_connection;
+  RemoteMem* _rdma_connection;
 
 public:
   void increase_used(size_t bytes);
@@ -330,7 +330,9 @@ private:
   ShenandoahSharedFlag   _full_gc_in_progress;
   ShenandoahSharedFlag   _full_gc_move_in_progress;
   ShenandoahSharedFlag   _progress_last_gc;
+  // Dat mod
   ShenandoahSharedFlag   _after_heap_scan;
+  ShenandoahSharedFlag   _do_remote_evac;   // if set, do evac cold obj to remote mem
 
   void set_gc_state_all_threads(char state);
   void set_gc_state_mask(uint mask, bool value);
@@ -346,7 +348,9 @@ public:
   void set_full_gc_in_progress(bool in_progress);
   void set_full_gc_move_in_progress(bool in_progress);
   void set_has_forwarded_objects(bool cond);
+  // Dat mod
   void set_after_heap_scan(bool value);
+  void set_do_remote_evac(bool value);
 
   inline bool is_stable() const;
   inline bool is_idle() const;
@@ -358,7 +362,9 @@ public:
   inline bool is_full_gc_move_in_progress() const;
   inline bool has_forwarded_objects() const;
   inline bool is_gc_in_progress_mask(uint mask) const;
+  // Dat mod
   inline bool is_after_heap_scan() const;
+  inline bool is_do_remote_evac() const;
 
 // ---------- GC cancellation and degeneration machinery
 //

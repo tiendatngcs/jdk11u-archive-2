@@ -127,11 +127,16 @@ bool ShenandoahAdaptiveHeuristics::should_start_gc() const {
   // anything else.
   size_t min_threshold = capacity / 100 * ShenandoahMinFreeThreshold;
   if (available < min_threshold) {
+    tty->print_cr("Availability is falling below worst limit, start evac to remote mem");
+    heap->set_do_remote_evac(true);
+
     log_info(gc)("Trigger: Free (" SIZE_FORMAT "%s) is below minimum threshold (" SIZE_FORMAT "%s)",
                  byte_size_in_proper_unit(available),     proper_unit_for_byte_size(available),
                  byte_size_in_proper_unit(min_threshold), proper_unit_for_byte_size(min_threshold));
     return true;
   }
+  // tty->print_cr("Good heap space available, evac to local heap as normal");
+  heap->set_do_remote_evac(false);
 
   // Check if are need to learn a bit about the application
   const size_t max_learn = ShenandoahLearningSteps;

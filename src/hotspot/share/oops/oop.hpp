@@ -86,6 +86,8 @@ class oopDesc {
   inline void set_access_counter(intptr_t new_value);
   static inline void set_access_counter(HeapWord* mem, intptr_t new_value);
   inline void increase_access_counter();
+
+  // static inline void increase_access_counter(oop obj);
   
   inline void set_gc_epoch(intptr_t new_value);
   static inline void set_gc_epoch(HeapWord* mem, intptr_t new_value);

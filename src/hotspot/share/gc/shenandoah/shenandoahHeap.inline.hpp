@@ -275,6 +275,14 @@ inline oop ShenandoahHeap::evacuate_object(oop p, Thread* thread) {
 
   assert(!heap_region_containing(p)->is_humongous(), "never evacuate humongous objects");
 
+  // Dat mod
+  
+  // if (is_do_remote_evac()) {
+  //   // remote evac path
+
+
+  // } else {
+    // local evac path
   bool alloc_from_gclab = true;
   HeapWord* copy = NULL;
 
@@ -339,6 +347,8 @@ inline oop ShenandoahHeap::evacuate_object(oop p, Thread* thread) {
     shenandoah_assert_correct(NULL, result);
     return result;
   }
+
+  // }
 }
 
 inline bool ShenandoahHeap::requires_marking(const void* entry) const {
@@ -391,9 +401,16 @@ inline bool ShenandoahHeap::is_update_refs_in_progress() const {
   return _gc_state.is_set(UPDATEREFS);
 }
 
+// Dat mod
+
 inline bool ShenandoahHeap::is_after_heap_scan() const {
   return _after_heap_scan.is_set();
 }
+
+inline bool ShenandoahHeap::is_do_remote_evac() const {
+  return _do_remote_evac.is_set();
+}
+//
 
 template<class T>
 inline void ShenandoahHeap::marked_object_iterate(ShenandoahHeapRegion* region, T* cl) {
